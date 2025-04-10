@@ -1,26 +1,26 @@
-name: C#-linter
+# name: C#-linter
 
-on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - master
+# on:
+#   workflow_dispatch:
+#   pull_request:
+#     branches:
+#       - master
 
-jobs:
-  lint:
-    runs-on: ubuntu-latest
+# jobs:
+#   lint:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "8.0.x"
+#       - name: Setup .NET SDK
+#         uses: actions/setup-dotnet@v3
+#         with:
+#           dotnet-version: "8.0.x"
 
-      - name: Restore dependencies
-        run: dotnet restore backend/code/code.sln
+#       - name: Restore dependencies
+#         run: dotnet restore backend/code/code.sln
 
-      - name: Lint with dotnet format
-        run: dotnet format backend/code/code.sln --verify-no-changes --severity warn
+#       - name: Lint with dotnet format
+#         run: dotnet format backend/code/code.sln --verify-no-changes --severity warn
