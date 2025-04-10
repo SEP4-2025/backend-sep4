@@ -1,4 +1,4 @@
-name: C# Lint check
+name: C#-linter
 
 on:
   workflow_dispatch:
@@ -20,7 +20,7 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore backend/code/code.sln
 
       - name: Lint with dotnet format
-        run: dotnet format --verify-no-changes --severity warn
+        run: dotnet format backend/code/code.sln --verify-no-changes --severity warn
