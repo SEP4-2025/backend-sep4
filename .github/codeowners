@@ -12,4 +12,5 @@
 
 # README and all markdown files
 
-\*.md @xvvcs @kacengas @marutza @rrromanm
+*.md @xvvcs @kacengas @marutza @rrromanm
+**/*.md @xvvcs @kacengas @marutza @rrromanm 
