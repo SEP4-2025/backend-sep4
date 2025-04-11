@@ -6,6 +6,6 @@ public class Picture
     public string Url { get; set; }
     public string Note { get; set; }
     public DateTime TimeStamp { get; set; }
-    
+
     public int PlantId { get; set; }
 }
