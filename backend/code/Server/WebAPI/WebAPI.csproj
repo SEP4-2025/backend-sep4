@@ -19,7 +19,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Shared\ApiContracts\ApiContracts.csproj" />
-      <ProjectReference Include="..\RepositoryContracts\RepositoryContracts.csproj" />
+      <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
     </ItemGroup>
 
     <ItemGroup>

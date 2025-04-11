@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{4F6BE84A-C5D7-4183-BC7A-F035A6B129B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepositoryContracts", "Server\RepositoryContracts\RepositoryContracts.csproj", "{7A01F00E-B2B4-43AF-8711-6AE399D66E9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogicInterfaces", "Server\LogicInterfaces\LogicInterfaces.csproj", "{7A01F00E-B2B4-43AF-8711-6AE399D66E9E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{E438425E-FE56-4844-B371-3840546E94A2}"
 EndProject
