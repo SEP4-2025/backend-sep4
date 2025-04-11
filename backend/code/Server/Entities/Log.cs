@@ -3,9 +3,11 @@ namespace Entities
     public class Log
     {
         public int Id { get; set; }
-        public string TimeStamp { get; set; }
+        public DateTime Timestamp { get; set; }
         public string Message { get; set; }
-        //Sensor reading here
-        //Water pump here
+    
+        public int SensorReadingId { get; set; }
+        public int WaterPumpId { get; set; }
+        public int GreenhouseId { get; set; }
     }
 }
