@@ -6,5 +6,5 @@ namespace WebAPI.Controllers;
 [Route("controller")]
 public class SensorReadingController : ControllerBase
 {
-    
+
 }
