@@ -21,7 +21,7 @@ public class SensorReadingController : ControllerBase
         var readings = await sensorReading.GetSensorReadingsAsync();
         return Ok(readings);
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReading sensorReading)
     {
