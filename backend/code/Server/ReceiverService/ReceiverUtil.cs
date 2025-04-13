@@ -5,93 +5,149 @@ namespace ReceiverService;
 
 public static class ReceiverUtil
 {
-    public static void ConfigureMqttClientEvents(IMqttClient mqttClient)
+    public static void ConfigureMqttClientEvents(
+        IMqttClient mqttClient,
+        ILogger logger,
+        Action<bool> setHealthStatus = null
+    )
     {
         mqttClient.ConnectedAsync += e =>
         {
-            Console.WriteLine("### CONNECTED TO BROKER ###");
+            logger.LogInformation("### CONNECTED TO BROKER ###");
+            setHealthStatus?.Invoke(true);
             return Task.CompletedTask;
         };
 
         mqttClient.DisconnectedAsync += e =>
         {
-            Console.WriteLine("### DISCONNECTED FROM BROKER ###");
+            logger.LogInformation("### DISCONNECTED FROM BROKER ###");
+            setHealthStatus?.Invoke(false);
             return Task.CompletedTask;
         };
 
         mqttClient.ApplicationMessageReceivedAsync += e =>
         {
-            Console.WriteLine("### RECEIVED MESSAGE ###");
-            Console.WriteLine($"+ Topic = {e.ApplicationMessage.Topic}");
-            Console.WriteLine(
-                $"+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}"
+            logger.LogInformation("### RECEIVED MESSAGE ###");
+            logger.LogInformation("Topic = {Topic}", e.ApplicationMessage.Topic);
+            logger.LogInformation(
+                "Message = {Message}",
+                Encoding.UTF8.GetString(e.ApplicationMessage.Payload)
             );
-            Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
-            Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
-            Console.WriteLine();
 
             return Task.CompletedTask;
         };
     }
 
-    public static async Task ConnectMqttClient(
+    public static async Task<bool> ConnectMqttClient(
         IMqttClient mqttClient,
         string server,
         int port,
-        string clientId
+        string clientId,
+        ILogger logger,
+        CancellationToken cancellationToken
     )
     {
-        var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer(server, port)
-            .WithClientId(clientId)
-            .WithCleanSession()
-            .Build();
+        try
+        {
+            var mqttClientOptions = new MqttClientOptionsBuilder()
+                .WithTcpServer(server, port)
+                .WithClientId(clientId)
+                .WithCleanSession()
+                .Build();
 
-        await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
-        Console.WriteLine("Connected to MQTT broker.");
+            await mqttClient.ConnectAsync(mqttClientOptions, cancellationToken);
+            logger.LogInformation("Connected to MQTT broker at {Server}:{Port}", server, port);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("Service shutdown requested during connection attempt");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to connect to MQTT broker");
+            return false;
+        }
     }
 
-    public static async Task DisconnectMqttClient(IMqttClient mqttClient)
+    public static async Task DisconnectMqttClient(
+        IMqttClient mqttClient,
+        ILogger logger,
+        CancellationToken cancellationToken
+    )
     {
-        var disconnectOptions = new MqttClientDisconnectOptionsBuilder()
-            .WithReason(MqttClientDisconnectOptionsReason.NormalDisconnection)
-            .Build();
+        try
+        {
+            if (mqttClient.IsConnected)
+            {
+                logger.LogInformation("Disconnecting from MQTT broker...");
 
-        await mqttClient.DisconnectAsync(disconnectOptions, CancellationToken.None);
-        Console.WriteLine("Disconnected from MQTT broker.");
+                var disconnectOptions = new MqttClientDisconnectOptionsBuilder()
+                    .WithReason(MqttClientDisconnectOptionsReason.NormalDisconnection)
+                    .Build();
+
+                await mqttClient.DisconnectAsync(disconnectOptions, cancellationToken);
+                logger.LogInformation("Disconnected from MQTT broker.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error during broker disconnect");
+        }
     }
 
-    public static async Task SubscribeToTopics(
+    public static async Task<bool> SubscribeToTopics(
         IMqttClient mqttClient,
         MqttClientFactory mqttFactory,
-        List<string> topics
+        List<string> topics,
+        ILogger logger,
+        CancellationToken cancellationToken
     )
     {
-        var subscribeOptionsBuilder = mqttFactory.CreateSubscribeOptionsBuilder();
-
-        foreach (var topic in topics)
+        try
         {
-            subscribeOptionsBuilder.WithTopicFilter(f =>
-                f.WithTopic(topic)
-                    .WithQualityOfServiceLevel(
-                        MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce
-                    )
+            var subscribeOptionsBuilder = mqttFactory.CreateSubscribeOptionsBuilder();
+
+            foreach (var topic in topics)
+            {
+                subscribeOptionsBuilder.WithTopicFilter(f =>
+                    f.WithTopic(topic)
+                        .WithQualityOfServiceLevel(
+                            MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce
+                        )
+                );
+            }
+
+            var mqttSubscribeOptions = subscribeOptionsBuilder.Build();
+
+            var subResult = await mqttClient.SubscribeAsync(
+                mqttSubscribeOptions,
+                cancellationToken
             );
+
+            logger.LogInformation("### SUBSCRIPTION RESULT ###");
+            foreach (var subscription in subResult.Items)
+            {
+                logger.LogInformation(
+                    "Topic Filter: {Topic}, Result Code: {ResultCode}",
+                    subscription.TopicFilter.Topic,
+                    subscription.ResultCode
+                );
+            }
+
+            logger.LogInformation("Receiver is now listening for sensor data...");
+            return true;
         }
-
-        var mqttSubscribeOptions = subscribeOptionsBuilder.Build();
-
-        var subResult = await mqttClient.SubscribeAsync(
-            mqttSubscribeOptions,
-            CancellationToken.None
-        );
-
-        Console.WriteLine("### SUBSCRIPTION RESULT ###");
-        foreach (var subscription in subResult.Items)
+        catch (OperationCanceledException)
         {
-            Console.WriteLine(
-                $"+ Topic Filter: {subscription.TopicFilter.Topic}, Result Code: {subscription.ResultCode}"
-            );
+            logger.LogInformation("Service shutdown requested during topic subscription");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to subscribe to topics");
+            return false;
         }
     }
 }
