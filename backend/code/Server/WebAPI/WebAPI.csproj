@@ -18,12 +18,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Shared\ApiContracts\ApiContracts.csproj" />
+      <ProjectReference Include="..\..\Shared\DTOs\DTOs.csproj" />
+      <ProjectReference Include="..\LogicImplements\LogicImplements.csproj" />
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Controllers\" />
     </ItemGroup>
 
 </Project>
