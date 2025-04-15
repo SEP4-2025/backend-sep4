@@ -14,7 +14,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private bool _isHealthy = false;
 
     public SensorReceiverService(
-        IConfiguration configuration,
+        
         ILogger<SensorReceiverService> logger
     )
     {
@@ -22,16 +22,13 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         _logger = logger;
 
         _server =
-            configuration["MQTT_BROKER_HOST"]
-            ?? throw new ArgumentNullException("MQTT_BROKER_HOST is not set in configuration");
+            "10.121.138.177";
 
-        if (!int.TryParse(configuration["MQTT_BROKER_PORT"], out _port))
-        {
-            _port = 1883;
-        }
+        _port = 1883;
+        
 
         _topics = new List<string>();
-        var topicsConfig = configuration["MQTT_TOPICS"];
+        var topicsConfig = "light/reading";
         foreach (var topic in topicsConfig.Split(',', StringSplitOptions.RemoveEmptyEntries))
         {
             _topics.Add(topic.Trim());
