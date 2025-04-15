@@ -14,7 +14,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private bool _isHealthy = false;
 
     public SensorReceiverService(
-        
+
         ILogger<SensorReceiverService> logger
     )
     {
@@ -25,7 +25,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             "10.121.138.177";
 
         _port = 1883;
-        
+
 
         _topics = new List<string>();
         var topicsConfig = "light/reading";
