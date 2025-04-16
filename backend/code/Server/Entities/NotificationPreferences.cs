@@ -1,6 +1,15 @@
-﻿namespace Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Entities;
 
 public class NotificationPreferences
 {
-    //talk to the team about this
+    [Key]
+    [ForeignKey(nameof(Gardener))]
+    public int GardenerId { get; set; }
+
+    public bool IsEnabled { get; set; }
+
+    public Gardener Gardener { get; set; } = null!;
 }

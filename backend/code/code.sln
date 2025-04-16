@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "Shared\DTOs\DTOs.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogicImplements", "Server\LogicImplements\LogicImplements.csproj", "{DD4855AA-B4FF-4FBB-A993-A223323C17B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Shared\Database\Database.csproj", "{78C7B19A-A3DD-4C84-900E-AB5BB78F6E9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,7 @@ Global
 		{29996139-C2DE-4C35-B90F-F17680431BE5} = {4F6BE84A-C5D7-4183-BC7A-F035A6B129B2}
 		{CA6BD64C-74A6-455D-9DDE-8A4265E2B173} = {E438425E-FE56-4844-B371-3840546E94A2}
 		{DD4855AA-B4FF-4FBB-A993-A223323C17B7} = {4F6BE84A-C5D7-4183-BC7A-F035A6B129B2}
+		{78C7B19A-A3DD-4C84-900E-AB5BB78F6E9B} = {E438425E-FE56-4844-B371-3840546E94A2}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7A01F00E-B2B4-43AF-8711-6AE399D66E9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -66,5 +69,9 @@ Global
 		{DD4855AA-B4FF-4FBB-A993-A223323C17B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD4855AA-B4FF-4FBB-A993-A223323C17B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD4855AA-B4FF-4FBB-A993-A223323C17B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78C7B19A-A3DD-4C84-900E-AB5BB78F6E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78C7B19A-A3DD-4C84-900E-AB5BB78F6E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78C7B19A-A3DD-4C84-900E-AB5BB78F6E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78C7B19A-A3DD-4C84-900E-AB5BB78F6E9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
