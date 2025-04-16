@@ -1,4 +1,7 @@
-﻿namespace WebAPI.Controllers;
+﻿using DTOs;
+using Entities;
+
+namespace WebAPI.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Database;
@@ -28,4 +31,30 @@ public class TestController : ControllerBase
             return StatusCode(500, $"Error: {ex.Message}");
         }
     }
+    
+      [HttpPost]
+        public async Task<IActionResult> CreateGardener([FromBody] CreateGardenerDto dto)
+        {
+            var gardener = new Gardener
+            {
+                Username = dto.Username,
+                Password = dto.Password 
+            };
+    
+            _context.Gardeners.Add(gardener);
+            await _context.SaveChangesAsync();
+    
+            return CreatedAtAction(nameof(GetGardener), new { id = gardener.Id }, gardener);
+        }
+    
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetGardener(int id)
+        {
+            var gardener = await _context.Gardeners.FindAsync(id);
+            if (gardener == null)
+                return NotFound();
+    
+            return Ok(gardener);
+        }
+    
 }

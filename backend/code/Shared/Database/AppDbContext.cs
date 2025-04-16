@@ -29,7 +29,13 @@ public class AppDbContext : DbContext
     {
         modelBuilder.HasDefaultSchema("GrowMate");
 
-        modelBuilder.Entity<Gardener>().ToTable("Gardener");
+        modelBuilder.Entity<Gardener>(entity =>
+        {
+            entity.ToTable("Gardener");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Username).HasColumnName("username");
+            entity.Property(e => e.Password).HasColumnName("password");
+        });
         modelBuilder.Entity<Greenhouse>().ToTable("Greenhouse");
         modelBuilder.Entity<Plant>().ToTable("Plant");
         modelBuilder.Entity<Picture>().ToTable("Picture");
