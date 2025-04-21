@@ -18,32 +18,48 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return _context.SensorReadings
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public Task<SensorReading> GetSensorReadingBySensorIdAsync(int sensorId)
     {
-        throw new NotImplementedException();
+        return _context.SensorReadings
+            .FirstOrDefaultAsync(x => x.SensorId == sensorId);
     }
 
     public Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
     {
-        throw new NotImplementedException();
+        return _context.SensorReadings
+            .Where(x => x.SensorId == sensorId)
+            .ToListAsync();
     }
 
-    public Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
+    public Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime utcDate)
     {
-        throw new NotImplementedException();
+        var start = utcDate.Date;
+        var end = utcDate.AddDays(1);
+        return _context.SensorReadings
+            .Where(sr => sr.TimeStamp >= start && sr.TimeStamp < end)
+            .ToListAsync();
     }
 
     public Task<SensorReading> AddSensorReadingAsync(SensorReading sensorReading)
     {
-        throw new NotImplementedException();
+        _context.SensorReadings.Add(sensorReading);
+        _context.SaveChanges();
+        return Task.FromResult(sensorReading);
     }
 
     public Task DeleteSensorReadingAsync(int id)
     {
-        throw new NotImplementedException();
+        var sensorReading = _context.SensorReadings.Find(id);
+        if (sensorReading != null)
+        {
+            _context.SensorReadings.Remove(sensorReading);
+            _context.SaveChanges();
+        }
+        return Task.CompletedTask;
     }
 
     public Task<List<SensorReading>> GetSensorReadingsAsync()
