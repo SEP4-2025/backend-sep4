@@ -1,15 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-
 using Entities;
 using LogicInterfaces;
-using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
 [ApiController]
-[Route("controller")]
-public class SensorReadingController : ControllerBase
-{
 [Route("[controller]")]
 public class SensorReadingController : ControllerBase
 {
