@@ -1,11 +1,20 @@
+using Database;
 using Entities;
 using LogicInterfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace LogicImplements;
 
 public class SensorReadingLogic : ISensorReadingInterface
 {
-    private readonly List<SensorReading> sensorReadings;
+    private readonly AppDbContext _context;
+
+    public SensorReadingLogic(AppDbContext context)
+    {
+        _context = context;
+    }
+    
+    
 
     public Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
@@ -29,9 +38,7 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public Task<SensorReading> AddSensorReadingAsync(SensorReading sensorReading)
     {
-        sensorReading.Id = sensorReadings.Any() ? sensorReadings.Max(sr => sr.Id) + 1 : 1;
-        sensorReadings.Add(sensorReading);
-        return Task.FromResult(sensorReading);
+        throw new NotImplementedException();
     }
 
     public Task DeleteSensorReadingAsync(int id)
@@ -41,6 +48,6 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public Task<List<SensorReading>> GetSensorReadingsAsync()
     {
-        return Task.FromResult(sensorReadings);
+        return _context.SensorReadings.ToListAsync();
     }
 }

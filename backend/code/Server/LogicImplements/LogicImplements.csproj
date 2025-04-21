@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Shared\Database\Database.csproj" />
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
     </ItemGroup>
 

@@ -9,6 +9,7 @@ namespace WebAPI.Controllers;
 public class SensorReadingController : ControllerBase
 {
     private readonly ISensorReadingInterface sensorReading;
+    
 
     public SensorReadingController(ISensorReadingInterface sensorReading)
     {

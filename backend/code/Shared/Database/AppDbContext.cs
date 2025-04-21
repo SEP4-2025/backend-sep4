@@ -36,16 +36,102 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Username).HasColumnName("username");
             entity.Property(e => e.Password).HasColumnName("password");
         });
-        modelBuilder.Entity<Greenhouse>().ToTable("Greenhouse");
-        modelBuilder.Entity<Plant>().ToTable("Plant");
-        modelBuilder.Entity<Picture>().ToTable("Picture");
-        modelBuilder.Entity<Sensor>().ToTable("Sensor");
-        modelBuilder.Entity<SensorReading>().ToTable("SensorReading");
-        modelBuilder.Entity<Prediction>().ToTable("Prediction");
-        modelBuilder.Entity<WaterPump>().ToTable("WaterPump");
-        modelBuilder.Entity<Log>().ToTable("Log");
-        modelBuilder.Entity<Notification>().ToTable("Notification");
-        modelBuilder.Entity<NotificationPreferences>().ToTable("NotificationPreference");
+        modelBuilder.Entity<Greenhouse>(entity =>
+        {
+            entity.ToTable("Greenhouse");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
+            
+        });
+        modelBuilder.Entity<Plant>(entity =>
+        {
+            entity.ToTable("Plant");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e=> e.Species).HasColumnName("species");
+            entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
+            
+        });
+        modelBuilder.Entity<Picture>(entity =>
+        {
+            entity.ToTable("Picture");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.TimeStamp).HasColumnName("date");
+            entity.Property(e => e.Url).HasColumnName("url");
+            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.PlantId).HasColumnName("plantid");
+        });
+        modelBuilder.Entity<Sensor>(entity =>
+        {
+            entity.ToTable("Sensor");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.MetricUnit).HasColumnName("metricunit");
+            entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
+        });
+        modelBuilder.Entity<SensorReading>(entity =>
+        {
+            entity.ToTable("SensorReading");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Value).HasColumnName("value");
+            entity.Property(e => e.TimeStamp).HasColumnName("date");
+            entity.Property(e => e.ThresholdValue).HasColumnName("threshold");
+            entity.Property(e => e.SensorId).HasColumnName("sensorid");
+        });
+        modelBuilder.Entity<Prediction>(entity =>
+        {
+            entity.ToTable("Prediction");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.OptimalTemperature).HasColumnName("optimaltemp");
+            entity.Property(e => e.OptimalLight).HasColumnName("optimallight");
+            entity.Property(e => e.OptimalHumidity).HasColumnName("optimalhumidity");
+            entity.Property(e => e.OptimalWaterLevel).HasColumnName("optimalwaterlevel");
+            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
+            entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
+            
+        });
+        modelBuilder.Entity<WaterPump>(entity =>
+        {
+            entity.ToTable("WaterPump");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.LastWateredTime).HasColumnName("lastwatered");
+            entity.Property(e => e.LastWaterAmount).HasColumnName("lastwateramount");
+            entity.Property(e => e.AutoWateringEnabled).HasColumnName("autowatering");
+            entity.Property(e => e.WaterTankCapacity).HasColumnName("watertankcapacity");
+            entity.Property(e => e.WaterLevel).HasColumnName("currentwaterlevel");
+            entity.Property(e => e.ThresholdValue).HasColumnName("thresholdvalue");
+        });
+        modelBuilder.Entity<Log>(entity =>
+        {
+            entity.ToTable("Log");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Timestamp).HasColumnName("date");
+            entity.Property(e => e.Message).HasColumnName("message");
+            entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
+            entity.Property(e => e.WaterPumpId).HasColumnName("waterpumpid");
+            entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
+            
+        });
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notification");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.Message).HasColumnName("message");
+            entity.Property(e => e.TimeStamp).HasColumnName("date");
+            entity.Property(e => e.IsRead).HasColumnName("isread");
+            entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
+            entity.Property(e => e.WaterPumpId).HasColumnName("waterpumpid");
+        });
+        modelBuilder.Entity<NotificationPreferences>(entity =>
+        {
+            entity.ToTable("NotificationPreferences");
+            entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
+            entity.Property(e => e.IsEnabled).HasColumnName("isenabled");
+            
+        });
     }
     
     
