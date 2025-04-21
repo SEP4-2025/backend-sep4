@@ -4,7 +4,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
             'build',
-            '-t', 'gcr.io/$growmate-457107/webapi:$82ad4935d691245911685c10eb355ebbf2d559c0', # Replace with your desired image tag
+            '-t', 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}', # Replace with your desired image tag
             '-f', 'backend/code/Server/WebAPI/Dockerfile', # Correct Dockerfile path
             'backend/code'  # Correct build context directory
           ]
@@ -14,7 +14,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
             'build',
-            '-t', 'gcr.io/$growmate-457107/receiver:$82ad4935d691245911685c10eb355ebbf2d559c0', # Replace with your desired image tag
+            '-t', 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}', # Replace with your desired image tag
             '-f', 'backend/code/Server/ReceiverService/Dockerfile', # Correct Dockerfile path
             'backend/code'  # Correct build context directory
           ]
@@ -26,8 +26,8 @@ steps:
 
 # List the images to be pushed to Google Container Registry
 images:
-  - 'gcr.io/$growmate-457107/webapi:$82ad4935d691245911685c10eb355ebbf2d559c0'
-  - 'gcr.io/$growmate-457107/receiver:$82ad4935d691245911685c10eb355ebbf2d559c0'
+  - 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
+  - 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
 
 options:
   logging: CLOUD_LOGGING_ONLY # Optional: Set logging options
