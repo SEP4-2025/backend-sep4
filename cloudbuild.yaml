@@ -24,7 +24,7 @@ steps:
     args: [
             'build',
             '-t', 'gcr.io/${PROJECT_ID}/mqtt:${COMMIT_SHA}', # Replace with your desired image tag
-            '-f', 'Dockerfile', # Correct Dockerfile path
+            '-f', 'mqtt/Dockerfile', # Correct Dockerfile path
             'mqtt'
           ]
     id: 'Build mqtt broker'
