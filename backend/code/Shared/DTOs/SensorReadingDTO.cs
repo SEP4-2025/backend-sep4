@@ -2,7 +2,9 @@ namespace DTOs;
 
 public class SensorReadingDTO
 {
-    private int sensorId;
-    private string sensorType;
-    private string message;
+    public int Value { get; set; } // not sure what this should be
+    public DateTime TimeStamp { get; set; }
+    public int ThresholdValue { get; set; }
+
+    public int SensorId { get; set; }
 }

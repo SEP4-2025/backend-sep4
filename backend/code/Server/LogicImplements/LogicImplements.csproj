@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Shared\Database\Database.csproj" />
+      <ProjectReference Include="..\..\Shared\DTOs\DTOs.csproj" />
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
     </ItemGroup>
 

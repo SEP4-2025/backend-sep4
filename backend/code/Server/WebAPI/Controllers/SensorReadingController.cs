@@ -1,3 +1,4 @@
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +58,7 @@ public class SensorReadingController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReading sensorReading)
+    public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReadingDTO sensorReading)
     {
         if (sensorReading == null)
         {
@@ -79,6 +80,7 @@ public class SensorReadingController : ControllerBase
 
         await sensorReading.DeleteSensorReadingAsync(id);
         return NoContent();
+        
     }
 
 }

@@ -1,4 +1,5 @@
 using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -44,11 +45,19 @@ public class SensorReadingLogic : ISensorReadingInterface
             .ToListAsync();
     }
 
-    public Task<SensorReading> AddSensorReadingAsync(SensorReading sensorReading)
+    public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
     {
-        _context.SensorReadings.Add(sensorReading);
-        _context.SaveChanges();
-        return Task.FromResult(sensorReading);
+        var entity = new SensorReading
+        {
+            TimeStamp = sensorReading.TimeStamp,
+            Value = sensorReading.Value,
+            ThresholdValue = sensorReading.ThresholdValue,
+            SensorId = sensorReading.SensorId
+        };
+
+        _context.SensorReadings.Add(entity);
+        await _context.SaveChangesAsync();
+        return entity;
     }
 
     public Task DeleteSensorReadingAsync(int id)
