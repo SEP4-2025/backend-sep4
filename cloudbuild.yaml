@@ -10,7 +10,7 @@ steps:
           ]
     id: 'Build WebAPI'
 
-  # Build the Receiver service (if needed)
+  # Build the Receiver service
   - name: 'gcr.io/cloud-builders/docker'
     args: [
             'build',
@@ -20,16 +20,19 @@ steps:
           ]
     id: 'Build Receiver'
 
-  - name: 'eclipse-mosquitto'
-    waitFor: ['-'] # Run in parallel with WebAPI build if desired
-
-      # Push the WebAPI image to Google Container Registry
+  # Push the WebAPI image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}']
     waitFor: ['Build WebAPI'] # Ensure build is finished before pushing
     id: 'Push WebAPI'
 
-    # Deploy WebAPI container image to Cloud Run
+  # Push the Receiver image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}']
+    waitFor: ['Build Receiver'] # Ensure build is finished before pushing
+    id: 'Push Receiver'
+
+  # Deploy WebAPI container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -45,12 +48,27 @@ steps:
     waitFor: ['Push WebAPI'] # Ensure image is pushed before deploying
     id: 'Deploy WebAPI'
 
+  # Deploy Receiver container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'receiver-service' # Choose a name for your Cloud Run service
+      - '--image=gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
+      - '--region=us-central1' # Replace with your desired region
+      - '--platform=managed'
+      # Add --port if the receiver service exposes one
+      # Add --allow-unauthenticated if needed, otherwise it defaults to private
+      - '--project=${PROJECT_ID}'
+    waitFor: ['Push Receiver'] # Ensure image is pushed before deploying
+    id: 'Deploy Receiver'
+
 
 # List the images to be pushed to Google Container Registry
 images:
   - 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
   - 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
-  - 'gcr.io/${PROJECT_ID}/mqtt:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY # Optional: Set logging options
