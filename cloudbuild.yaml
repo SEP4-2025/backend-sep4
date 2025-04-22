@@ -23,8 +23,28 @@ steps:
   - name: 'eclipse-mosquitto'
     waitFor: ['-'] # Run in parallel with WebAPI build if desired
 
-# Add other steps like pushing the images, deploying, etc.
-# ...
+      # Push the WebAPI image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}']
+    waitFor: ['Build WebAPI'] # Ensure build is finished before pushing
+    id: 'Push WebAPI'
+
+    # Deploy WebAPI container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'webapi-service' # Choose a name for your Cloud Run service
+      - '--image=gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
+      - '--region=us-central1' # Replace with your desired region
+      - '--platform=managed'
+      - '--port=8080' # Replace with the port your WebAPI listens on inside the container
+      - '--allow-unauthenticated' # Add this if you want the API to be publicly accessible
+      - '--project=${PROJECT_ID}'
+    waitFor: ['Push WebAPI'] # Ensure image is pushed before deploying
+    id: 'Deploy WebAPI'
+
 
 # List the images to be pushed to Google Container Registry
 images:
