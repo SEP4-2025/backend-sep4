@@ -3,9 +3,7 @@ USER root
 
 ARG GCSFUSE_VERSION=2.4.2
 ARG ARCH=amd64
-RUN mkdir /download
-RUN wget "https://github.com/googlecloudplatform/gcsfuse/releases/download/v${GCSFUSE_VERSION}/gcsfuse_${GCSFUSE_VERSION}_${ARCH}.deb" -O /download/gcsfuse.deb
-RUN dpkg -i /download/gcsfuse.deb && rm /download/gcsfuse.deb
+RUN apt-get update && apt-get install gcsfuse
 
 RUN mkdir /mnt/data
 
