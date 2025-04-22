@@ -23,7 +23,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
             'build',
-            '-t', 'gcr.io/${PROJECT_ID}/mqtt:2.0.21', # Replace with your desired image tag
+            '-t', 'gcr.io/${PROJECT_ID}/mqtt:${COMMIT_SHA}', # Replace with your desired image tag
             '-f', 'Dockerfile', # Correct Dockerfile path
             'mqtt'
           ]
