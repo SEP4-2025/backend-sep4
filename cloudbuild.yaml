@@ -19,6 +19,15 @@ steps:
             'backend/code'  # Correct build context directory
           ]
     id: 'Build Receiver'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/mqtt:latest', # Replace with your desired image tag
+            'eclipse-mosquitto:latest', # Correct Dockerfile path
+            'backend/mqtt-broker'  # Correct build context directory
+          ]
+    id: 'Build MQTT broker'
     waitFor: ['-'] # Run in parallel with WebAPI build if desired
 
 # Add other steps like pushing the images, deploying, etc.
@@ -28,6 +37,7 @@ steps:
 images:
   - 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
   - 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
+  - 'gcr.io/${PROJECT_ID}/mqtt:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY # Optional: Set logging options
