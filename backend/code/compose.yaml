@@ -1,11 +1,14 @@
 ﻿services:
   db:
+    image: postgres
     build:
         context: ./Shared/Database
         dockerfile: Dockerfile
     container_name: growmate-db
     restart: always
+    env_file: .env
     environment:
+      POSTGRES_HOST: ${DB_HOST}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
@@ -29,6 +32,9 @@
       mqtt:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - growmate-network
+      
 
   mqtt:
     image: eclipse-mosquitto:latest

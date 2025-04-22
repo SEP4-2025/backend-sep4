@@ -17,6 +17,7 @@ public class SensorReadingController : ControllerBase
         this.sensorReading = sensorReading;
     }
 
+    
     [HttpGet]
     public async Task<ActionResult<SensorReading>> GetSensorReadings()
     {

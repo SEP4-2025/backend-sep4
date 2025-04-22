@@ -1,5 +1,5 @@
-CREATE DATABASE "GrowMate";
-CREATE SCHEMA "GrowMate";
+
+CREATE SCHEMA IF NOT EXISTS "GrowMate";
 SET SCHEMA 'GrowMate';
 
 
@@ -56,7 +56,7 @@ CREATE TABLE "SensorReading"
     id SERIAL PRIMARY KEY,
     date TIMESTAMP NOT NULL,
     value INT NOT NULL,
-    treshold INT NOT NULL,
+    threshold INT NOT NULL,
     sensorId INT         NOT NULL,
     FOREIGN KEY (sensorId) REFERENCES "Sensor" (id) ON UPDATE CASCADE
 );
@@ -86,7 +86,7 @@ CREATE TABLE "WaterPump"
     autoWatering BOOLEAN NOT NULL,
     waterTankCapacity INT NOT NULL,
     currentWaterLevel INT NOT NULL,
-    tresholdValue INT NOT NULL
+    thresholdValue INT NOT NULL
 );
 
 CREATE TABLE "Log"
@@ -124,36 +124,32 @@ CREATE TABLE "NotificationPreference"
     isEnabled BOOLEAN NOT NULL
 );
 
-
-SELECT * FROM "Gardener";
-
 INSERT INTO "Gardener" (username, password) VALUES
-('test', 'test');
+    ('test', 'test');
 
--- 2. Greenhouse
+
 INSERT INTO "Greenhouse" (name, gardenerId) VALUES
-('gh1', 3);
+    ('gh1', 1);
 
--- 3. Plants
+
 INSERT INTO "Plant" (name, species, greenhouseId) VALUES
 
-('Basil', 'basil', 2);
+    ('Basil', 'basil', 1);
 
 
 
--- 5. Senzori (cu ID manual)
+
 INSERT INTO "Sensor" (id, type, metricUnit, greenhouseId) VALUES
-(101, 'Temperature', '°C', 2),
-(102, 'Humidity', '%', 2);
-
--- 6. Citiri senzor
-INSERT INTO "SensorReading" (date, value, treshold, sensorId) VALUES
-('2025-04-20 08:00:00', 21, 24, 101),
-('2025-04-20 09:00:00', 26, 24, 101),
-('2025-04-20 10:00:00', 23, 24, 101),
-('2025-04-20 08:00:00', 55, 60, 102),
-('2025-04-20 09:00:00', 67, 60, 102);
+                                                              (101, 'Temperature', '°C', 1),
+                                                              (102, 'Humidity', '%', 1);
 
 
-ALTER TABLE "SensorReading"
-RENAME COLUMN "treshold" TO "threshold";
+INSERT INTO "SensorReading" (date, value, threshold, sensorId) VALUES
+                                                                  ('2025-04-20 08:00:00', 21, 24, 101),
+                                                                  ('2025-04-20 09:00:00', 26, 24, 101),
+                                                                  ('2025-04-20 10:00:00', 23, 24, 101),
+                                                                  ('2025-04-20 08:00:00', 55, 60, 102),
+                                                                  ('2025-04-20 09:00:00', 67, 60, 102);
+
+
+
