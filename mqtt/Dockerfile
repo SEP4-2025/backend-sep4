@@ -1,13 +1,8 @@
-FROM ansi/mosquitto
-USER root
+FROM eclipse-mosquitto:2.0.21
 
-ARG GCSFUSE_VERSION=2.4.2
-ARG ARCH=amd64
-RUN apt-get update && apt-get install gcsfuse
+# Copy the configuration file into the container
+COPY config/mosquitto.conf /mosquitto/config/mosquitto.conf
+# Copy the data directory into the container
+COPY data /mosquitto/data
 
-RUN mkdir /mnt/data
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
