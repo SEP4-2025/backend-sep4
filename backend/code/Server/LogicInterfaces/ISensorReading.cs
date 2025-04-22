@@ -10,6 +10,6 @@ public interface ISensorReadingInterface
     Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId);
     Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date);
     Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading);
-    Task DeleteSensorReadingAsync(int id);
+    Task<Task> DeleteSensorReadingAsync(int id);
     Task<List<SensorReading>> GetSensorReadingsAsync();
 }

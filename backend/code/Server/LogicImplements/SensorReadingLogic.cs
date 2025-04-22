@@ -60,13 +60,13 @@ public class SensorReadingLogic : ISensorReadingInterface
         return entity;
     }
 
-    public Task DeleteSensorReadingAsync(int id)
+    public async Task<Task> DeleteSensorReadingAsync(int id)
     {
         var sensorReading = _context.SensorReadings.Find(id);
         if (sensorReading != null)
         {
             _context.SensorReadings.Remove(sensorReading);
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
         }
         return Task.CompletedTask;
     }
