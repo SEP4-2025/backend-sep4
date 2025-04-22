@@ -7,6 +7,12 @@ public class SensorReadingLogic : ISensorReadingInterface
 {
     private readonly List<SensorReading> sensorReadings;
 
+    // Add a constructor to initialize the list
+    public SensorReadingLogic()
+    {
+        sensorReadings = new List<SensorReading>();
+    }
+
     public Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
         throw new NotImplementedException();
