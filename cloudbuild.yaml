@@ -20,8 +20,13 @@ steps:
           ]
     id: 'Build Receiver'
 
-  - name: 'eclipse-mosquitto'
-    waitFor: ['-'] # Run in parallel with WebAPI build if desired
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/mqtt:latest', # Replace with your desired image tag
+            '-f', 'mqtt/Dockerfile', # Correct Dockerfile path
+          ]
+    id: 'Build mqtt broker'
 
 # Add other steps like pushing the images, deploying, etc.
 # ...
