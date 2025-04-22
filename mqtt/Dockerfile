@@ -1,4 +1,4 @@
-FROM eclipse-mosquitto:latest  # Or a specific version if preferred
+FROM eclipse-mosquitto:2.0.21
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fuse \
