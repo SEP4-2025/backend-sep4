@@ -1,0 +1,33 @@
+# cloudbuild.yaml (Example)
+steps:
+  # Build the WebAPI service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}', # Replace with your desired image tag
+            '-f', 'backend/code/Server/WebAPI/Dockerfile', # Correct Dockerfile path
+            'backend/code'  # Correct build context directory
+          ]
+    id: 'Build WebAPI'
+
+  # Build the Receiver service (if needed)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}', # Replace with your desired image tag
+            '-f', 'backend/code/Server/ReceiverService/Dockerfile', # Correct Dockerfile path
+            'backend/code'  # Correct build context directory
+          ]
+    id: 'Build Receiver'
+    waitFor: ['-'] # Run in parallel with WebAPI build if desired
+
+# Add other steps like pushing the images, deploying, etc.
+# ...
+
+# List the images to be pushed to Google Container Registry
+images:
+  - 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
+  - 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY # Optional: Set logging options

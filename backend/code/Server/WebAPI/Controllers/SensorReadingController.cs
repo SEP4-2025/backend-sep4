@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Mvc;
 using Entities;
 using LogicInterfaces;
-using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
@@ -33,5 +33,4 @@ public class SensorReadingController : ControllerBase
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
         return CreatedAtAction(nameof(GetSensorReadings), new { id = addedSensorReading.Id }, addedSensorReading);
     }
-
 }
