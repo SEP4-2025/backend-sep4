@@ -20,7 +20,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         return await _context.SensorReadings
             .FirstOrDefaultAsync(sr => sr.Id == id);
     }
-    
+
     public async Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
     {
         var sensor = await _context.Sensors.FindAsync(sensorId);
@@ -28,7 +28,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         {
             throw new Exception($"Sensor with id {sensorId} not found");
         }
-        
+
         return await _context.SensorReadings.Where(s => s.SensorId == sensorId).ToListAsync();
     }
 
@@ -48,10 +48,10 @@ public class SensorReadingLogic : ISensorReadingInterface
             SensorId = sensorReading.SensorId,
         };
 
-        _context.SensorReadings.Add(newSensorReading);  
-        await _context.SaveChangesAsync();  
+        _context.SensorReadings.Add(newSensorReading);
+        await _context.SaveChangesAsync();
 
-        return newSensorReading; 
+        return newSensorReading;
     }
 
 
