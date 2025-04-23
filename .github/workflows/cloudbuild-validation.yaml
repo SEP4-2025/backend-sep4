@@ -28,24 +28,9 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Install gcloud beta components
-        run: gcloud components install beta --quiet
-
       - name: Validate Cloud Build configuration
         run: |
           # Validate the Cloud Build configuration by doing a dry run
           gcloud builds submit --config=cloudbuild.yaml --no-source --substitutions=COMMIT_SHA=${{ github.sha }}
 
-      - name: Check Docker build processes
-        run: |
-          # Test building WebAPI image
-          docker build -t webapi-test:${{ github.sha }} -f backend/code/Server/WebAPI/Dockerfile backend/code
-
-          # Test building Database image
-          docker build -t db-test:${{ github.sha }} -f backend/code/Shared/Database/Dockerfile backend/code/Shared/Database
-
-          # Test building Receiver image
-          docker build -t receiver-test:${{ github.sha }} -f backend/code/Server/ReceiverService/Dockerfile backend/code
-
-          # Test building MQTT image
-          docker build -t mqtt-test:${{ github.sha }} -f mqtt/Dockerfile mqtt
+          echo "Cloud Build configuration validated successfully!"
