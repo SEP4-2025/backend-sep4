@@ -83,7 +83,7 @@ steps:
       - '--image=gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}'
       - '--region=europe-north2' # Change region to europe-north2
       - '--platform=managed'
-      # Add --port if the database service exposes one
+      - '--port=5432' # Replace with the port your Database listens on inside the container
       - '--allow-unauthenticated'
       - '--project=${PROJECT_ID}'
     waitFor: ['Push Database'] # Ensure image is pushed before deploying
