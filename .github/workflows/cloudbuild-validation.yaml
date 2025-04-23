@@ -33,9 +33,9 @@ jobs:
 
       - name: Validate Cloud Build configuration
         run: |
-          # Validate the Cloud Build configuration
-          gcloud beta builds submit --no-source --config cloudbuild.yaml --validate-config-only
-
+          # Validate the Cloud Build configuration by doing a dry run
+          gcloud builds submit --config=cloudbuild.yaml --no-source --substitutions=_TAG=${{ github.sha }}
+        
       - name: Check Docker build processes
         run: |
           # Test building WebAPI image
