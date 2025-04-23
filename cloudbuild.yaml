@@ -1,0 +1,116 @@
+# cloudbuild.yaml (Example)
+steps:
+  # Build the WebAPI service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}', # Replace with your desired image tag
+            '-f', 'backend/code/Server/WebAPI/Dockerfile', # Correct Dockerfile path
+            'backend/code'  # Correct build context directory
+          ]
+    id: 'Build WebAPI'
+  # Build the Database service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+                'build',
+                '-t', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}', # Replace with your desired image tag
+                '-f', 'Shared/Database/Dockerfile', # Correct Dockerfile path
+                'Shared/Database'  # Correct build context directory
+            ]
+    id: 'Build Database'
+        
+  # Build the Receiver service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}', # Replace with your desired image tag
+            '-f', 'backend/code/Server/ReceiverService/Dockerfile', # Correct Dockerfile path
+            'backend/code'  # Correct build context directory
+          ]
+    id: 'Build Receiver'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+            'build',
+            '-t', 'gcr.io/${PROJECT_ID}/mqtt:${COMMIT_SHA}', # Replace with your desired image tag
+            '-f', 'mqtt/Dockerfile', # Correct Dockerfile path
+            'mqtt'
+          ]
+    id: 'Build mqtt broker'
+
+
+  # Push the WebAPI image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}']
+    waitFor: ['Build WebAPI'] # Ensure build is finished before pushing
+    id: 'Push WebAPI'
+    
+    # Push the Database image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}']
+    waitFor: ['Build Database'] # Ensure build is finished before pushing
+    id: 'Push Database'
+
+  # Push the Receiver image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}']
+    waitFor: ['Build Receiver'] # Ensure build is finished before pushing
+    id: 'Push Receiver'
+
+  # Deploy WebAPI container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'webapi-service'
+      - '--image=gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
+      - '--region=europe-north2' # Change region to europe-north2
+      - '--platform=managed'
+      - '--port=8080' # Replace with the port your WebAPI listens on inside the container
+      - '--allow-unauthenticated' # Add this if you want the API to be publicly accessible
+      - '--project=${PROJECT_ID}'
+    waitFor: ['Push WebAPI'] # Ensure image is pushed before deploying
+    id: 'Deploy WebAPI'
+
+  # Deploy Database container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'db-service' # Choose a name for your Cloud Run service
+      - '--image=gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}'
+      - '--region=europe-north2' # Change region to europe-north2
+      - '--platform=managed'
+      # Add --port if the database service exposes one
+      - '--allow-unauthenticated'
+      - '--project=${PROJECT_ID}'
+    waitFor: ['Push Database'] # Ensure image is pushed before deploying
+    id: 'Deploy Database'
+    
+  # Deploy Receiver container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'receiver-service' # Choose a name for your Cloud Run service
+      - '--image=gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
+      - '--region=europe-north2' # Change region to europe-north2
+      - '--platform=managed'
+      # Add --port if the receiver service exposes one
+      - '--allow-unauthenticated'
+      - '--project=${PROJECT_ID}'
+    waitFor: ['Push Receiver'] # Ensure image is pushed before deploying
+    id: 'Deploy Receiver'
+
+
+# List the images to be pushed to Google Container Registry
+images:
+  - 'gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}'
+  - 'gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}'
+  - 'gcr.io/${PROJECT_ID}/mqtt:${COMMIT_SHA}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY # Optional: Set logging options

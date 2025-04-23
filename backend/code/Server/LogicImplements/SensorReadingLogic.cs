@@ -17,6 +17,7 @@ public class SensorReadingLogic : ISensorReadingInterface
     
     
 
+   
     public Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
         return _context.SensorReadings
