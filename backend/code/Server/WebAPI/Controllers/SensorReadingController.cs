@@ -21,13 +21,12 @@ public class SensorReadingController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<SensorReading>> GetSensorReadings()
     {
-        var reading = await sensorReading.GetSensorReadingByIdAsync(1);
-        Console.WriteLine(reading?.Value); // safely handles null
-        if (reading == null)
+        var readings = await sensorReading.GetSensorReadingsAsync();
+        if (readings == null || !readings.Any())
         {
             return NotFound();
         }
-        return Ok(reading);
+        return Ok(readings);
     }
     
     [HttpGet("{id}")]

@@ -58,8 +58,8 @@ public class SensorReadingLogic : ISensorReadingInterface
         throw new NotImplementedException();
     }
 
-    public Task<List<SensorReading>> GetSensorReadingsAsync()
+    public async Task<List<SensorReading>> GetSensorReadingsAsync()
     {
-        throw new NotImplementedException();
+        return await _context.SensorReadings.ToListAsync();
     }
 }
