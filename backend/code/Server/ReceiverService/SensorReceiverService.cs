@@ -13,19 +13,14 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private readonly ILogger<SensorReceiverService> _logger;
     private bool _isHealthy = false;
 
-    public SensorReceiverService(
-
-        ILogger<SensorReceiverService> logger
-    )
+    public SensorReceiverService(ILogger<SensorReceiverService> logger)
     {
         _mqttClient = _mqttFactory.CreateMqttClient();
         _logger = logger;
 
-        _server =
-            "10.121.138.177";
+        _server = "10.121.138.177";
 
         _port = 1883;
-
 
         _topics = new List<string>();
         var topicsConfig = "light/reading";

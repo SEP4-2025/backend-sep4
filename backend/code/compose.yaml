@@ -2,8 +2,8 @@
   db:
     image: postgres:16
     build:
-        context: .
-        dockerfile: /Shared/Database/Dockerfile
+      context: .
+      dockerfile: /Shared/Database/Dockerfile
     container_name: growmate-db
     restart: always
     env_file: .env
@@ -18,8 +18,7 @@
       - postgres-data:/var/lib/postgresql/data
     networks:
       - growmate-network
-  
-  
+
   webapi:
     image: webapi
     build:
@@ -34,7 +33,6 @@
     restart: unless-stopped
     networks:
       - growmate-network
-      
 
   mqtt:
     image: eclipse-mosquitto:latest
@@ -86,12 +84,12 @@
   #   environment:
   #     - MQTT_BROKER_HOST=mqtt
   #   restart: unless-stopped
+  #
 
 volumes:
   mosquitto-data:
   mosquitto-log:
   postgres-data:
-    
-    
+
 networks:
   growmate-network:
