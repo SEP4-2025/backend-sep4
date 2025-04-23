@@ -28,6 +28,9 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Install gcloud beta components
+        run: gcloud components install beta --quiet
+
       - name: Validate Cloud Build configuration
         run: |
           # Validate the Cloud Build configuration
