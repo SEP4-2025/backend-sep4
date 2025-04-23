@@ -14,10 +14,9 @@ public class SensorReadingLogic : ISensorReadingInterface
     {
         _context = context;
     }
-    
-    
 
-   
+
+
     public Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
         return _context.SensorReadings
@@ -67,7 +66,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         if (sensorReading != null)
         {
             _context.SensorReadings.Remove(sensorReading);
-           await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
         return Task.CompletedTask;
     }

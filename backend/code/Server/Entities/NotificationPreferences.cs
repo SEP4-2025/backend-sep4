@@ -11,6 +11,6 @@ public class NotificationPreferences
     public string Type { get; set; } // e.g., "Water", "Soil", "Light"
     public bool IsEnabled { get; set; }
     public Gardener Gardener { get; set; } = null!;
-    
+
 
 }

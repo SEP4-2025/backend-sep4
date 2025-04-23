@@ -10,14 +10,14 @@ namespace WebAPI.Controllers;
 public class SensorReadingController : ControllerBase
 {
     private readonly ISensorReadingInterface sensorReading;
-    
+
 
     public SensorReadingController(ISensorReadingInterface sensorReading)
     {
         this.sensorReading = sensorReading;
     }
 
-    
+
     [HttpGet]
     public async Task<ActionResult<SensorReading>> GetSensorReadings()
     {
@@ -34,7 +34,7 @@ public class SensorReadingController : ControllerBase
         }
         return Ok(reading);
     }
-    
+
     [HttpGet("sensor/{sensorId}")]
     public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsBySensorId(int sensorId)
     {
@@ -45,9 +45,9 @@ public class SensorReadingController : ControllerBase
         }
         return Ok(readings);
     }
-    
+
     [HttpGet("date/{date}")]
-    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate([FromQuery]DateTime date)
+    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate([FromQuery] DateTime date)
     {
         var utcDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
         var readings = await sensorReading.GetSensorReadingsByDateAsync(utcDate);
@@ -57,7 +57,7 @@ public class SensorReadingController : ControllerBase
         }
         return Ok(readings);
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReadingDTO sensorReading)
     {
@@ -69,7 +69,7 @@ public class SensorReadingController : ControllerBase
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
         return CreatedAtAction(nameof(GetSensorReadings), new { id = addedSensorReading.Id }, addedSensorReading);
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSensorReading(int id)
     {
@@ -81,7 +81,7 @@ public class SensorReadingController : ControllerBase
 
         await sensorReading.DeleteSensorReadingAsync(id);
         return NoContent();
-        
+
     }
 
 }

@@ -6,9 +6,9 @@ namespace Database;
 public class AppDbContext : DbContext
 {
 
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    
+
 
     public DbSet<Gardener> Gardeners => Set<Gardener>();
     public DbSet<Greenhouse> Greenhouses => Set<Greenhouse>();
@@ -42,16 +42,16 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
-            
+
         });
         modelBuilder.Entity<Plant>(entity =>
         {
             entity.ToTable("Plant");
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e=> e.Species).HasColumnName("species");
+            entity.Property(e => e.Species).HasColumnName("species");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
-            
+
         });
         modelBuilder.Entity<Picture>(entity =>
         {
@@ -90,7 +90,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Date).HasColumnName("date");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
             entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
-            
+
         });
         modelBuilder.Entity<WaterPump>(entity =>
         {
@@ -112,7 +112,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
             entity.Property(e => e.WaterPumpId).HasColumnName("waterpumpid");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
-            
+
         });
         modelBuilder.Entity<Notification>(entity =>
         {
@@ -130,10 +130,10 @@ public class AppDbContext : DbContext
             entity.ToTable("NotificationPreferences");
             entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
             entity.Property(e => e.IsEnabled).HasColumnName("isenabled");
-            
+
         });
     }
-    
-    
-   
+
+
+
 }
