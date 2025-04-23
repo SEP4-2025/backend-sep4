@@ -21,9 +21,15 @@ public class SensorReadingController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<SensorReading>> GetSensorReadings()
     {
-        var readings = await sensorReading.GetSensorReadingsAsync();
-        return Ok(readings);
+        var reading = await sensorReading.GetSensorReadingByIdAsync(1);
+        Console.WriteLine(reading?.Value); // safely handles null
+        if (reading == null)
+        {
+            return NotFound();
+        }
+        return Ok(reading);
     }
+    
     [HttpGet("{id}")]
     public async Task<ActionResult<SensorReading>> GetSensorReadingById(int id)
     {
@@ -67,7 +73,7 @@ public class SensorReadingController : ControllerBase
         }
 
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
-        return CreatedAtAction(nameof(GetSensorReadings), new { id = addedSensorReading.Id }, addedSensorReading);
+        return CreatedAtAction(nameof(GetSensorReadingById), new { id = addedSensorReading.Id }, addedSensorReading);
     }
 
     [HttpDelete("{id}")]
