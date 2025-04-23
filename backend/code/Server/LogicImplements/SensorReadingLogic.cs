@@ -1,52 +1,78 @@
+using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace LogicImplements;
 
 public class SensorReadingLogic : ISensorReadingInterface
 {
-    private readonly List<SensorReading> sensorReadings;
+    private readonly AppDbContext _context;
 
-    // Add a constructor to initialize the list
-    public SensorReadingLogic()
+    public SensorReadingLogic(AppDbContext context)
     {
-        sensorReadings = new List<SensorReading>();
+        _context = context;
     }
+
+
 
     public Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return _context.SensorReadings
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public Task<SensorReading> GetSensorReadingBySensorIdAsync(int sensorId)
     {
-        throw new NotImplementedException();
+        return _context.SensorReadings
+            .FirstOrDefaultAsync(x => x.SensorId == sensorId);
     }
 
     public Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
     {
-        throw new NotImplementedException();
+        return _context.SensorReadings
+            .Where(x => x.SensorId == sensorId)
+            .ToListAsync();
     }
 
-    public Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
+    public Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime utcDate)
     {
-        throw new NotImplementedException();
+        var start = utcDate.Date;
+        var end = utcDate.AddDays(1);
+        return _context.SensorReadings
+            .Where(sr => sr.TimeStamp >= start && sr.TimeStamp < end)
+            .ToListAsync();
     }
 
-    public Task<SensorReading> AddSensorReadingAsync(SensorReading sensorReading)
+    public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
     {
-        sensorReading.Id = sensorReadings.Any() ? sensorReadings.Max(sr => sr.Id) + 1 : 1;
-        sensorReadings.Add(sensorReading);
-        return Task.FromResult(sensorReading);
+        var entity = new SensorReading
+        {
+            TimeStamp = sensorReading.TimeStamp,
+            Value = sensorReading.Value,
+            ThresholdValue = sensorReading.ThresholdValue,
+            SensorId = sensorReading.SensorId
+        };
+
+        _context.SensorReadings.Add(entity);
+        await _context.SaveChangesAsync();
+        return entity;
     }
 
-    public Task DeleteSensorReadingAsync(int id)
+    public async Task<Task> DeleteSensorReadingAsync(int id)
     {
-        throw new NotImplementedException();
+        var sensorReading = _context.SensorReadings.Find(id);
+        if (sensorReading != null)
+        {
+            _context.SensorReadings.Remove(sensorReading);
+            await _context.SaveChangesAsync();
+        }
+        return Task.CompletedTask;
     }
 
     public Task<List<SensorReading>> GetSensorReadingsAsync()
     {
-        return Task.FromResult(sensorReadings);
+        return _context.SensorReadings.ToListAsync();
     }
 }
