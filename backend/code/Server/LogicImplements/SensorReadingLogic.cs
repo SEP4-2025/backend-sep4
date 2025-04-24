@@ -17,8 +17,14 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public async Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
-        return await _context.SensorReadings
-            .FirstOrDefaultAsync(sr => sr.Id == id);
+        var reading = await _context.SensorReadings.FirstOrDefaultAsync(sr => sr.Id == id);
+
+        if (reading == null)
+        {
+            throw new Exception($"Sensor reading with id {id} not found");
+        }
+        
+        return reading;
     }
 
     public async Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
