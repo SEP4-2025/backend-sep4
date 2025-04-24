@@ -10,14 +10,14 @@ steps:
           ]
     id: 'Build WebAPI'
   # Build the Database service
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [
-                'build',
-                '-t', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}', # Replace with your desired image tag
-                '-f', 'backend/code/Shared/Database/Dockerfile', # Correct Dockerfile path
-                'backend/code/Shared/Database' # Correct build context directory
-            ]
-    id: 'Build Database'
+#  - name: 'gcr.io/cloud-builders/docker'
+#    args: [
+#                'build',
+#                '-t', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}', # Replace with your desired image tag
+#                '-f', 'backend/code/Shared/Database/Dockerfile', # Correct Dockerfile path
+#                'backend/code/Shared/Database' # Correct build context directory
+#            ]
+#    id: 'Build Database'
         
   # Build the Receiver service
   - name: 'gcr.io/cloud-builders/docker'
@@ -45,11 +45,11 @@ steps:
     waitFor: ['Build WebAPI'] # Ensure build is finished before pushing
     id: 'Push WebAPI'
     
-    # Push the Database image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}']
-    waitFor: ['Build Database'] # Ensure build is finished before pushing
-    id: 'Push Database'
+#    # Push the Database image to Google Container Registry
+#  - name: 'gcr.io/cloud-builders/docker'
+#    args: ['push', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}']
+#    waitFor: ['Build Database'] # Ensure build is finished before pushing
+#    id: 'Push Database'
 
   # Push the Receiver image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -73,22 +73,22 @@ steps:
     waitFor: ['Push WebAPI'] # Ensure image is pushed before deploying
     id: 'Deploy WebAPI'
 
-  # Deploy Database container image to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
-    args:
-      - 'run'
-      - 'deploy'
-      - 'db-service' # Choose a name for your Cloud Run service
-      - '--image=gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}'
-      - '--region=europe-north2' # Change region to europe-north2
-      - '--platform=managed'
-      - '--port=5432' # Replace with the port your Database listens on inside the container
-      - '--allow-unauthenticated'
-      - '--project=${PROJECT_ID}'
-    waitFor: ['Push Database'] # Ensure image is pushed before deploying
-    id: 'Deploy Database'
-    
+#  Deploy Database container image to Cloud Run
+#  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#    entrypoint: gcloud
+#    args:
+#      - 'run'
+#      - 'deploy'
+#      - 'db-service' # Choose a name for your Cloud Run service
+#      - '--image=gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}'
+#      - '--region=europe-north2' # Change region to europe-north2
+#      - '--platform=managed'
+#      - '--port=5432' # Replace with the port your Database listens on inside the container
+#      - '--allow-unauthenticated'
+#      - '--project=${PROJECT_ID}'
+#    waitFor: ['Push Database'] # Ensure image is pushed before deploying
+#    id: 'Deploy Database'
+#    
   # Deploy Receiver container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
