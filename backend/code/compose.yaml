@@ -1,23 +1,23 @@
 ﻿services:
-  db:
-    image: postgres:16
-    build:
-        context: .
-        dockerfile: ./Shared/Database/Dockerfile
-    container_name: growmate-db
-    restart: always
-    env_file: .env
-    environment:
-      POSTGRES_HOST: ${DB_HOST}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - growmate-network
+#  db:
+#    image: postgres:16
+#    build:
+#        context: .
+#        dockerfile: Shared/Database/Dockerfile
+#    container_name: growmate-db
+#    restart: always
+#    env_file: .env
+#    environment:
+#      POSTGRES_HOST: ${DB_HOST}
+#      POSTGRES_USER: ${DB_USER}
+#      POSTGRES_PASSWORD: ${DB_PASSWORD}
+#      POSTGRES_DB: ${DB_NAME}
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#    networks:
+#      - growmate-network
   
   
   webapi:
@@ -32,8 +32,8 @@
       mqtt:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - growmate-network
+#    networks:
+#      - growmate-network
       
 
   mqtt:
@@ -90,8 +90,8 @@
 volumes:
   mosquitto-data:
   mosquitto-log:
-  postgres-data:
+#  postgres-data:
     
     
-networks:
-  growmate-network:
+#networks:
+#  growmate-network:
