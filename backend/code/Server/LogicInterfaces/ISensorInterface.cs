@@ -1,18 +1,16 @@
+using DTOs;
 using Entities;
 
 namespace LogicInterfaces;
 
 public interface ISensorInterface
 {
+    Task<List<Sensor>> GetAllSensorsAsync();
     Task<Sensor> GetSensorByIdAsync(int id);
     Task<Sensor> GetSensorByTypeAsync(string type);
-    Task<Sensor> GetSensorByGreenhouseIdAsync(int greenhouseId);
-    Task<List<Sensor>> GetSensorsByGreenhouseIdAsync(int greenhouseId);
-    Task<List<Sensor>> GetSensorsByTypeAsync(string type);
-    Task<List<Sensor>> GetAllSensorsAsync();
-    Task<Sensor> UpdateSensorThresholdAsync(int id, double threshold);
-    Task<Sensor> UpdateSensorMetricUnitAsync(int id, string metricUnit);
-    Task AddSensorAsync(Sensor sensor);
-    Task UpdateSensorAsync(Sensor sensor);
+    Task<String> GetMetricUnitBySensorIdAsync(int sensorId);
+    Task<List<Sensor>> GetAllSensorsByGreenHouseId(int greenHouseId);
+    Task<Sensor> AddSensorAsync(SensorDTO sensor);
+    Task<Sensor> UpdateSensorAsync(int id, UpdateSensorDTO sensor);
     Task DeleteSensorAsync(int id);
 }

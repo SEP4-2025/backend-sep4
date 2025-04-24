@@ -1,4 +1,5 @@
 using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,12 @@ public class SensorLogic : ISensorInterface
     {
         _context = context;
     }
-
+    
+    public async Task<List<Sensor>> GetAllSensorsAsync()
+    {
+        return await _context.Sensors.ToListAsync();
+    }
+    
     public async Task<Sensor> GetSensorByIdAsync(int id)
     {
         var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
@@ -24,7 +30,7 @@ public class SensorLogic : ISensorInterface
         
         return sensor;
     }
-
+    
     public async Task<Sensor> GetSensorByTypeAsync(string type)
     {
         var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Type == type);
@@ -35,55 +41,60 @@ public class SensorLogic : ISensorInterface
         return sensor;
     }
 
-    public async Task<Sensor> GetSensorByGreenhouseIdAsync(int greenhouseId)
+    public async Task<String> GetMetricUnitBySensorIdAsync(int sensorId)
     {
-        throw new NotImplementedException();
+        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == sensorId);
+        if (sensor == null)
+        {
+            throw new Exception($"Sensor with id {sensorId} not found");
+        }
+        return sensor.MetricUnit;
     }
 
-    public async Task<List<Sensor>> GetSensorsByGreenhouseIdAsync(int greenhouseId)
+    public async Task<List<Sensor>> GetAllSensorsByGreenHouseId(int greenHouseId)
     {
-        var sensors = await _context.Sensors.Where(s => s.GreenhouseId == greenhouseId).ToListAsync();
+        var sensors = await _context.Sensors.Where(s => s.GreenhouseId == greenHouseId).ToListAsync();
         return sensors;
     }
 
-    public async Task<List<Sensor>> GetSensorsByTypeAsync(string type)
+    public async Task<Sensor> AddSensorAsync(SensorDTO sensor)
     {
-        throw new NotImplementedException();
-    }
+        var newSensor = new Sensor
+        {
+            Type = sensor.Type,
+            MetricUnit = sensor.MetricUnit,
+            GreenhouseId = sensor.greenHouseId
+        };
 
-    public async Task<List<Sensor>> GetAllSensorsAsync()
-    {
-        throw new NotImplementedException();
-    }
+        _context.Sensors.Add(newSensor);
+        await _context.SaveChangesAsync();
 
-    public async Task<Sensor> UpdateSensorThresholdAsync(int id, double threshold)
-    {
-        throw new NotImplementedException();
+        return newSensor;
     }
-
-    public async Task<Sensor> UpdateSensorMetricUnitAsync(int id, string metricUnit)
+    
+    public async Task<Sensor> UpdateSensorAsync(int id, UpdateSensorDTO sensor)
     {
-        throw new NotImplementedException();
-    }
-
-    public async Task AddSensorAsync(Sensor sensor)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task UpdateSensorAsync(Sensor sensor)
-    {
-        throw new NotImplementedException();
+        var sensorToUpdate = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+        if (sensorToUpdate == null)
+        {
+            throw new Exception($"Sensor with id {id} not found");
+        }
+        sensorToUpdate.Type = sensor.Type ?? sensorToUpdate.Type;
+        sensorToUpdate.MetricUnit = sensor.MetricUnit ?? sensorToUpdate.MetricUnit;
+        
+        _context.Sensors.Update(sensorToUpdate);
+        await _context.SaveChangesAsync();
+        return sensorToUpdate;
     }
 
     public async Task DeleteSensorAsync(int id)
     {
-        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
-        if (sensor == null)
+        var sensorToDelete = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+        if (sensorToDelete == null)
         {
             throw new Exception($"Sensor with id {id} not found");
         }
-        _context.Sensors.Remove(sensor);
+        _context.Sensors.Remove(sensorToDelete);
         await _context.SaveChangesAsync();
     }
 }
