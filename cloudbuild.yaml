@@ -14,8 +14,8 @@ steps:
     args: [
                 'build',
                 '-t', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}', # Replace with your desired image tag
-                '-f', 'Shared/Database/Dockerfile', # Correct Dockerfile path
-                'Shared/Database'  # Correct build context directory
+                '-f', 'backend/code/Shared/Database/Dockerfile', # Correct Dockerfile path
+                'backend/code/Shared/Database' # Correct build context directory
             ]
     id: 'Build Database'
         

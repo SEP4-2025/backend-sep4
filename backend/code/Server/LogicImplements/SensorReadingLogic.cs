@@ -15,64 +15,61 @@ public class SensorReadingLogic : ISensorReadingInterface
         _context = context;
     }
 
-
-
-    public Task<SensorReading> GetSensorReadingByIdAsync(int id)
+    public async Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
-        return _context.SensorReadings
-            .FirstOrDefaultAsync(x => x.Id == id);
+        return await _context.SensorReadings
+            .FirstOrDefaultAsync(sr => sr.Id == id);
     }
 
-    public Task<SensorReading> GetSensorReadingBySensorIdAsync(int sensorId)
+    public async Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
     {
-        return _context.SensorReadings
-            .FirstOrDefaultAsync(x => x.SensorId == sensorId);
+        var sensor = await _context.Sensors.FindAsync(sensorId);
+        if (sensor == null)
+        {
+            throw new Exception($"Sensor with id {sensorId} not found");
+        }
+
+        return await _context.SensorReadings.Where(s => s.SensorId == sensorId).ToListAsync();
     }
 
-    public Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
+    public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
     {
-        return _context.SensorReadings
-            .Where(x => x.SensorId == sensorId)
-            .ToListAsync();
-    }
-
-    public Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime utcDate)
-    {
-        var start = utcDate.Date;
-        var end = utcDate.AddDays(1);
-        return _context.SensorReadings
-            .Where(sr => sr.TimeStamp >= start && sr.TimeStamp < end)
-            .ToListAsync();
+        var readings = await _context.SensorReadings.Where(sr => sr.TimeStamp == date).ToListAsync();
+        return readings;
     }
 
     public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
     {
-        var entity = new SensorReading
+        var newSensorReading = new SensorReading
         {
-            TimeStamp = sensorReading.TimeStamp,
             Value = sensorReading.Value,
+            TimeStamp = sensorReading.TimeStamp,
             ThresholdValue = sensorReading.ThresholdValue,
-            SensorId = sensorReading.SensorId
+            SensorId = sensorReading.SensorId,
         };
 
-        _context.SensorReadings.Add(entity);
+        _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
-        return entity;
+
+        return newSensorReading;
     }
 
-    public async Task<Task> DeleteSensorReadingAsync(int id)
+
+    public async Task DeleteSensorReadingAsync(int id)
     {
-        var sensorReading = _context.SensorReadings.Find(id);
-        if (sensorReading != null)
+        var sensorReading = await _context.SensorReadings.FindAsync(id);
+        if (sensorReading == null)
         {
-            _context.SensorReadings.Remove(sensorReading);
-            await _context.SaveChangesAsync();
+            return;
         }
-        return Task.CompletedTask;
+
+        _context.SensorReadings.Remove(sensorReading);
+        await _context.SaveChangesAsync();
     }
 
-    public Task<List<SensorReading>> GetSensorReadingsAsync()
+
+    public async Task<List<SensorReading>> GetSensorReadingsAsync()
     {
-        return _context.SensorReadings.ToListAsync();
+        return await _context.SensorReadings.ToListAsync();
     }
 }
