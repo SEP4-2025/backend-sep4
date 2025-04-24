@@ -26,7 +26,7 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
           export_environment_variables: true
       
       - name: Set up Docker Buildx
@@ -35,20 +35,18 @@ jobs:
       - name: Create temporary directory for build artifacts
         run: mkdir -p /tmp/cloudbuild-artifacts
       
-      - name: Run Cloud Build local emulator with --dryrun
+      - name: Run actual Cloud Build local emulator (without dryrun)
         id: cloud-build-validate
         run: |
-          echo "Running Cloud Build emulation in dry-run mode..."
+          echo "Running Cloud Build emulation with actual builds..."
           
           gcloud beta builds submit \
             --config=cloudbuild.yaml \
-            --project=${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }} \
-            --substitutions=_COMMIT_SHA=${{ github.sha }},PROJECT_ID=${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }},COMMIT_SHA=${{ github.sha }} \
-            --gcs-log-dir=gs://${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }}_cloudbuild/logs \
-            --gcs-source-staging-dir=gs://${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }}_cloudbuild/source \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --substitutions=_COMMIT_SHA=${{ github.sha }},PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},COMMIT_SHA=${{ github.sha }} \
             --local-cloudbuild=/tmp/cloudbuild-artifacts \
             --no-source \
-            --dryrun
+            --no-push
           
           echo "Cloud Build validation completed successfully"
       
@@ -56,10 +54,10 @@ jobs:
         if: success()
         run: |
           echo "✅ Cloud Build configuration validated successfully!"
-          echo "This configuration should build correctly when merged to master."
+          echo "All build steps were executed successfully."
           
-          # Print the steps that would be executed
-          echo "Steps that would be executed:"
+          # Print the steps that were executed
+          echo "Steps that were executed:"
           cat cloudbuild.yaml | grep "name\|id:" | sed 's/^[ \t]*/    /'
       
       - name: Validate Dockerfiles
@@ -82,12 +80,27 @@ jobs:
             exit 1
           fi
           
+          # Check Sender Dockerfile
+          if [ -f backend/code/Server/SenderService/Dockerfile ]; then
+            echo "✅ Sender Dockerfile exists"
+          else
+            echo "❌ Sender Dockerfile missing!"
+            exit 1
+          fi
+          
           # Check MQTT Dockerfile
           if [ -f mqtt/Dockerfile ]; then
             echo "✅ MQTT Dockerfile exists"
           else
             echo "❌ MQTT Dockerfile missing!"
             exit 1
+          fi
+          
+          # Check Database Dockerfile if used
+          if [ -f backend/code/Shared/Database/Dockerfile ]; then
+            echo "✅ Database Dockerfile exists"
+          else
+            echo "⚠️ Database Dockerfile not found, but might be commented out in cloudbuild.yaml"
           fi
           
           echo "All Dockerfiles validated successfully!"
