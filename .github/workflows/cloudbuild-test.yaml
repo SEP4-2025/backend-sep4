@@ -1,3 +1,12 @@
+name: Trigger Cloud Build
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
 jobs:
   trigger-cloud-build:
     runs-on: ubuntu-latest
