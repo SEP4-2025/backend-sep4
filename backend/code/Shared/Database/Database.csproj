@@ -21,10 +21,4 @@
       <ProjectReference Include="..\..\Server\Entities\Entities.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
 </Project>
