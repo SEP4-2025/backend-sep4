@@ -1,4 +1,4 @@
-name: Test Docker Builds for Cloud Deployment
+name: Dockerization validation & build test
 
 on:
   pull_request:
@@ -73,14 +73,6 @@ jobs:
           docker ps | grep mqtt-test
           docker logs mqtt-test
           docker stop mqtt-test
-
-      - name: Google Auth (for reference only)
-        id: auth
-        if: false  # Skip this step - included only for reference
-        uses: google-github-actions/auth@v1
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Validate cloudbuild.yaml structure
         run: |

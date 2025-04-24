@@ -1,0 +1,93 @@
+name: Google Cloud Build Emulation
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  cloud-build-validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          install_components: 'beta'
+      
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          export_environment_variables: true
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Create temporary directory for build artifacts
+        run: mkdir -p /tmp/cloudbuild-artifacts
+      
+      - name: Run Cloud Build local emulator with --dryrun
+        id: cloud-build-validate
+        run: |
+          echo "Running Cloud Build emulation in dry-run mode..."
+          
+          gcloud beta builds submit \
+            --config=cloudbuild.yaml \
+            --project=${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }} \
+            --substitutions=_COMMIT_SHA=${{ github.sha }},PROJECT_ID=${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }},COMMIT_SHA=${{ github.sha }} \
+            --gcs-log-dir=gs://${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }}_cloudbuild/logs \
+            --gcs-source-staging-dir=gs://${{ vars.GOOGLE_CLOUD_PROJECT || 'growmate-457107' }}_cloudbuild/source \
+            --local-cloudbuild=/tmp/cloudbuild-artifacts \
+            --no-source \
+            --dryrun
+          
+          echo "Cloud Build validation completed successfully"
+      
+      - name: Extract build details
+        if: success()
+        run: |
+          echo "✅ Cloud Build configuration validated successfully!"
+          echo "This configuration should build correctly when merged to master."
+          
+          # Print the steps that would be executed
+          echo "Steps that would be executed:"
+          cat cloudbuild.yaml | grep "name\|id:" | sed 's/^[ \t]*/    /'
+      
+      - name: Validate Dockerfiles
+        run: |
+          echo "Validating Dockerfiles referenced in cloudbuild.yaml..."
+          
+          # Check WebAPI Dockerfile
+          if [ -f backend/code/Server/WebAPI/Dockerfile ]; then
+            echo "✅ WebAPI Dockerfile exists"
+          else
+            echo "❌ WebAPI Dockerfile missing!"
+            exit 1
+          fi
+          
+          # Check Receiver Dockerfile
+          if [ -f backend/code/Server/ReceiverService/Dockerfile ]; then
+            echo "✅ Receiver Dockerfile exists"
+          else
+            echo "❌ Receiver Dockerfile missing!"
+            exit 1
+          fi
+          
+          # Check MQTT Dockerfile
+          if [ -f mqtt/Dockerfile ]; then
+            echo "✅ MQTT Dockerfile exists"
+          else
+            echo "❌ MQTT Dockerfile missing!"
+            exit 1
+          fi
+          
+          echo "All Dockerfiles validated successfully!"
