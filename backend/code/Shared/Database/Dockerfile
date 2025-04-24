@@ -10,3 +10,6 @@ ENV POSTGRES_HOST=growmate-db
 
 # Copying the SQL script to the Docker entrypoint initialization directory
 COPY database.sql /docker-entrypoint-initdb.d/
+
+
+#
