@@ -3,7 +3,7 @@
     image: postgres:16
     build:
         context: .
-        dockerfile: /Shared/Database/Dockerfile
+        dockerfile: ./Shared/Database/Dockerfile
     container_name: growmate-db
     restart: always
     env_file: .env
