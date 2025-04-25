@@ -21,44 +21,64 @@ public class SensorController : ControllerBase
     public async Task<ActionResult<Sensor>> GetSensors()
     {
         var sensors = await sensor.GetAllSensorsAsync();
+        if (sensors == null || !sensors.Any())
+        {
+            return NotFound("No sensors found.");
+        }
         return Ok(sensors);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Sensor>> GetSensorByIdAsync(int id)
+    public async Task<ActionResult<Sensor>> GetSensorById(int id)
     {
         var sensorById = await sensor.GetSensorByIdAsync(id);
+        if (sensorById == null)
+        {
+            return NotFound($"Sensor with ID {id} not found.");
+        }
         return Ok(sensorById);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Sensor>> AddSensor([FromBody] SensorDTO sensor)
+    public async Task<ActionResult<Sensor>> AddSensor([FromBody] SensorDTO sensorDto)
     {
-        if (sensor == null)
+        if (sensorDto == null)
         {
-            return BadRequest("Sensor cannot be null");
+            return BadRequest($"Sensor data is required.");
         }
 
-        var addedSensor = await this.sensor.AddSensorAsync(sensor);
-        return CreatedAtAction(nameof(GetSensors), new { id = addedSensor.Id }, addedSensor);
+        var addedSensor = await sensor.AddSensorAsync(sensorDto);
+        return CreatedAtAction(nameof(GetSensorById), new { id = addedSensor.Id }, addedSensor);
     }
 
     [HttpPatch]
-    public async Task<ActionResult<Sensor>> UpdateSensor([FromBody] Sensor sensor)
+    public async Task<ActionResult<Sensor>> UpdateSensor([FromBody] Sensor sensorToUpdate)
     {
-        var sensorToUpdate = await this.sensor.UpdateSensorAsync(sensor);
-        return Ok(sensorToUpdate);
+        if (sensorToUpdate == null)
+        {
+            return BadRequest("Sensor data is required.");
+        }
+
+        var updatedSensor = await sensor.UpdateSensorAsync(sensorToUpdate);
+        if (updatedSensor == null)
+        {
+            return NotFound($"Sensor with ID {sensorToUpdate.Id} not found.");
+        }
+
+        return Ok(updatedSensor);
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteSensor(int id)
     {
-        var sensorToDelete = await sensor.GetSensorByIdAsync(id);
-        if (sensorToDelete == null)
+        var existing = await sensor.GetSensorByIdAsync(id);
+        if (existing == null)
         {
-            return BadRequest("Sensor does not exist");
+            return NotFound($"Sensor with ID {id} not found.");
         }
-        await sensor.DeleteSensorAsync(sensorToDelete.Id);
+
+        await sensor.DeleteSensorAsync(id);
         return NoContent();
     }
+
 }

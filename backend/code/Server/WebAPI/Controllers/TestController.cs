@@ -33,7 +33,7 @@ public class TestController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateGardener([FromBody] CreateGardenerDto dto)
+    public async Task<IActionResult> CreateGardener([FromBody] GardenerDTO dto)
     {
         var gardener = new Gardener
         {

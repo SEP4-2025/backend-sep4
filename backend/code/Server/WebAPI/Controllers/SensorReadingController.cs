@@ -24,7 +24,7 @@ public class SensorReadingController : ControllerBase
         var readings = await sensorReading.GetSensorReadingsAsync();
         if (readings == null || !readings.Any())
         {
-            return NotFound();
+            return NotFound("No sensor readings found.");
         }
         return Ok(readings);
     }
@@ -35,7 +35,7 @@ public class SensorReadingController : ControllerBase
         var reading = await sensorReading.GetSensorReadingByIdAsync(id);
         if (reading == null)
         {
-            return NotFound();
+            return NotFound($"Sensor reading with ID {id} not found.");
         }
         return Ok(reading);
     }
@@ -46,7 +46,7 @@ public class SensorReadingController : ControllerBase
         var readings = await sensorReading.GetSensorReadingsBySensorIdAsync(sensorId);
         if (readings == null || readings.Count == 0)
         {
-            return NotFound();
+            return NotFound($"No readings found for sensor with ID {sensorId}.");
         }
         return Ok(readings);
     }
@@ -58,7 +58,7 @@ public class SensorReadingController : ControllerBase
         var readings = await sensorReading.GetSensorReadingsByDateAsync(utcDate);
         if (readings == null || readings.Count == 0)
         {
-            return NotFound();
+            return NotFound($"No readings found on {utcDate.ToShortDateString()}.");
         }
         return Ok(readings);
     }
@@ -68,7 +68,7 @@ public class SensorReadingController : ControllerBase
     {
         if (sensorReading == null)
         {
-            return BadRequest("Sensor reading cannot be null");
+            return BadRequest("Sensor reading cannot be null.");
         }
 
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
@@ -76,12 +76,12 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteSensorReading(int id)
+    public async Task<ActionResult> DeleteSensorReading(int id)
     {
-        var sensorReadingToDelete = await sensorReading.GetSensorReadingByIdAsync(id);
-        if (sensorReadingToDelete == null)
+        var reading = await sensorReading.GetSensorReadingByIdAsync(id);
+        if (reading == null)
         {
-            return NotFound();
+            return NotFound($"Sensor reading with ID {id} not found.");
         }
 
         await sensorReading.DeleteSensorReadingAsync(id);

@@ -1,4 +1,5 @@
 using Database;
+using Entities;
 using LogicInterfaces;
 using LogicImplements;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<ISensorInterface, SensorLogic>();
+builder.Services.AddScoped<IGardenerInterface, GardenerLogic>();    
+builder.Services.AddScoped<IGreenhouseInterface, GreenhouseLogic>();
 
 var app = builder.Build();
 

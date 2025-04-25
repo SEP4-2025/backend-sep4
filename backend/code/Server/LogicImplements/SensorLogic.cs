@@ -20,15 +20,9 @@ public class SensorLogic : ISensorInterface
         return await _context.Sensors.ToListAsync();
     }
 
-    public async Task<Sensor> GetSensorByIdAsync(int id)
+    public async Task<Sensor?> GetSensorByIdAsync(int id)
     {
-        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
-        if (sensor == null)
-        {
-            throw new Exception($"Sensor with id {id} not found");
-        }
-
-        return sensor;
+        return await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
     }
 
     public async Task<Sensor> AddSensorAsync(SensorDTO sensor)
@@ -66,11 +60,11 @@ public class SensorLogic : ISensorInterface
     public async Task DeleteSensorAsync(int id)
     {
         var sensorToDelete = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
-        if (sensorToDelete == null)
+        if (sensorToDelete != null)
         {
-            throw new Exception($"Sensor with id {id} not found");
+            
+            _context.Sensors.Remove(sensorToDelete);
+            await _context.SaveChangesAsync();
         }
-        _context.Sensors.Remove(sensorToDelete);
-        await _context.SaveChangesAsync();
     }
 }
