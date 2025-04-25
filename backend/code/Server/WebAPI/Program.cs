@@ -16,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
+builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 
 var app = builder.Build();
 

@@ -24,6 +24,13 @@ public class SensorController : ControllerBase
         return Ok(sensors);
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Sensor>> GetSensorByIdAsync(int id)
+    {
+        var sensorById = await sensor.GetSensorByIdAsync(id);
+        return Ok(sensorById);
+    }
+
     [HttpPost]
     public async Task<ActionResult<Sensor>> AddSensor([FromBody] SensorDTO sensor)
     {
@@ -31,9 +38,16 @@ public class SensorController : ControllerBase
         {
             return BadRequest("Sensor cannot be null");
         }
-        
+
         var addedSensor = await this.sensor.AddSensorAsync(sensor);
         return CreatedAtAction(nameof(GetSensors), new { id = addedSensor.Id }, addedSensor);
+    }
+
+    [HttpPatch]
+    public async Task<ActionResult<Sensor>> UpdateSensor([FromBody] Sensor sensor)
+    {
+        var sensorToUpdate = await this.sensor.UpdateSensorAsync(sensor);
+        return Ok(sensorToUpdate);
     }
 
     [HttpDelete]

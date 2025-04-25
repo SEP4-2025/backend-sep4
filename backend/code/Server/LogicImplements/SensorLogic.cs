@@ -14,12 +14,12 @@ public class SensorLogic : ISensorInterface
     {
         _context = context;
     }
-    
+
     public async Task<List<Sensor>> GetAllSensorsAsync()
     {
         return await _context.Sensors.ToListAsync();
     }
-    
+
     public async Task<Sensor> GetSensorByIdAsync(int id)
     {
         var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
@@ -27,34 +27,8 @@ public class SensorLogic : ISensorInterface
         {
             throw new Exception($"Sensor with id {id} not found");
         }
-        
-        return sensor;
-    }
-    
-    public async Task<Sensor> GetSensorByTypeAsync(string type)
-    {
-        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Type == type);
-        if (sensor == null)
-        {
-            throw new Exception($"Sensor type {type} not found");
-        }
-        return sensor;
-    }
 
-    public async Task<String> GetMetricUnitBySensorIdAsync(int sensorId)
-    {
-        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == sensorId);
-        if (sensor == null)
-        {
-            throw new Exception($"Sensor with id {sensorId} not found");
-        }
-        return sensor.MetricUnit;
-    }
-
-    public async Task<List<Sensor>> GetAllSensorsByGreenHouseId(int greenHouseId)
-    {
-        var sensors = await _context.Sensors.Where(s => s.GreenhouseId == greenHouseId).ToListAsync();
-        return sensors;
+        return sensor;
     }
 
     public async Task<Sensor> AddSensorAsync(SensorDTO sensor)
@@ -71,20 +45,22 @@ public class SensorLogic : ISensorInterface
 
         return newSensor;
     }
-    
-    public async Task<Sensor> UpdateSensorAsync(int id, UpdateSensorDTO sensor)
+
+    public async Task<Sensor> UpdateSensorAsync(Sensor sensor)
     {
-        var sensorToUpdate = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
-        if (sensorToUpdate == null)
+        var existingSensor = await _context.Sensors.FindAsync(sensor.Id);
+        if (existingSensor == null)
         {
-            throw new Exception($"Sensor with id {id} not found");
+            throw new Exception($"Sensor with ID {sensor.Id} not found.");
         }
-        sensorToUpdate.Type = sensor.Type ?? sensorToUpdate.Type;
-        sensorToUpdate.MetricUnit = sensor.MetricUnit ?? sensorToUpdate.MetricUnit;
-        
-        _context.Sensors.Update(sensorToUpdate);
+
+        existingSensor.Type = sensor.Type;
+        existingSensor.MetricUnit = sensor.MetricUnit;
+        existingSensor.GreenhouseId = sensor.GreenhouseId;
+
         await _context.SaveChangesAsync();
-        return sensorToUpdate;
+
+        return existingSensor;
     }
 
     public async Task DeleteSensorAsync(int id)

@@ -23,7 +23,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         {
             throw new Exception($"Sensor reading with id {id} not found");
         }
-        
+
         return reading;
     }
 
