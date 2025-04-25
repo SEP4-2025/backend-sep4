@@ -1,4 +1,10 @@
-﻿namespace ReceiverService
+﻿using Database;
+using DTOs;
+using LogicImplements;
+using LogicInterfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace ReceiverService
 {
     class Program
     {
@@ -10,6 +16,13 @@
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+            );
+
+            builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
+            builder.Services.AddScoped<SensorReadingDTO>();
 
             builder.Services.AddHostedService<SensorReceiverService>();
 

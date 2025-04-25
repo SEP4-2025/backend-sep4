@@ -11,12 +11,10 @@ public class SensorReadingController : ControllerBase
 {
     private readonly ISensorReadingInterface sensorReading;
 
-
     public SensorReadingController(ISensorReadingInterface sensorReading)
     {
         this.sensorReading = sensorReading;
     }
-
 
     [HttpGet]
     public async Task<ActionResult<SensorReading>> GetSensorReadings()
@@ -52,7 +50,9 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("date/{date}")]
-    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate([FromRoute] DateTime date)
+    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(
+        [FromRoute] DateTime date
+    )
     {
         var utcDate = DateTime.SpecifyKind(date, DateTimeKind.Utc);
         var readings = await sensorReading.GetSensorReadingsByDateAsync(utcDate);
@@ -64,7 +64,9 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReadingDTO sensorReading)
+    public async Task<ActionResult<SensorReading>> AddSensorReading(
+        [FromBody] SensorReadingDTO sensorReading
+    )
     {
         if (sensorReading == null)
         {
@@ -72,7 +74,11 @@ public class SensorReadingController : ControllerBase
         }
 
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
-        return CreatedAtAction(nameof(GetSensorReadingById), new { id = addedSensorReading.Id }, addedSensorReading);
+        return CreatedAtAction(
+            nameof(GetSensorReadingById),
+            new { id = addedSensorReading.Id },
+            addedSensorReading
+        );
     }
 
     [HttpDelete("{id}")]
@@ -86,7 +92,5 @@ public class SensorReadingController : ControllerBase
 
         await sensorReading.DeleteSensorReadingAsync(id);
         return NoContent();
-
     }
-
 }

@@ -1,3 +1,4 @@
+using LogicInterfaces;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MQTTnet;
 
@@ -11,21 +12,21 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private readonly string _server;
     private readonly int _port;
     private readonly ILogger<SensorReceiverService> _logger;
+    private readonly ISensorReadingInterface _sensorReadingLogic;
     private bool _isHealthy = false;
 
     public SensorReceiverService(
-
-        ILogger<SensorReceiverService> logger
+        ILogger<SensorReceiverService> logger,
+        ISensorReadingInterface sensorReadingLogic
     )
     {
         _mqttClient = _mqttFactory.CreateMqttClient();
         _logger = logger;
+        _sensorReadingLogic = sensorReadingLogic;
 
-        _server =
-            "10.121.138.177";
+        _server = "10.121.138.177";
 
         _port = 1883;
-
 
         _topics = new List<string>();
         var topicsConfig = "light/reading";
@@ -47,6 +48,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         ReceiverUtil.ConfigureMqttClientEvents(
             _mqttClient,
             _logger,
+            _sensorReadingLogic,
             isConnected => _isHealthy = isConnected
         );
 

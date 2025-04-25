@@ -1,4 +1,9 @@
 using System.Text;
+using System.Text.Json;
+using DTOs;
+using Entities;
+using LogicImplements;
+using LogicInterfaces;
 using MQTTnet;
 
 namespace ReceiverService;
@@ -8,7 +13,8 @@ public static class ReceiverUtil
     public static void ConfigureMqttClientEvents(
         IMqttClient mqttClient,
         ILogger logger,
-        Action<bool> setHealthStatus = null
+        ISensorReadingInterface sensorReadingLogic,
+        Action<bool>? setHealthStatus = null
     )
     {
         mqttClient.ConnectedAsync += e =>
@@ -29,10 +35,55 @@ public static class ReceiverUtil
         {
             logger.LogInformation("### RECEIVED MESSAGE ###");
             logger.LogInformation("Topic = {Topic}", e.ApplicationMessage.Topic);
-            logger.LogInformation(
-                "Message = {Message}",
-                Encoding.UTF8.GetString(e.ApplicationMessage.Payload)
-            );
+
+            // Get the message payload as a string
+            var messagePayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            logger.LogInformation("Message = {Message}", messagePayload);
+
+            logger.LogInformation("Adding received reading to database...");
+
+            try
+            {
+                // Try to parse the message as JSON directly into SensorReadingDTO
+                var newSensorReading = JsonSerializer.Deserialize<SensorReadingDTO>(messagePayload);
+
+                if (newSensorReading != null)
+                {
+                    // If TimeStamp wasn't set in the JSON, use current time
+                    if (newSensorReading.TimeStamp == default)
+                    {
+                        newSensorReading.TimeStamp = DateTime.UtcNow;
+                    }
+
+                    logger.LogInformation(
+                        "Parsed sensor reading: Value={Value}, SensorId={SensorId}, ThresholdValue={ThresholdValue}",
+                        newSensorReading.Value,
+                        newSensorReading.SensorId,
+                        newSensorReading.ThresholdValue
+                    );
+
+                    sensorReadingLogic.AddSensorReadingAsync(newSensorReading).Wait();
+                }
+                else
+                {
+                    logger.LogWarning("Failed to parse message as JSON: {Message}", messagePayload);
+                }
+            }
+            catch (JsonException ex)
+            {
+                logger.LogWarning(ex, "Failed to parse message as JSON: {Message}", messagePayload);
+
+                // Fallback to the original behavior when JSON parsing fails
+                var newSensorReading = new SensorReadingDTO
+                {
+                    Value = int.TryParse(messagePayload, out var value) ? value : 0,
+                    TimeStamp = DateTime.UtcNow,
+                    ThresholdValue = 0,
+                    SensorId = 1,
+                };
+
+                sensorReadingLogic.AddSensorReadingAsync(newSensorReading).Wait();
+            }
 
             return Task.CompletedTask;
         };
