@@ -4,10 +4,9 @@ namespace LogicInterfaces;
 
 public interface IPictureInterface
 {
-    Task<Picture> GetPictureByIdAsync(int id);
-    Task<List<Picture>> GetPicturesByDateAsync(DateTime date);
-    Task<List<Picture>> GetAllPictures();
-    Task<Picture> AddPictureNoteAsync(int id, string note);
-    Task AddPictureAsync(Picture picture);
+    Task<Picture> GetPictureById(int id);
+    Task<List<Picture>> GetPictureByPlantIdAsync(int plantId);
+    Task<Picture> AddPictureAsync(Picture picture);
+    Task<Picture> UpdateNote(int id, string note);
     Task DeletePictureAsync(int id);
 }
