@@ -50,17 +50,39 @@ steps:
     waitFor: ["Build WebAPI"] # Ensure build is finished before pushing
     id: "Push WebAPI"
 
+  # Push the Receiver image to Google Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}"]
+    waitFor: ["Build Receiver"] # Ensure build is finished before pushing
+    id: "Push Receiver"
+
+  # Push the mqtt broker image to Google Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/${PROJECT_ID}/mqtt:${COMMIT_SHA}"]
+    waitFor: ["Build mqtt broker"]
+    id: "Push mqtt broker"
+
   #    # Push the Database image to Google Container Registry
   #  - name: 'gcr.io/cloud-builders/docker'
   #    args: ['push', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}']
   #    waitFor: ['Build Database'] # Ensure build is finished before pushing
   #    id: 'Push Database'
 
-  # Push the Receiver image to Google Container Registry
-  - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/${PROJECT_ID}/receiver:${COMMIT_SHA}"]
-    waitFor: ["Build Receiver"] # Ensure build is finished before pushing
-    id: "Push Receiver"
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "mqtt-broker"
+      - "--image=gcr.io/${PROJECT_ID}/mqtt:${COMMIT_SHA}"
+      - "--region=europe-north2"
+      - "--platform=managed"
+      - "--port=1883"
+      - "--allow-unauthenticated"
+      - "--project=${PROJECT_ID}"
+    waitFor: ["Push mqtt broker"]
+    id: "Deploy mqtt"
+
 
   # Deploy WebAPI container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
