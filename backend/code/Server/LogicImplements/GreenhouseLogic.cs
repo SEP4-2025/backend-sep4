@@ -37,10 +37,10 @@ public class GreenhouseLogic : IGreenhouseInterface
             Name = greenhouse.Name,
             GardenerId = greenhouse.GardenerId
         };
-        
+
         _context.Greenhouses.Add(newGreenhouse);
         await _context.SaveChangesAsync();
-        
+
         return newGreenhouse;
 
     }
@@ -48,10 +48,10 @@ public class GreenhouseLogic : IGreenhouseInterface
     public async Task<Greenhouse> UpdateGreenhouseAsync(Greenhouse greenhouse)
     {
         var existingGreenhouse = await _context.Greenhouses.FindAsync(greenhouse.Id);
-        
+
         existingGreenhouse.Name = greenhouse.Name;
         existingGreenhouse.GardenerId = greenhouse.GardenerId;
-        
+
         await _context.SaveChangesAsync();
         return existingGreenhouse;
     }
@@ -61,7 +61,7 @@ public class GreenhouseLogic : IGreenhouseInterface
         var greenhouseToDelete = await _context.Greenhouses.FirstOrDefaultAsync(s => s.Id == id);
         if (greenhouseToDelete != null)
         {
-            
+
             _context.Greenhouses.Remove(greenhouseToDelete);
             await _context.SaveChangesAsync();
         }

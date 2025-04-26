@@ -13,7 +13,7 @@ public class LogLogic : ILogInterface
     {
         _context = context;
     }
-    
+
     public async Task<Log?> GetLogByIdAsync(int id)
     {
         return await _context.Logs.FirstOrDefaultAsync(x => x.Id == id);

@@ -29,7 +29,7 @@ public class LogController : ControllerBase
         if (logs is null) return NotFound($"No logs found for date {date}");
         return logs;
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteLog(int id)
     {
@@ -38,6 +38,6 @@ public class LogController : ControllerBase
         await _logInterface.DeleteLogAsync(id);
         return NoContent();
     }
-    
-    
+
+
 }

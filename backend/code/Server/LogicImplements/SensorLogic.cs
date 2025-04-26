@@ -62,7 +62,7 @@ public class SensorLogic : ISensorInterface
         var sensorToDelete = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
         if (sensorToDelete != null)
         {
-            
+
             _context.Sensors.Remove(sensorToDelete);
             await _context.SaveChangesAsync();
         }

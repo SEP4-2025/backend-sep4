@@ -27,7 +27,7 @@ public class PlantLogic : IPlantInterface
             Name = plant.Name,
             GreenhouseId = plant.GreenhouseId,
         };
-        
+
         await _context.Plants.AddAsync(newPlant);
         await _context.SaveChangesAsync();
         return newPlant;
@@ -36,9 +36,9 @@ public class PlantLogic : IPlantInterface
     public async Task<Plant> UpdatePlantNameAsync(int id, string plantName)
     {
         var existingPlant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
-        
+
         existingPlant.Name = plantName;
-        
+
         await _context.SaveChangesAsync();
         return existingPlant;
     }
@@ -49,7 +49,7 @@ public class PlantLogic : IPlantInterface
         if (plant != null)
         {
             _context.Plants.Remove(plant);
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
         }
     }
 }

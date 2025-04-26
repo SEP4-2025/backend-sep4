@@ -12,7 +12,7 @@ namespace WebAPI.Controllers;
 public class GardenerController : ControllerBase
 {
     private readonly IGardenerInterface _gardener;
-    
+
     public GardenerController(IGardenerInterface gardenerInterface)
     {
         _gardener = gardenerInterface;

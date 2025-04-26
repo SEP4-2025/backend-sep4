@@ -36,7 +36,7 @@ public class GreenhouseController : ControllerBase
         {
             return NotFound($"Greenhouse with gardenerId {gardenerId} does not exist.");
         }
-        
+
         return Ok(greenhouse);
     }
 
@@ -58,7 +58,7 @@ public class GreenhouseController : ControllerBase
         {
             return BadRequest($"Gardener data is required.");
         }
-        
+
         var addedGreenhouse = await _greenhouse.AddGreenhouseAsync(greenhouse);
         return Ok(addedGreenhouse);
     }
@@ -70,7 +70,7 @@ public class GreenhouseController : ControllerBase
         {
             return BadRequest($"Gardener data is required.");
         }
-        
+
         var updatedGreenhouse = await _greenhouse.UpdateGreenhouseAsync(greenhouse);
         if (updatedGreenhouse == null)
         {
