@@ -21,9 +21,6 @@ namespace ReceiverService
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
-            builder.Services.AddScoped<SensorReadingDTO>();
-
             builder.Services.AddHostedService<SensorReceiverService>();
 
             builder.Services.AddHealthChecks().AddCheck<SensorReceiverService>("mqtt_connection");
