@@ -7,6 +7,7 @@ namespace ReceiverService;
 
 public static class ReceiverUtil
 {
+    // Define a delegate for handling sensor readings
     public delegate Task SensorReadingHandlerDelegate(SensorReadingDTO sensorReading);
 
     public static void ConfigureMqttClientEvents(
@@ -37,26 +38,24 @@ public static class ReceiverUtil
 
             var message = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             logger.LogInformation("Message = {Message}", message);
-
             logger.LogInformation("Parsing received string message...");
 
             try
             {
                 var parts = message.Split(',');
 
-                if (parts.Length >= 3)
+                if (parts.Length >= 2)
                 {
                     if (
                         int.TryParse(parts[0], out var sensorId)
                         && int.TryParse(parts[1], out var value)
-                        && DateTime.TryParse(parts[2], out var timestamp)
                     )
                     {
                         var newSensorReading = new SensorReadingDTO
                         {
                             SensorId = sensorId,
                             Value = value,
-                            TimeStamp = timestamp,
+                            TimeStamp = DateTime.UtcNow,
                             ThresholdValue = 0, // Default value
                         };
 
@@ -80,7 +79,7 @@ public static class ReceiverUtil
                 else
                 {
                     logger.LogWarning(
-                        "Message doesn't match expected format (sensorId,Value,Timestamp): {Message}",
+                        "Message doesn't match expected format (sensorId,Value): {Message}",
                         message
                     );
                 }

@@ -26,7 +26,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         _logger = logger;
         _serviceProvider = serviceProvider;
 
-        _server = "10.121.138.177";
+        _server = "35.204.67.247";
 
         _port = 1883;
 
