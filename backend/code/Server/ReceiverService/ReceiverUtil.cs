@@ -1,16 +1,18 @@
 using System.Text;
 using DTOs;
-using LogicInterfaces;
+using Entities;
 using MQTTnet;
 
 namespace ReceiverService;
 
 public static class ReceiverUtil
 {
+    public delegate Task SensorReadingHandlerDelegate(SensorReadingDTO sensorReading);
+
     public static void ConfigureMqttClientEvents(
         IMqttClient mqttClient,
         ILogger logger,
-        ISensorReadingInterface sensorReadingLogic,
+        SensorReadingHandlerDelegate handleSensorReading,
         Action<bool>? setHealthStatus = null
     )
     {
@@ -65,7 +67,7 @@ public static class ReceiverUtil
                             newSensorReading.TimeStamp
                         );
 
-                        sensorReadingLogic.AddSensorReadingAsync(newSensorReading).Wait();
+                        handleSensorReading(newSensorReading).Wait();
                     }
                     else
                     {
