@@ -1,4 +1,5 @@
 using Database;
+using Entities;
 using LogicInterfaces;
 using LogicImplements;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IGardenerInterface, GardenerLogic>();
+builder.Services.AddScoped<IGreenhouseInterface, GreenhouseLogic>();
+builder.Services.AddScoped<ILogInterface, LogLogic>();
+builder.Services.AddScoped<IPictureInterface, PictureLogic>();
+builder.Services.AddScoped<IPlantInterface, PlantLogic>();
+builder.Services.AddScoped<IPredictionInterface, PredictionLogic>();
+builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
+builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
+
+
 
 var app = builder.Build();
 
