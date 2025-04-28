@@ -71,9 +71,9 @@ public class GreenhouseController : ControllerBase
         {
             return NotFound($"Greenhouse with id {id} not found.");
         }
-        
+
         await _greenhouse.UpdateGreenhouseName(id, name);
-        
+
         return Ok(greenhouse);
     }
 

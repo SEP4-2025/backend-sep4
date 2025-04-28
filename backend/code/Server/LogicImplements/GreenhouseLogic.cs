@@ -49,7 +49,7 @@ public class GreenhouseLogic : IGreenhouseInterface
     {
         var greenhouse = await _context.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
         greenhouse.Name = name;
-        
+
         await _context.SaveChangesAsync();
         return greenhouse;
     }
