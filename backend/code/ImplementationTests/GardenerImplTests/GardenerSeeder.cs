@@ -1,7 +1,7 @@
 ﻿using DTOs;
 using Entities;
 
-namespace ImplementationTests.GardenerImplementationTests;
+namespace ImplementationTests.GardenerImplTests;
 
 public static class GardenerSeeder
 {

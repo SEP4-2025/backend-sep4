@@ -70,7 +70,6 @@ public class GreenhouseLogic : IGreenhouseInterface
         var greenhouseToDelete = await _context.Greenhouses.FirstOrDefaultAsync(s => s.Id == id);
         if (greenhouseToDelete != null)
         {
-
             _context.Greenhouses.Remove(greenhouseToDelete);
             await _context.SaveChangesAsync();
         }

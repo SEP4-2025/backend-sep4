@@ -4,7 +4,7 @@ using Entities;
 using LogicImplements;
 using LogicInterfaces;
 
-namespace ImplementationTests.GardenerImplementationTests;
+namespace ImplementationTests.GardenerImplTests;
 
 public class GardenerTests
 {
