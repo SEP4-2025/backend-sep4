@@ -15,10 +15,9 @@ public class SensorReadingLogic : ISensorReadingInterface
         _context = context;
     }
 
-    public async Task<SensorReading> GetSensorReadingByIdAsync(int id)
+    public async Task<SensorReading?> GetSensorReadingByIdAsync(int id)
     {
-        return await _context.SensorReadings
-            .FirstOrDefaultAsync(sr => sr.Id == id);
+        return await _context.SensorReadings.FirstOrDefaultAsync(sr => sr.Id == id);
     }
 
     public async Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
@@ -26,7 +25,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         var sensor = await _context.Sensors.FindAsync(sensorId);
         if (sensor == null)
         {
-            throw new Exception($"Sensor with id {sensorId} not found");
+            return new List<SensorReading>();
         }
 
         return await _context.SensorReadings.Where(s => s.SensorId == sensorId).ToListAsync();
@@ -34,8 +33,7 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
     {
-        var readings = await _context.SensorReadings.Where(sr => sr.TimeStamp == date).ToListAsync();
-        return readings;
+        return await _context.SensorReadings.Where(sr => sr.TimeStamp == date).ToListAsync();
     }
 
     public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
@@ -58,13 +56,11 @@ public class SensorReadingLogic : ISensorReadingInterface
     public async Task DeleteSensorReadingAsync(int id)
     {
         var sensorReading = await _context.SensorReadings.FindAsync(id);
-        if (sensorReading == null)
+        if (sensorReading != null)
         {
-            return;
+            _context.SensorReadings.Remove(sensorReading);
+            await _context.SaveChangesAsync();
         }
-
-        _context.SensorReadings.Remove(sensorReading);
-        await _context.SaveChangesAsync();
     }
 
 

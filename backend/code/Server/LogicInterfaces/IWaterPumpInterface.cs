@@ -1,15 +1,17 @@
+using DTOs;
 using Entities;
 
-namespace LogicInterfaces;
-
-public interface IWaterPumpInterface
+namespace LogicInterfaces
 {
-    Task<WaterPump> GetWaterPumpByIdAsync(int id);
-    Task<WaterPump> GetRecentUsageDataAsync(int waterPumpId);
-    Task<WaterPump> GetCurrentWaterLevelAsync(int waterPumpId);
-    Task<WaterPump> UpdateAutoWateringStatusAsync(int waterPumpId, bool status);
-    Task<WaterPump> UpdateWaterTankCapacityAsync(int waterPumpId, int capacity);
-    Task<WaterPump> UpdateThresholdValueAsync(int waterPumpId, int newThreshold);
-    Task AddWaterPumpAsync(WaterPump waterPump);
-    Task UpdateWaterPumpAsync(WaterPump waterPump);
+    public interface IWaterPumpInterface
+    {
+        Task<WaterPump> GetWaterPumpByIdAsync(int id);
+        Task<List<WaterPump>> GetAllWaterPumpsAsync();
+        Task<WaterPump> UpdateAutoWateringStatusAsync(int id, bool autoWatering);
+        Task<WaterPump> TriggerManualWateringAsync(int id, int waterAmount);
+        Task<WaterPump> UpdateCurrentWaterLevelAsync(int id, int addedWaterAmount);
+        Task<WaterPump> UpdateThresholdValueAsync(int id, int newThresholdValue);
+        Task<WaterPump> AddWaterPumpAsync(WaterPumpDTO waterPumpDTO);
+        Task DeleteWaterPumpAsync(int id);
+    }
 }

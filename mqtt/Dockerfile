@@ -5,4 +5,5 @@ COPY mosquitto.conf /mosquitto/config/mosquitto.conf
 # Copy the data directory into the container
 COPY mosquitto.db /mosquitto/data
 
-ENTRYPOINT ["/usr/bin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+# Corrected ENTRYPOINT to use the proper path to mosquitto
+ENTRYPOINT ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
