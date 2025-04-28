@@ -42,7 +42,7 @@ public static class ReceiverUtil
 
             try
             {
-                var parts = message.Split(',');
+                var parts = message.Split('|');
 
                 if (parts.Length >= 2)
                 {

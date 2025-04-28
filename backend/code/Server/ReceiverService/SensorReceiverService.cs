@@ -87,6 +87,10 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             _isHealthy = false;
             _logger.LogError(ex, "Error in ExecuteAsync");
         }
+        finally
+        {
+            await Task.Delay(5000);
+        }
     }
 
     private async Task HandleSensorReading(SensorReadingDTO sensorReading)
