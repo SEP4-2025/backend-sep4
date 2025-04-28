@@ -1,14 +1,20 @@
 using System.Text;
+using DTOs;
+using Entities;
 using MQTTnet;
 
 namespace ReceiverService;
 
 public static class ReceiverUtil
 {
+    // Define a delegate for handling sensor readings
+    public delegate Task SensorReadingHandlerDelegate(SensorReadingDTO sensorReading);
+
     public static void ConfigureMqttClientEvents(
         IMqttClient mqttClient,
         ILogger logger,
-        Action<bool> setHealthStatus = null
+        SensorReadingHandlerDelegate handleSensorReading,
+        Action<bool>? setHealthStatus = null
     )
     {
         mqttClient.ConnectedAsync += e =>
@@ -29,10 +35,59 @@ public static class ReceiverUtil
         {
             logger.LogInformation("### RECEIVED MESSAGE ###");
             logger.LogInformation("Topic = {Topic}", e.ApplicationMessage.Topic);
-            logger.LogInformation(
-                "Message = {Message}",
-                Encoding.UTF8.GetString(e.ApplicationMessage.Payload)
-            );
+
+            var message = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            logger.LogInformation("Message = {Message}", message);
+            logger.LogInformation("Parsing received string message...");
+
+            try
+            {
+                var parts = message.Split('|');
+
+                if (parts.Length >= 2)
+                {
+                    if (
+                        int.TryParse(parts[0], out var sensorId)
+                        && int.TryParse(parts[1], out var value)
+                    )
+                    {
+                        var newSensorReading = new SensorReadingDTO
+                        {
+                            SensorId = sensorId,
+                            Value = value,
+                            TimeStamp = DateTime.UtcNow,
+                            ThresholdValue = 0, // Default value
+                        };
+
+                        logger.LogInformation(
+                            "Parsed sensor reading: SensorId={SensorId}, Value={Value}, Timestamp={Timestamp}",
+                            newSensorReading.SensorId,
+                            newSensorReading.Value,
+                            newSensorReading.TimeStamp
+                        );
+
+                        handleSensorReading(newSensorReading).Wait();
+                    }
+                    else
+                    {
+                        logger.LogWarning(
+                            "Failed to parse one or more components of the message: {Message}",
+                            message
+                        );
+                    }
+                }
+                else
+                {
+                    logger.LogWarning(
+                        "Message doesn't match expected format (sensorId,Value): {Message}",
+                        message
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Error parsing message: {Message}", message);
+            }
 
             return Task.CompletedTask;
         };
