@@ -1,25 +1,25 @@
-# cloudbuild.yaml (Example)
 steps:
   # Build the WebAPI service
   - name: "gcr.io/cloud-builders/docker"
     args: [
         "build",
         "-t",
-        "gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}", # Replace with your desired image tag
+        "gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}",
         "-f",
-        "backend/code/Server/WebAPI/Dockerfile", # Correct Dockerfile path
-        "backend/code", # Correct build context directory
+        "backend/code/Server/WebAPI/Dockerfile",
+        "backend/code",
       ]
     id: "Build WebAPI"
+    
   # Build the Database service
-  #  - name: 'gcr.io/cloud-builders/docker'
-  #    args: [
-  #                'build',
-  #                '-t', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}', # Replace with your desired image tag
-  #                '-f', 'backend/code/Shared/Database/Dockerfile', # Correct Dockerfile path
-  #                'backend/code/Shared/Database' # Correct build context directory
-  #            ]
-  #    id: 'Build Database'
+    - name: 'gcr.io/cloud-builders/docker'
+      args: [
+                  'build',
+                  '-t', 'gcr.io/${PROJECT_ID}/db:${COMMIT_SHA}',
+                  '-f', 'backend/code/Shared/Database/Dockerfile',
+                  'backend/code/Shared/Database', 
+              ]
+      id: 'Build Database'
 
   # Build the Receiver service
   - name: "gcr.io/cloud-builders/docker"
