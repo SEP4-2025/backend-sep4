@@ -1,3 +1,6 @@
+using Database;
+using DTOs;
+using LogicImplements;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MQTTnet;
 
@@ -11,21 +14,21 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private readonly string _server;
     private readonly int _port;
     private readonly ILogger<SensorReceiverService> _logger;
+    private readonly IServiceProvider _serviceProvider;
     private bool _isHealthy = false;
 
     public SensorReceiverService(
-
-        ILogger<SensorReceiverService> logger
+        ILogger<SensorReceiverService> logger,
+        IServiceProvider serviceProvider
     )
     {
         _mqttClient = _mqttFactory.CreateMqttClient();
         _logger = logger;
+        _serviceProvider = serviceProvider;
 
-        _server =
-            "10.121.138.177";
+        _server = "35.204.67.247";
 
         _port = 1883;
-
 
         _topics = new List<string>();
         var topicsConfig = "light/reading";
@@ -47,6 +50,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         ReceiverUtil.ConfigureMqttClientEvents(
             _mqttClient,
             _logger,
+            HandleSensorReading,
             isConnected => _isHealthy = isConnected
         );
 
@@ -82,6 +86,30 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         {
             _isHealthy = false;
             _logger.LogError(ex, "Error in ExecuteAsync");
+        }
+        finally
+        {
+            await Task.Delay(5000);
+        }
+    }
+
+    private async Task HandleSensorReading(SensorReadingDTO sensorReading)
+    {
+        try
+        {
+            using var scope = _serviceProvider.CreateScope();
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var sensorReadingLogic = new SensorReadingLogic(dbContext);
+
+            await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
+
+            _logger.LogInformation("Successfully added sensor reading to database");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add sensor reading to database");
         }
     }
 
