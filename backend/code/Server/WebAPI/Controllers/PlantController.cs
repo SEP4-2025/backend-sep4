@@ -17,10 +17,10 @@ public class PlantController : ControllerBase
     }
 
     [HttpGet("{plantId}")]
-    public async Task<ActionResult<Plant>> GetPlantById(int id)
+    public async Task<ActionResult<Plant>> GetPlantById(int plantId)
     {
-        var plant = await _plantInterface.GetPlantByIdAsync(id);
-        if (plant == null) return NotFound($"No plant found with id {id}");
+        var plant = await _plantInterface.GetPlantByIdAsync(plantId);
+        if (plant == null) return NotFound($"No plant found with id {plantId}");
         return Ok(plant);
     }
 

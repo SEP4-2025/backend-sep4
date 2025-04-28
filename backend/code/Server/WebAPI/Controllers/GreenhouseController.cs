@@ -63,20 +63,18 @@ public class GreenhouseController : ControllerBase
         return Ok(addedGreenhouse);
     }
 
-    [HttpPatch]
-    public async Task<ActionResult<Greenhouse>> UpdateGreenhouseAsync([FromBody] Greenhouse greenhouse)
+    [HttpPut]
+    public async Task<ActionResult<Greenhouse>> UpdateGreenhouseNameAsync([FromQuery] int id, [FromQuery] string name)
     {
+        var greenhouse = await _greenhouse.GetGreenhouseByIdAsync(id);
         if (greenhouse == null)
         {
-            return BadRequest($"Gardener data is required.");
+            return NotFound($"Greenhouse with id {id} not found.");
         }
-
-        var updatedGreenhouse = await _greenhouse.UpdateGreenhouseAsync(greenhouse);
-        if (updatedGreenhouse == null)
-        {
-            return NotFound($"Greenhouse with id {greenhouse.Id} not found.");
-        }
-        return Ok(updatedGreenhouse);
+        
+        await _greenhouse.UpdateGreenhouseName(id, name);
+        
+        return Ok(greenhouse);
     }
 
     [HttpDelete("{id}")]
@@ -87,7 +85,19 @@ public class GreenhouseController : ControllerBase
         {
             return NotFound($"Greenhouse with id {id} not found.");
         }
-        await _greenhouse.DeleteGreenhouseAsync(id);
+
+        try
+        {
+            await _greenhouse.DeleteGreenhouseAsync(id);
+        }
+        catch (Exception e)
+        {
+            if (e.InnerException?.Message.Contains("Plant_greenhouseid_fkey") == true)
+            {
+                return BadRequest("Cannot delete Greenhouse because it is associated with a Plant.");
+            }
+            throw;
+        }
         return NoContent();
     }
 }

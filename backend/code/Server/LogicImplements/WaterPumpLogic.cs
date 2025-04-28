@@ -38,11 +38,10 @@ public class WaterPumpLogic : IWaterPumpInterface
     public async Task<WaterPump> TriggerManualWateringAsync(int id, int waterAmount)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump == null) return null;
         if (waterPump.WaterLevel < waterAmount) return null;
 
         waterPump.WaterLevel -= waterAmount;
-        waterPump.LastWateredTime = DateTime.Now;
+        waterPump.LastWateredTime = DateTime.UtcNow;
         waterPump.LastWaterAmount = waterAmount;
 
         await _context.SaveChangesAsync();

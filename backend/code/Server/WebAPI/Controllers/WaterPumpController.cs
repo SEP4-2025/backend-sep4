@@ -59,18 +59,19 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/manual-watering")]
-    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync(int id, [FromBody] int waterAmount)
+    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync([FromRoute] int id, int waterAmount)
     {
-        var updatedPump = await _waterPumpLogic.TriggerManualWateringAsync(id, waterAmount);
-        if (updatedPump == null)
+        var pump = await _waterPumpLogic.GetWaterPumpByIdAsync(id);
+        if (pump == null)
         {
-            return BadRequest("Manual watering failed. Either pump not found or not enough water.");
+            return NotFound($"Water pump with id {id} not found.");
         }
-        return Ok(updatedPump);
+        await _waterPumpLogic.TriggerManualWateringAsync(id, waterAmount);
+        return Ok(pump);
     }
 
     [HttpPatch("{id}/add-water")]
-    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync(int id, [FromBody] int addedWaterAmount)
+    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync([FromRoute] int id, int addedWaterAmount)
     {
         var updatedPump = await _waterPumpLogic.UpdateCurrentWaterLevelAsync(id, addedWaterAmount);
         if (updatedPump == null)
@@ -81,7 +82,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/threshold")]
-    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(int id, [FromBody] int newThresholdValue)
+    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync([FromRoute] int id, int newThresholdValue)
     {
         var updatedPump = await _waterPumpLogic.UpdateThresholdValueAsync(id, newThresholdValue);
         if (updatedPump == null)

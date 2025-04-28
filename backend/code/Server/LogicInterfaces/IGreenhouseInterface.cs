@@ -9,6 +9,6 @@ public interface IGreenhouseInterface
     Task<Greenhouse> GetGreenhouseByNameAsync(string name);
     Task<Greenhouse> GetGreenhouseByGardenerIdAsync(int gardenerId);
     Task<Greenhouse> AddGreenhouseAsync(GreenhouseDTO greenhouse);
-    Task<Greenhouse> UpdateGreenhouseAsync(Greenhouse greenhouse);
+    Task<Greenhouse> UpdateGreenhouseName(int id, string name);
     Task DeleteGreenhouseAsync(int id);
 }

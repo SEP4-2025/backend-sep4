@@ -45,6 +45,15 @@ public class GreenhouseLogic : IGreenhouseInterface
 
     }
 
+    public async Task<Greenhouse> UpdateGreenhouseName(int id, string name)
+    {
+        var greenhouse = await _context.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
+        greenhouse.Name = name;
+        
+        await _context.SaveChangesAsync();
+        return greenhouse;
+    }
+
     public async Task<Greenhouse> UpdateGreenhouseAsync(Greenhouse greenhouse)
     {
         var existingGreenhouse = await _context.Greenhouses.FindAsync(greenhouse.Id);

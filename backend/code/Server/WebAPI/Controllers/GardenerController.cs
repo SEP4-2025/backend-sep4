@@ -2,6 +2,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
@@ -60,13 +61,13 @@ public class GardenerController : ControllerBase
             return BadRequest("Gardener data is required.");
         }
 
-        var updated = await _gardener.UpdateGardenerAsync(gardener);
-        if (updated == null)
+        var gardenerToUpdate = await _gardener.GetGardenerByIdAsync(gardener.Id);
+        if (gardenerToUpdate == null)
         {
             return NotFound($"Gardener with ID {gardener.Id} not found.");
         }
-
-        return Ok(updated);
+        await _gardener.UpdateGardenerAsync(gardener);
+        return Ok(gardenerToUpdate);
     }
 
     [HttpDelete("{id}")]
@@ -77,7 +78,18 @@ public class GardenerController : ControllerBase
         {
             return NotFound($"Gardener with ID {id} not found.");
         }
-        await _gardener.DeleteGardenerAsync(id);
+        try
+        {
+            await _gardener.DeleteGardenerAsync(id);
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException?.Message.Contains("Greenhouse_gardenerid_fkey") == true)
+            {
+                return BadRequest("Cannot delete Gardener because it is associated with a Greenhouse.");
+            }
+            throw;
+        }
         return NoContent();
     }
 
