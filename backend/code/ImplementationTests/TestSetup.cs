@@ -29,7 +29,7 @@ public static class TestSetup
         var provider = services.BuildServiceProvider();
         _context = provider.GetRequiredService<AppDbContext>();
     }
-    
+
     [OneTimeTearDown]
     public static void GlobalTearDown()
     {

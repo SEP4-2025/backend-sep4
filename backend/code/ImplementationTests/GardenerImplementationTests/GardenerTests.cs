@@ -10,13 +10,13 @@ public class GardenerTests
 {
     private AppDbContext _context;
     private IGardenerInterface _gardenerLogic;
-    
+
     [SetUp]
     public void Setup()
     {
-         _context = TestSetup.Context;
+        _context = TestSetup.Context;
         _gardenerLogic = new GardenerLogic(_context);
-        
+
         //Cleans up, but might need refactoring
         _context.Gardeners.RemoveRange(_context.Gardeners.ToList());
         _context.SaveChanges();
@@ -26,9 +26,9 @@ public class GardenerTests
     public async Task FetchGardenersAsync_Success_ReturnsAllGardenersCorrectly()
     {
         await GardenerSeeder.SeedGardenerAsync();
-        
+
         var gardenerList = await _gardenerLogic.GetGardeners();
-        
+
         Assert.IsNotNull(gardenerList);
         Assert.That(gardenerList.Count, Is.EqualTo(1));
     }
@@ -37,9 +37,9 @@ public class GardenerTests
     public async Task FetchGardenersByIdAsync_Success_ReturnsCorrectGardener()
     {
         var testGardener = await GardenerSeeder.SeedGardenerAsync();
-        
+
         var addedGardener = await _gardenerLogic.GetGardenerByIdAsync(testGardener.Id);
-        
+
         Assert.IsNotNull(addedGardener);
         Assert.That(addedGardener.Username, Is.EqualTo(testGardener.Username));
     }
@@ -55,7 +55,7 @@ public class GardenerTests
 
         var testGardener = await _gardenerLogic.AddGardenerAsync(gardenerDto);
         var addedGardener = await _gardenerLogic.GetGardenerByIdAsync(testGardener.Id);
-        
+
         Assert.IsNotNull(addedGardener);
         Assert.That(gardenerDto.Username, Is.EqualTo(addedGardener.Username));
     }
@@ -70,11 +70,11 @@ public class GardenerTests
             Username = "newGardener",
             Password = "123456"
         };
-        
+
         await _gardenerLogic.UpdateGardenerAsync(newGardener);
-        
+
         var updatedGardener = await _gardenerLogic.GetGardenerByIdAsync(newGardener.Id);
-        
+
         Assert.IsNotNull(updatedGardener);
         Assert.That(updatedGardener.Username, Is.EqualTo(newGardener.Username));
     }
@@ -83,10 +83,10 @@ public class GardenerTests
     public async Task DeleteGardenerAsync_Success_DeletesUser()
     {
         var testGardener = await GardenerSeeder.SeedGardenerAsync();
-        
+
         await _gardenerLogic.DeleteGardenerAsync(testGardener.Id);
         var gardenerList = await _gardenerLogic.GetGardeners();
-        
+
         Assert.IsEmpty(gardenerList);
     }
 }
