@@ -47,16 +47,16 @@ public static class ReceiverUtil
                 if (parts.Length >= 2)
                 {
                     if (
-                        int.TryParse(parts[0], out var sensorId)
+                        int.TryParse(parts[0], out var sensorId) // TODO: Delete it, not needed
                         && int.TryParse(parts[1], out var value)
                     )
                     {
                         var newSensorReading = new SensorReadingDTO
                         {
-                            SensorId = sensorId,
+                            SensorId = 3, // Default for light sensor
                             Value = value,
                             TimeStamp = DateTime.UtcNow,
-                            ThresholdValue = 0, // Default value
+                            ThresholdValue = 0, // TODO: This one needs to be in sensor entity
                         };
 
                         logger.LogInformation(
