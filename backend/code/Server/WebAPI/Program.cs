@@ -1,7 +1,7 @@
 using Database;
 using Entities;
-using LogicInterfaces;
 using LogicImplements;
+using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -16,17 +17,18 @@ builder.Services.AddSwaggerGen();
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
+    options.AddPolicy(
+        "AllowAllOrigins",
         builder =>
         {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
+            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        }
+    );
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddScoped<IGardenerInterface, GardenerLogic>();
 builder.Services.AddScoped<IGreenhouseInterface, GreenhouseLogic>();
@@ -37,8 +39,6 @@ builder.Services.AddScoped<IPredictionInterface, PredictionLogic>();
 builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
-
-
 
 var app = builder.Build();
 

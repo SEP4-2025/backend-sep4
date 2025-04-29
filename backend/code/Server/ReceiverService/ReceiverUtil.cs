@@ -7,8 +7,16 @@ namespace ReceiverService;
 
 public static class ReceiverUtil
 {
-    // Define a delegate for handling sensor readings
     public delegate Task SensorReadingHandlerDelegate(SensorReadingDTO sensorReading);
+
+    // Only for Proof of concept, will be in .ENV file in future (??)
+    private static readonly Dictionary<string, int> TopicToSensorIdMap = new()
+    {
+        { "light/reading", 3 },
+        { "temperature/reading", 1 },
+        { "humidity/reading", 2 },
+        { "soil/reading", 4 },
+    };
 
     public static void ConfigureMqttClientEvents(
         IMqttClient mqttClient,
@@ -34,7 +42,9 @@ public static class ReceiverUtil
         mqttClient.ApplicationMessageReceivedAsync += e =>
         {
             logger.LogInformation("### RECEIVED MESSAGE ###");
-            logger.LogInformation("Topic = {Topic}", e.ApplicationMessage.Topic);
+
+            var topic = e.ApplicationMessage.Topic;
+            logger.LogInformation("Topic = {Topic}", topic);
 
             var message = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             logger.LogInformation("Message = {Message}", message);
@@ -42,44 +52,35 @@ public static class ReceiverUtil
 
             try
             {
-                var parts = message.Split('|');
-
-                if (parts.Length >= 2)
+                if (!TopicToSensorIdMap.TryGetValue(topic, out int sensorId))
                 {
-                    if (
-                        int.TryParse(parts[0], out var sensorId) // TODO: Delete it, not needed
-                        && int.TryParse(parts[1], out var value)
-                    )
-                    {
-                        var newSensorReading = new SensorReadingDTO
-                        {
-                            SensorId = 3, // Default for light sensor
-                            Value = value,
-                            TimeStamp = DateTime.UtcNow,
-                            ThresholdValue = 0, // TODO: This one needs to be in sensor entity
-                        };
+                    logger.LogWarning("Unknown topic: {Topic}, cannot map to sensor ID", topic);
+                    return Task.CompletedTask;
+                }
 
-                        logger.LogInformation(
-                            "Parsed sensor reading: SensorId={SensorId}, Value={Value}, Timestamp={Timestamp}",
-                            newSensorReading.SensorId,
-                            newSensorReading.Value,
-                            newSensorReading.TimeStamp
-                        );
-
-                        handleSensorReading(newSensorReading).Wait();
-                    }
-                    else
+                if (int.TryParse(message, out var value))
+                {
+                    var newSensorReading = new SensorReadingDTO
                     {
-                        logger.LogWarning(
-                            "Failed to parse one or more components of the message: {Message}",
-                            message
-                        );
-                    }
+                        SensorId = sensorId,
+                        Value = value,
+                        TimeStamp = DateTime.UtcNow,
+                        ThresholdValue = 0, // TODO: This should be in sensor entity
+                    };
+
+                    logger.LogInformation(
+                        "Parsed sensor reading: SensorId={SensorId}, Value={Value}, Timestamp={Timestamp}",
+                        newSensorReading.SensorId,
+                        newSensorReading.Value,
+                        newSensorReading.TimeStamp
+                    );
+
+                    handleSensorReading(newSensorReading).Wait();
                 }
                 else
                 {
                     logger.LogWarning(
-                        "Message doesn't match expected format (sensorId,Value): {Message}",
+                        "Failed to parse message as integer value: {Message}",
                         message
                     );
                 }
