@@ -167,4 +167,4 @@ This layered architecture facilitates separation of concerns and allows for easi
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details. 
