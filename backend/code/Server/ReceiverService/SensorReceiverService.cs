@@ -27,15 +27,17 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         _serviceProvider = serviceProvider;
 
         _server = "35.204.67.247";
-
         _port = 1883;
 
-        _topics = new List<string>();
-        var topicsConfig = "light/reading";
-        foreach (var topic in topicsConfig.Split(',', StringSplitOptions.RemoveEmptyEntries))
+        // Only for Proof of concept, will be in .ENV file in future
+        // Define topics to subscribe to
+        _topics = new List<string>
         {
-            _topics.Add(topic.Trim());
-        }
+            "light/reading",
+            "temperature/reading",
+            "humidity/reading",
+            "soil/reading",
+        };
 
         _logger.LogInformation(
             "ReceiverService configured with MQTT broker at {Server}:{Port}",
