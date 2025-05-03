@@ -41,13 +41,13 @@ public class PlantController : ControllerBase
         await _plantInterface.UpdatePlantNameAsync(id, plantName);
         return Ok(plant);
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeletePlant(int id)
     {
         var plant = await _plantInterface.GetPlantByIdAsync(id);
         if (plant == null) return NotFound($"No plant found with id {id}");
-        
+
         await _plantInterface.DeletePlantAsync(id);
         return NoContent();
     }

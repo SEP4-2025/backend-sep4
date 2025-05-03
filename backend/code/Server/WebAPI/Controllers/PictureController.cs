@@ -16,7 +16,7 @@ public class PictureController : ControllerBase
     {
         _pictureInterface = pictureInterface;
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<Picture>> AddPicture([FromQuery] PictureDTO picture)
     {

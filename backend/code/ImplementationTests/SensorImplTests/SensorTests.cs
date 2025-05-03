@@ -102,9 +102,9 @@ public class SensorTests
             GreenhouseId = 1
         };
 
-        Assert.ThrowsAsync<Exception>(async () => 
+        Assert.ThrowsAsync<Exception>(async () =>
             await _sensorLogic.UpdateSensorAsync(
-                nonExistentSensor.Id, 
+                nonExistentSensor.Id,
                 new UpdateSensorDTO
                 {
                     Type = nonExistentSensor.Type,
