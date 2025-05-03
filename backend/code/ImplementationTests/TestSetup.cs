@@ -21,7 +21,7 @@ public static class TestSetup
         var services = new ServiceCollection();
 
         services.AddDbContext<AppDbContext>(options =>
-            options.UseInMemoryDatabase("TestDb")
+            options.UseInMemoryDatabase("TestDb").EnableSensitiveDataLogging()
         );
 
         services.AddScoped<DbContext, AppDbContext>();
@@ -34,6 +34,5 @@ public static class TestSetup
     public static void GlobalTearDown()
     {
         _context?.Dispose();
-        _context = null;
     }
 }

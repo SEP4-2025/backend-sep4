@@ -17,10 +17,6 @@ public class GreenhouseTests
     {
         _context = TestSetup.Context;
         _greenhouseLogic = new GreenhouseLogic(_context);
-
-        // Clean up existing data
-        _context.Greenhouses.RemoveRange(_context.Greenhouses.ToList());
-        _context.SaveChanges();
     }
 
     [Test]
@@ -85,6 +81,7 @@ public class GreenhouseTests
         Assert.IsNotNull(result);
         Assert.That(result.Name, Is.EqualTo(newName));
     }
+    
     // Method not implemented in the controller
     // [Test]
     // public async Task UpdateGreenhouseAsync_Success_UpdatesCorrectly()
@@ -123,5 +120,12 @@ public class GreenhouseTests
         var deleteGreenhose = await _greenhouseLogic.GetGreenhouseByIdAsync(testGreenhouse.Id);
         
         Assert.That(deleteGreenhose, Is.Null);
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        _context.Greenhouses.RemoveRange(_context.Greenhouses.ToList());
+        _context.SaveChanges();
     }
 }

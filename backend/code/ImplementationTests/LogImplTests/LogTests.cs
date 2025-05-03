@@ -15,10 +15,6 @@ public class LogTests
     {
         _context = TestSetup.Context;
         _logLogic = new LogLogic(_context);
-
-        // Clean up existing data
-        _context.Logs.RemoveRange(_context.Logs.ToList());
-        _context.SaveChanges();
     }
 
     [Test]
@@ -66,5 +62,12 @@ public class LogTests
         var logs = await _logLogic.GetAllLogs();
 
         Assert.IsEmpty(logs);
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        _context.Logs.RemoveRange(_context.Logs.ToList());
+        _context.SaveChanges();
     }
 }

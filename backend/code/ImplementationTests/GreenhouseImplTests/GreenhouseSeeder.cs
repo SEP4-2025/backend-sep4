@@ -20,15 +20,4 @@ public static class GreenhouseSeeder
 
         return greenhouse;
     }
-
-    public static GreenhouseDTO SeedGreenhouseDto(int gardenerId = 0)
-    {
-        var greenhouseDto = new GreenhouseDTO
-        {
-            Name = "Test Greenhouse",
-            GardenerId = gardenerId
-        };
-
-        return greenhouseDto;
-    }
 }

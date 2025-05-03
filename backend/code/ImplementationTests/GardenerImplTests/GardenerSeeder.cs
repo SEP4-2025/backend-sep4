@@ -20,15 +20,4 @@ public static class GardenerSeeder
 
         return gardener;
     }
-
-    public static GardenerDTO SeedGardenerDto()
-    {
-        var gardenerDto = new GardenerDTO
-        {
-            Username = "testGardener",
-            Password = "testPassword"
-        };
-
-        return gardenerDto;
-    }
 }

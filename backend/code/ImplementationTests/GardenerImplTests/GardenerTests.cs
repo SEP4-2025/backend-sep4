@@ -16,10 +16,6 @@ public class GardenerTests
     {
         _context = TestSetup.Context;
         _gardenerLogic = new GardenerLogic(_context);
-
-        //Cleans up, but might need refactoring
-        _context.Gardeners.RemoveRange(_context.Gardeners.ToList());
-        _context.SaveChanges();
     }
 
     [Test]
@@ -88,5 +84,12 @@ public class GardenerTests
         var gardenerList = await _gardenerLogic.GetGardeners();
 
         Assert.IsEmpty(gardenerList);
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        _context.Gardeners.RemoveRange(_context.Gardeners.ToList());
+        _context.SaveChanges();
     }
 }
