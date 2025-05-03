@@ -10,7 +10,7 @@ public static class PlantSeeder
         var context = TestSetup.Context;
 
         var greenhouse = await GreenhouseSeeder.SeedGreenhouseAsync();
-        
+
         var plant = new Plant
         {
             Name = "TestPlant",

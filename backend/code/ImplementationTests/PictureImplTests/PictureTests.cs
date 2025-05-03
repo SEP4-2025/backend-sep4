@@ -81,7 +81,7 @@ public class PictureTests
         var testPicture = await PictureSeeder.SeedPictureAsync();
 
         await _pictureLogic.DeletePictureAsync(testPicture.Id);
-        
+
         var result = await _pictureLogic.GetPictureById(testPicture.Id);
         Assert.IsNull(result);
     }

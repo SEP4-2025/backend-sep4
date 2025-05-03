@@ -63,7 +63,7 @@ public class LogTests
 
         Assert.IsEmpty(logs);
     }
-    
+
     [TearDown]
     public void TearDown()
     {

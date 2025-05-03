@@ -64,7 +64,7 @@ public class GreenhouseTests
         };
 
         var result = await _greenhouseLogic.AddGreenhouseAsync(greenhouseDto);
-        
+
         Assert.IsNotNull(result);
         Assert.That(result.Name, Is.EqualTo(greenhouseDto.Name));
         Assert.That(result.GardenerId, Is.EqualTo(gardener.Id));
@@ -81,7 +81,7 @@ public class GreenhouseTests
         Assert.IsNotNull(result);
         Assert.That(result.Name, Is.EqualTo(newName));
     }
-    
+
     // Method not implemented in the controller
     // [Test]
     // public async Task UpdateGreenhouseAsync_Success_UpdatesCorrectly()
@@ -114,14 +114,14 @@ public class GreenhouseTests
     public async Task DeleteGreenhouseAsync_Success_DeletesGreenhouse()
     {
         var testGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync();
-    
+
         await _greenhouseLogic.DeleteGreenhouseAsync(testGreenhouse.Id);
-    
+
         var deleteGreenhose = await _greenhouseLogic.GetGreenhouseByIdAsync(testGreenhouse.Id);
-        
+
         Assert.That(deleteGreenhose, Is.Null);
     }
-    
+
     [TearDown]
     public void TearDown()
     {

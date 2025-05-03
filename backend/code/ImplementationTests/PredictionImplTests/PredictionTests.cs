@@ -76,8 +76,8 @@ public class PredictionTests
         await _predictionLogic.AddPredictionAsync(prediction);
 
         var allPredictions = await _predictionLogic.GetAllPredictions();
-        var addedPrediction = allPredictions.FirstOrDefault(p => 
-            p.OptimalTemperature == prediction.OptimalTemperature && 
+        var addedPrediction = allPredictions.FirstOrDefault(p =>
+            p.OptimalTemperature == prediction.OptimalTemperature &&
             p.OptimalHumidity == prediction.OptimalHumidity &&
             p.GreenhouseId == prediction.GreenhouseId &&
             p.SensorReadingId == prediction.SensorReadingId);
@@ -97,7 +97,7 @@ public class PredictionTests
         var testPrediction = await PredictionSeeder.SeedPredictionAsync();
 
         await _predictionLogic.DeletePredictionAsync(testPrediction.Id);
-        
+
         var result = await _predictionLogic.GetPredictionByIdAsync(testPrediction.Id);
         Assert.IsNull(result);
     }
