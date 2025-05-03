@@ -1,6 +1,5 @@
 ﻿using Database;
 using DTOs;
-using Entities;
 using LogicImplements;
 using LogicInterfaces;
 
@@ -90,7 +89,8 @@ public class WaterPumpTests
         var result = await _waterPumpLogic.TriggerManualWateringAsync(testWaterPump.Id, waterAmount);
 
         Assert.IsNotNull(result);
-        Assert.That(waterAmount, Is.EqualTo(waterAmount));
+        Assert.That(result.WaterLevel, Is.EqualTo(expectedWaterLevel));
+        Assert.That(result.LastWaterAmount, Is.EqualTo(waterAmount));
         Assert.That(result.LastWateredTime.Date, Is.EqualTo(DateTime.UtcNow.Date));
     }
 

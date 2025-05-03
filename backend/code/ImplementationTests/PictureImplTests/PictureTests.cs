@@ -87,9 +87,9 @@ public class PictureTests
     }
 
     [TearDown]
-    public async Task TearDown()
+    public void TearDown()
     {
         _context.Pictures.RemoveRange(_context.Pictures);
-        await _context.SaveChangesAsync();
+        _context.SaveChangesAsync();
     }
 }
