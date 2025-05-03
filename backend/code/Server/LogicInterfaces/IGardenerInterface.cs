@@ -7,7 +7,7 @@ public interface IGardenerInterface
 {
     Task<List<Gardener>> GetGardeners();
     Task<Gardener> GetGardenerByIdAsync(int id);
-    Task<Gardener> AddGardenerAsync(GardenerDTO gardener);
-    Task<Gardener> UpdateGardenerAsync(Gardener gardener);
+    Task<Gardener> AddGardenerAsync(GardenerDTO addGardener);
+    Task<Gardener> UpdateGardenerAsync(int id, GardenerDTO gardener);
     Task DeleteGardenerAsync(int id);
 }

@@ -1,3 +1,4 @@
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,14 @@ public class PictureController : ControllerBase
     public PictureController(IPictureInterface pictureInterface)
     {
         _pictureInterface = pictureInterface;
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult<Picture>> AddPicture([FromQuery] PictureDTO picture)
+    {
+        if (picture.IsEmpty()) return BadRequest("Picture is null");
+        var newPicture = await _pictureInterface.AddPictureAsync(picture);
+        return CreatedAtAction(nameof(GetPicturesByPlantId), new { plantId = newPicture.PlantId }, newPicture);
     }
 
     [HttpGet("{plantId}")]
@@ -35,7 +44,7 @@ public class PictureController : ControllerBase
     [HttpDelete("{Id}")]
     public async Task<ActionResult> DeletePicture(int Id)
     {
-        var picture = _pictureInterface.GetPictureByPlantIdAsync(Id);
+        var picture = await _pictureInterface.GetPictureByPlantIdAsync(Id);
         if (picture == null) return NotFound($"Picture with id {Id} not found");
         await _pictureInterface.DeletePictureAsync(Id);
         return NoContent();

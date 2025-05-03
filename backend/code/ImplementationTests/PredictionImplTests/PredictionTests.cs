@@ -1,4 +1,5 @@
 ﻿using Database;
+using DTOs;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
@@ -62,13 +63,12 @@ public class PredictionTests
     [Test]
     public async Task AddPredictionAsync_Success_AddsPredictionCorrectly()
     {
-        var prediction = new Prediction
+        var prediction = new PredictionDTO
         {
             OptimalTemperature = 22,
             OptimalHumidity = 55,
             OptimalLight = 65,
             OptimalWaterLevel = 70,
-            Date = DateTime.Now,
             GreenhouseId = 2,
             SensorReadingId = 2
         };

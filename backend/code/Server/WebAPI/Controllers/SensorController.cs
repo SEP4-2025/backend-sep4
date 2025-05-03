@@ -40,29 +40,29 @@ public class SensorController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Sensor>> AddSensor([FromBody] SensorDTO sensorDto)
+    public async Task<ActionResult<Sensor>> AddSensor([FromBody] AddSensorDTO addSensorDto)
     {
-        if (sensorDto == null)
+        if (addSensorDto == null)
         {
             return BadRequest($"Sensor data is required.");
         }
 
-        var addedSensor = await sensor.AddSensorAsync(sensorDto);
+        var addedSensor = await sensor.AddSensorAsync(addSensorDto);
         return CreatedAtAction(nameof(GetSensorById), new { id = addedSensor.Id }, addedSensor);
     }
 
     [HttpPatch]
-    public async Task<ActionResult<Sensor>> UpdateSensor([FromBody] Sensor sensorToUpdate)
+    public async Task<ActionResult<Sensor>> UpdateSensor([FromQuery] int id, UpdateSensorDTO sensorToUpdate)
     {
         if (sensorToUpdate == null)
         {
             return BadRequest("Sensor data is required.");
         }
 
-        var updatedSensor = await sensor.UpdateSensorAsync(sensorToUpdate);
+        var updatedSensor = await sensor.UpdateSensorAsync(id, sensorToUpdate);
         if (updatedSensor == null)
         {
-            return NotFound($"Sensor with ID {sensorToUpdate.Id} not found.");
+            return NotFound($"Sensor with ID {id} not found.");
         }
 
         return Ok(updatedSensor);

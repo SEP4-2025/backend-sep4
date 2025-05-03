@@ -1,4 +1,5 @@
 ﻿using Database;
+using DTOs;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
@@ -46,11 +47,10 @@ public class PictureTests
     [Test]
     public async Task AddPictureAsync_Success_AddsPictureCorrectly()
     {
-        var picture = new Picture
+        var picture = new PictureDTO
         {
             Url = "http://new-image.com/test.jpg",
             Note = "New test picture",
-            TimeStamp = DateTime.Now,
             PlantId = 3
         };
 

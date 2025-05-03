@@ -1,3 +1,4 @@
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ public class PlantController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Plant>> AddPlant([FromBody] Plant plant)
+    public async Task<ActionResult<Plant>> AddPlant([FromQuery] PlantDTO plant)
     {
         if (plant == null) return BadRequest($"Plant cannot be null");
         var addedPlant = await _plantInterface.AddPlantAsync(plant);
@@ -39,5 +40,15 @@ public class PlantController : ControllerBase
         if (plant == null) return NotFound($"No plant found with id {id}");
         await _plantInterface.UpdatePlantNameAsync(id, plantName);
         return Ok(plant);
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeletePlant(int id)
+    {
+        var plant = await _plantInterface.GetPlantByIdAsync(id);
+        if (plant == null) return NotFound($"No plant found with id {id}");
+        
+        await _plantInterface.DeletePlantAsync(id);
+        return NoContent();
     }
 }
