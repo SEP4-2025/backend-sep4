@@ -133,7 +133,4 @@ public class AppDbContext : DbContext
 
         });
     }
-
-
-
 }

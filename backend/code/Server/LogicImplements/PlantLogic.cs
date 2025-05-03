@@ -25,6 +25,7 @@ public class PlantLogic : IPlantInterface
         {
             Id = plant.Id,
             Name = plant.Name,
+            Species = plant.Species,
             GreenhouseId = plant.GreenhouseId,
         };
 
