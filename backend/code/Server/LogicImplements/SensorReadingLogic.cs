@@ -42,7 +42,6 @@ public class SensorReadingLogic : ISensorReadingInterface
         {
             Value = sensorReading.Value,
             TimeStamp = sensorReading.TimeStamp,
-            ThresholdValue = sensorReading.ThresholdValue,
             SensorId = sensorReading.SensorId,
         };
 
