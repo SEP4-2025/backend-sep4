@@ -1,8 +1,12 @@
+using System.Text;
 using Database;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,20 +44,70 @@ builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
 
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+            ),
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Configure default gardner in the database if doesnt exist yet
+using var scope = app.Services.CreateScope();
+var DbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var passwordHasher = new PasswordHasher<Gardener>();
+
+    var gardener = new Gardener
+    {
+        Username = "admin",
+        Password = passwordHasher.HashPassword(new Gardener(), "admin"),
+    };
+    DbContext.Gardeners.Add(gardener);
+    DbContext.SaveChanges();
 }
 
-// Use CORS middleware - must be called before UseRouting and endpoint configuration
-app.UseCors("AllowAllOrigins");
+// Configure the HTTP request pipeline. We might need to adjust for it or get other solution for running local(dev) / cloud(prod)
+if (app.Environment.IsDevelopment())
+{ //Development mode
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GrowMate API v1 (dev env)");
+        c.RoutePrefix = string.Empty;
+    });
 
-app.UseHttpsRedirection();
+    app.UseCors("AllowAllOrigins");
+}
+else
+{
+    // Production mode
+    app.UseHttpsRedirection();
+    app.UseCors("AllowAllOrigins");
+}
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
