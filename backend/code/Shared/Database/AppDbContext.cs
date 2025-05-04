@@ -67,6 +67,7 @@ public class AppDbContext : DbContext
             entity.ToTable("Sensor");
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.ThresholdValue).HasColumnName("threshold");
             entity.Property(e => e.MetricUnit).HasColumnName("metricunit");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
         });
@@ -76,7 +77,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Value).HasColumnName("value");
             entity.Property(e => e.TimeStamp).HasColumnName("date");
-            entity.Property(e => e.ThresholdValue).HasColumnName("threshold");
             entity.Property(e => e.SensorId).HasColumnName("sensorid");
         });
         modelBuilder.Entity<Prediction>(entity =>

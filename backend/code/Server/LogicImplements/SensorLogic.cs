@@ -31,6 +31,7 @@ public class SensorLogic : ISensorInterface
         {
             Type = sensor.Type,
             MetricUnit = sensor.MetricUnit,
+            ThresholdValue = sensor.ThresholdValue,
             GreenhouseId = sensor.greenHouseId
         };
 
