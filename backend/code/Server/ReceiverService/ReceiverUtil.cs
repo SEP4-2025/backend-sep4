@@ -65,7 +65,7 @@ public static class ReceiverUtil
                         SensorId = sensorId,
                         Value = value,
                         TimeStamp = DateTime.UtcNow,
-                        ThresholdValue = 0, // TODO: This should be in sensor entity
+
                     };
 
                     logger.LogInformation(

@@ -5,10 +5,8 @@ namespace Database;
 
 public class AppDbContext : DbContext
 {
-
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options) { }
 
     public DbSet<Gardener> Gardeners => Set<Gardener>();
     public DbSet<Greenhouse> Greenhouses => Set<Greenhouse>();
@@ -21,9 +19,6 @@ public class AppDbContext : DbContext
     public DbSet<Sensor> Sensors => Set<Sensor>();
     public DbSet<SensorReading> SensorReadings => Set<SensorReading>();
     public DbSet<WaterPump> WaterPumps => Set<WaterPump>();
-
-
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,7 +37,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
-
         });
         modelBuilder.Entity<Plant>(entity =>
         {
@@ -51,7 +45,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.Species).HasColumnName("species");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
-
         });
         modelBuilder.Entity<Picture>(entity =>
         {
@@ -67,6 +60,7 @@ public class AppDbContext : DbContext
             entity.ToTable("Sensor");
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.ThresholdValue).HasColumnName("threshold");
             entity.Property(e => e.MetricUnit).HasColumnName("metricunit");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
         });
@@ -76,7 +70,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Value).HasColumnName("value");
             entity.Property(e => e.TimeStamp).HasColumnName("date");
-            entity.Property(e => e.ThresholdValue).HasColumnName("threshold");
             entity.Property(e => e.SensorId).HasColumnName("sensorid");
         });
         modelBuilder.Entity<Prediction>(entity =>
@@ -90,7 +83,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Date).HasColumnName("date");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
             entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
-
         });
         modelBuilder.Entity<WaterPump>(entity =>
         {
@@ -112,7 +104,6 @@ public class AppDbContext : DbContext
             entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");
             entity.Property(e => e.WaterPumpId).HasColumnName("waterpumpid");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
-
         });
         modelBuilder.Entity<Notification>(entity =>
         {
@@ -130,7 +121,6 @@ public class AppDbContext : DbContext
             entity.ToTable("NotificationPreferences");
             entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
             entity.Property(e => e.IsEnabled).HasColumnName("isenabled");
-
         });
     }
 }
