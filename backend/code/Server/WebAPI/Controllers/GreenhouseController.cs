@@ -16,11 +16,22 @@ public class GreenhouseController : ControllerBase
     {
         _greenhouse = greenhouse;
     }
-
+    
+    [HttpGet]
+    public async Task<ActionResult<List<Greenhouse>>> GetAllGreenhousesAsync()
+    {
+        var greenhouses = await _greenhouse.GetGreenhouses();
+        if (greenhouses == null || !greenhouses.Any())
+        {
+            return NotFound("No greenhouses found.");
+        }
+        return Ok(greenhouses);
+    }
+    
     [HttpGet("{id}")]
     public async Task<ActionResult<Greenhouse>> GetGreenhouseByIdAsync(int id)
     {
-        var greenhouse = await _greenhouse.GetGreenhouseByIdAsync(id);
+        var greenhouse = await _greenhouse.GetGreenhouseById(id);
         if (greenhouse == null)
         {
             return NotFound($"Greenhouse with id {id} not found.");
@@ -31,7 +42,7 @@ public class GreenhouseController : ControllerBase
     [HttpGet("gardener/{gardenerId}")]
     public async Task<ActionResult<Greenhouse>> GetGreenhouseByGardenerId(int gardenerId)
     {
-        var greenhouse = await _greenhouse.GetGreenhouseByGardenerIdAsync(gardenerId);
+        var greenhouse = await _greenhouse.GetGreenhouseByGardenerId(gardenerId);
         if (greenhouse == null)
         {
             return NotFound($"Greenhouse with gardenerId {gardenerId} does not exist.");
@@ -43,7 +54,7 @@ public class GreenhouseController : ControllerBase
     [HttpGet("name/{name}")]
     public async Task<ActionResult<Greenhouse>> GetGreenhouseByNameAsync(string name)
     {
-        var greenhouse = await _greenhouse.GetGreenhouseByNameAsync(name);
+        var greenhouse = await _greenhouse.GetGreenhouseByName(name);
         if (greenhouse == null)
         {
             return NotFound($"Greenhouse with name {name} does not exist.");
@@ -54,22 +65,34 @@ public class GreenhouseController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Greenhouse>> AddGreenhouseAsync([FromBody] GreenhouseDTO greenhouse)
     {
-        if (greenhouse == null)
+        if (greenhouse.isEmpty())
         {
             return BadRequest($"Gardener data is required.");
         }
+        
+        var greenhouses = await _greenhouse.GetGreenhouses();
+        var greenhousesCount = greenhouses.Count();
+        if (greenhousesCount > 0)
+        {
+            return BadRequest("You can only create one greenhouse.");
+        }
 
-        var addedGreenhouse = await _greenhouse.AddGreenhouseAsync(greenhouse);
+        var addedGreenhouse = await _greenhouse.AddGreenhouse(greenhouse);
         return Ok(addedGreenhouse);
     }
 
     [HttpPut("update/{id}")]
     public async Task<ActionResult<Greenhouse>> UpdateGreenhouseNameAsync(int id, [FromBody] string name)
     {
-        var greenhouse = await _greenhouse.GetGreenhouseByIdAsync(id);
+        var greenhouse = await _greenhouse.GetGreenhouseById(id);
         if (greenhouse == null)
         {
             return NotFound($"Greenhouse with id {id} not found.");
+        }
+        
+        if (string.IsNullOrEmpty(name))
+        {
+            return BadRequest("Name cannot be empty.");
         }
 
         await _greenhouse.UpdateGreenhouseName(id, name);
@@ -80,7 +103,7 @@ public class GreenhouseController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteGreenhouseAsync(int id)
     {
-        var greenhouse = await _greenhouse.GetGreenhouseByIdAsync(id);
+        var greenhouse = await _greenhouse.GetGreenhouseById(id);
         if (greenhouse == null)
         {
             return NotFound($"Greenhouse with id {id} not found.");
@@ -88,7 +111,7 @@ public class GreenhouseController : ControllerBase
 
         try
         {
-            await _greenhouse.DeleteGreenhouseAsync(id);
+            await _greenhouse.DeleteGreenhouse(id);
         }
         catch (Exception e)
         {
@@ -96,8 +119,12 @@ public class GreenhouseController : ControllerBase
             {
                 return BadRequest("Cannot delete Greenhouse because it is associated with a Plant.");
             }
+            if (e.InnerException?.Message.Contains("Sensor_greenhouseid_fkey") == true)
+            {
+                return BadRequest("Cannot delete Greenhouse because it has associated Sensors.");
+            }
             throw;
         }
-        return NoContent();
+        return Ok("Successfully deleted greenhouse.");
     }
 }

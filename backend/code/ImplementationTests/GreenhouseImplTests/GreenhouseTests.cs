@@ -24,7 +24,7 @@ public class GreenhouseTests
     {
         var testGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync();
 
-        var result = await _greenhouseLogic.GetGreenhouseByIdAsync(testGreenhouse.Id);
+        var result = await _greenhouseLogic.GetGreenhouseById(testGreenhouse.Id);
 
         Assert.IsNotNull(result);
         Assert.That(result.Name, Is.EqualTo(testGreenhouse.Name));
@@ -35,7 +35,7 @@ public class GreenhouseTests
     {
         var testGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync();
 
-        var result = await _greenhouseLogic.GetGreenhouseByNameAsync(testGreenhouse.Name);
+        var result = await _greenhouseLogic.GetGreenhouseByName(testGreenhouse.Name);
 
         Assert.IsNotNull(result);
         Assert.That(result.Id, Is.EqualTo(testGreenhouse.Id));
@@ -47,7 +47,7 @@ public class GreenhouseTests
         var gardener = await GardenerSeeder.SeedGardenerAsync();
         var testGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync(gardener.Id);
 
-        var result = await _greenhouseLogic.GetGreenhouseByGardenerIdAsync(gardener.Id);
+        var result = await _greenhouseLogic.GetGreenhouseByGardenerId(gardener.Id);
 
         Assert.IsNotNull(result);
         Assert.That(result.Id, Is.EqualTo(testGreenhouse.Id));
@@ -63,7 +63,7 @@ public class GreenhouseTests
             GardenerId = gardener.Id
         };
 
-        var result = await _greenhouseLogic.AddGreenhouseAsync(greenhouseDto);
+        var result = await _greenhouseLogic.AddGreenhouse(greenhouseDto);
 
         Assert.IsNotNull(result);
         Assert.That(result.Name, Is.EqualTo(greenhouseDto.Name));
@@ -115,9 +115,9 @@ public class GreenhouseTests
     {
         var testGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync();
 
-        await _greenhouseLogic.DeleteGreenhouseAsync(testGreenhouse.Id);
+        await _greenhouseLogic.DeleteGreenhouse(testGreenhouse.Id);
 
-        var deleteGreenhose = await _greenhouseLogic.GetGreenhouseByIdAsync(testGreenhouse.Id);
+        var deleteGreenhose = await _greenhouseLogic.GetGreenhouseById(testGreenhouse.Id);
 
         Assert.That(deleteGreenhose, Is.Null);
     }

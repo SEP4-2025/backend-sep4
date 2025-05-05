@@ -64,9 +64,9 @@ public class SensorReadingController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReadingDTO sensorReading)
     {
-        if (sensorReading == null)
+        if (sensorReading.IsMissingValues())
         {
-            return BadRequest("Sensor reading cannot be null.");
+            return BadRequest("Sensor reading data is required.");
         }
 
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
@@ -87,6 +87,6 @@ public class SensorReadingController : ControllerBase
         }
 
         await sensorReading.DeleteSensorReadingAsync(id);
-        return NoContent();
+        return Ok("Sensor reading deleted successfully.");
     }
 }

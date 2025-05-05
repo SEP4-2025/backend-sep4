@@ -42,7 +42,7 @@ public class SensorController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Sensor>> AddSensor([FromBody] AddSensorDTO addSensorDto)
     {
-        if (addSensorDto == null)
+        if (addSensorDto.IsEmpty())
         {
             return BadRequest($"Sensor data is required.");
         }
@@ -54,15 +54,15 @@ public class SensorController : ControllerBase
     [HttpPatch("update/{id}")]
     public async Task<ActionResult<Sensor>> UpdateSensor(int id, [FromBody] UpdateSensorDTO sensorToUpdate)
     {
-        if (sensorToUpdate == null)
-        {
-            return BadRequest("Sensor data is required.");
-        }
-
         var updatedSensor = await sensor.UpdateSensorAsync(id, sensorToUpdate);
         if (updatedSensor == null)
         {
             return NotFound($"Sensor with ID {id} not found.");
+        }
+        
+        if (sensorToUpdate.IsEmpty())
+        {
+            return BadRequest("Sensor data is required.");
         }
 
         return Ok(updatedSensor);
@@ -78,7 +78,7 @@ public class SensorController : ControllerBase
         }
 
         await sensor.DeleteSensorAsync(id);
-        return NoContent();
+        return Ok("Sensor deleted successfully.");
     }
 
 }
