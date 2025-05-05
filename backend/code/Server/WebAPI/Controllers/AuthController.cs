@@ -71,4 +71,40 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    [HttpPatch("change-password")]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangePasswordRequestDTO changePasswordRequest
+    )
+    {
+        var gardener = await _dbContext.Gardeners.FirstOrDefaultAsync(g =>
+            g.Username == changePasswordRequest.Username
+        );
+        if (gardener == null)
+        {
+            return NotFound("Gardener not found.");
+        }
+
+        var isOldPasswordValid = _passwordHasher.VerifyHashedPassword(
+            gardener,
+            gardener.Password,
+            changePasswordRequest.OldPassword
+        );
+        if (isOldPasswordValid == PasswordVerificationResult.Failed)
+        {
+            return Unauthorized("Invalid old password.");
+        }
+        if (changePasswordRequest.NewPassword != changePasswordRequest.RepeatNewPassword)
+        {
+            return Unauthorized("New password and repeat password do not match.");
+        }
+
+        gardener.Password = _passwordHasher.HashPassword(
+            gardener,
+            changePasswordRequest.NewPassword
+        );
+        await _dbContext.SaveChangesAsync();
+
+        return Ok("Password changed successfully.");
+    }
 }
