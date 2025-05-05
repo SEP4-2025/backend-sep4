@@ -50,9 +50,7 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("date/{date}")]
-    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(
-        [FromRoute] DateTime date
-    )
+    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(DateTime date)
     {
         var utcDate = DateTime.SpecifyKind(date, DateTimeKind.Utc);
         var readings = await sensorReading.GetSensorReadingsByDateAsync(utcDate);
@@ -64,9 +62,7 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<SensorReading>> AddSensorReading(
-        [FromBody] SensorReadingDTO sensorReading
-    )
+    public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReadingDTO sensorReading)
     {
         if (sensorReading == null)
         {

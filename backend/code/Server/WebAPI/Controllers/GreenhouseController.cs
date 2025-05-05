@@ -63,8 +63,8 @@ public class GreenhouseController : ControllerBase
         return Ok(addedGreenhouse);
     }
 
-    [HttpPut]
-    public async Task<ActionResult<Greenhouse>> UpdateGreenhouseNameAsync([FromQuery] int id, [FromQuery] string name)
+    [HttpPut("update/{id}")]
+    public async Task<ActionResult<Greenhouse>> UpdateGreenhouseNameAsync(int id, [FromBody] string name)
     {
         var greenhouse = await _greenhouse.GetGreenhouseByIdAsync(id);
         if (greenhouse == null)

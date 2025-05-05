@@ -26,7 +26,7 @@ public class PlantController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Plant>> AddPlant([FromQuery] PlantDTO plant)
+    public async Task<ActionResult<Plant>> AddPlant([FromBody] PlantDTO plant)
     {
         if (plant == null) return BadRequest($"Plant cannot be null");
         var addedPlant = await _plantInterface.AddPlantAsync(plant);

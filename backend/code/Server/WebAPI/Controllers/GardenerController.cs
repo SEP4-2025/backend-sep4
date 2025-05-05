@@ -42,7 +42,7 @@ public class GardenerController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Gardener>> AddGardenerAsync([FromQuery] GardenerDTO addGardener)
+    public async Task<ActionResult<Gardener>> AddGardenerAsync([FromBody] GardenerDTO addGardener)
     {
         if (addGardener.IsEmpty())
         {
@@ -53,8 +53,8 @@ public class GardenerController : ControllerBase
         return CreatedAtAction(nameof(GetGardenerById), new { id = addedGardener.Id }, addedGardener);
     }
 
-    [HttpPatch]
-    public async Task<ActionResult<Gardener>> UpdateGardener([FromQuery] int id, [FromQuery] GardenerDTO gardener)
+    [HttpPatch("update/{id}")]
+    public async Task<ActionResult<Gardener>> UpdateGardener(int id, [FromBody] GardenerDTO gardener)
     {
         if (gardener.Username == null && gardener.Password == null)
         {

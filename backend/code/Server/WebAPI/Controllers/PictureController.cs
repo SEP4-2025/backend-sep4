@@ -18,7 +18,7 @@ public class PictureController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Picture>> AddPicture([FromQuery] PictureDTO picture)
+    public async Task<ActionResult<Picture>> AddPicture([FromBody] PictureDTO picture)
     {
         if (picture.IsEmpty()) return BadRequest("Picture is null");
         var newPicture = await _pictureInterface.AddPictureAsync(picture);

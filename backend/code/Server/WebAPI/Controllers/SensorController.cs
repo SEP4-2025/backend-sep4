@@ -51,8 +51,8 @@ public class SensorController : ControllerBase
         return CreatedAtAction(nameof(GetSensorById), new { id = addedSensor.Id }, addedSensor);
     }
 
-    [HttpPatch]
-    public async Task<ActionResult<Sensor>> UpdateSensor([FromQuery] int id, UpdateSensorDTO sensorToUpdate)
+    [HttpPatch("update/{id}")]
+    public async Task<ActionResult<Sensor>> UpdateSensor(int id, [FromBody] UpdateSensorDTO sensorToUpdate)
     {
         if (sensorToUpdate == null)
         {
