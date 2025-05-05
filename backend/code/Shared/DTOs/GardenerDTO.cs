@@ -9,7 +9,7 @@ public class GardenerDTO
     {
         return string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password);
     }
-    
+
     public bool ValueMissing()
     {
         return string.IsNullOrWhiteSpace(Username) && string.IsNullOrWhiteSpace(Password);

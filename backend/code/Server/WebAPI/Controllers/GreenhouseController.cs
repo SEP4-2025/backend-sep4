@@ -16,7 +16,7 @@ public class GreenhouseController : ControllerBase
     {
         _greenhouse = greenhouse;
     }
-    
+
     [HttpGet]
     public async Task<ActionResult<List<Greenhouse>>> GetAllGreenhousesAsync()
     {
@@ -27,7 +27,7 @@ public class GreenhouseController : ControllerBase
         }
         return Ok(greenhouses);
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Greenhouse>> GetGreenhouseByIdAsync(int id)
     {
@@ -69,7 +69,7 @@ public class GreenhouseController : ControllerBase
         {
             return BadRequest($"Gardener data is required.");
         }
-        
+
         var greenhouses = await _greenhouse.GetGreenhouses();
         var greenhousesCount = greenhouses.Count();
         if (greenhousesCount > 0)
@@ -89,7 +89,7 @@ public class GreenhouseController : ControllerBase
         {
             return NotFound($"Greenhouse with id {id} not found.");
         }
-        
+
         if (string.IsNullOrEmpty(name))
         {
             return BadRequest("Name cannot be empty.");

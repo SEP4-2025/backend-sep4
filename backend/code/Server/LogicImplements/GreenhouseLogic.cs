@@ -14,7 +14,7 @@ public class GreenhouseLogic : IGreenhouseInterface
     {
         _context = context;
     }
-    
+
     public async Task<List<Greenhouse>> GetGreenhouses()
     {
         return await _context.Greenhouses.ToListAsync();

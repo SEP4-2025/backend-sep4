@@ -59,7 +59,7 @@ public class SensorController : ControllerBase
         {
             return NotFound($"Sensor with ID {id} not found.");
         }
-        
+
         if (sensorToUpdate.IsEmpty())
         {
             return BadRequest("Sensor data is required.");

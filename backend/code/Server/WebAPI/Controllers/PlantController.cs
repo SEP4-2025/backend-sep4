@@ -16,7 +16,7 @@ public class PlantController : ControllerBase
     {
         _plantInterface = plantInterface;
     }
-    
+
     [HttpGet]
     public async Task<ActionResult<List<Plant>>> GetPlants()
     {
@@ -55,7 +55,7 @@ public class PlantController : ControllerBase
     {
         var plant = await _plantInterface.GetPlantByIdAsync(id);
         if (plant == null) return NotFound($"No plant found with id {id}");
-        
+
         if (string.IsNullOrEmpty(plantName))
         {
             return BadRequest("Plant name cannot be null or empty.");
