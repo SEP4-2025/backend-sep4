@@ -59,7 +59,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/manual-watering")]
-    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync(int id, [FromRoute] int waterAmount)
+    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync(int id, [FromQuery] int waterAmount)
     {
         var pump = await _waterPumpLogic.GetWaterPumpByIdAsync(id);
         if (pump == null)
