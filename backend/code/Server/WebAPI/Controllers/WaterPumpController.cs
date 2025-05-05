@@ -82,7 +82,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/threshold")]
-    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(int id, [FromRoute] int newThresholdValue)
+    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(int id, [FromBody] int newThresholdValue)
     {
         var updatedPump = await _waterPumpLogic.UpdateThresholdValueAsync(id, newThresholdValue);
         if (updatedPump == null)
