@@ -3,7 +3,6 @@ using DTOs;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace ImplementationTests.SensorReadingImplTests;
 
@@ -28,7 +27,6 @@ public class SensorReadingTests
 
         Assert.IsNotNull(result);
         Assert.That(result.Value, Is.EqualTo(testReading.Value));
-        Assert.That(result.ThresholdValue, Is.EqualTo(testReading.ThresholdValue));
         Assert.That(result.SensorId, Is.EqualTo(testReading.SensorId));
     }
 
@@ -92,7 +90,6 @@ public class SensorReadingTests
         {
             Value = 22,
             TimeStamp = DateTime.Now,
-            ThresholdValue = 25,
             SensorId = 1
         };
 
@@ -101,7 +98,6 @@ public class SensorReadingTests
         Assert.IsNotNull(result);
         Assert.That(result.Id, Is.GreaterThan(0));
         Assert.That(result.Value, Is.EqualTo(sensorReadingDto.Value));
-        Assert.That(result.ThresholdValue, Is.EqualTo(sensorReadingDto.ThresholdValue));
         Assert.That(result.SensorId, Is.EqualTo(sensorReadingDto.SensorId));
     }
 

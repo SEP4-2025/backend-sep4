@@ -106,6 +106,8 @@ else
     app.UseHttpsRedirection();
     app.UseCors("AllowAllOrigins");
 }
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseAuthentication();
 app.UseAuthorization();
