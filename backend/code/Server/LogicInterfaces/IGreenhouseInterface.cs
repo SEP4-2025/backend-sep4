@@ -5,10 +5,11 @@ namespace LogicInterfaces;
 
 public interface IGreenhouseInterface
 {
-    Task<Greenhouse> GetGreenhouseByIdAsync(int id);
-    Task<Greenhouse> GetGreenhouseByNameAsync(string name);
-    Task<Greenhouse> GetGreenhouseByGardenerIdAsync(int gardenerId);
-    Task<Greenhouse> AddGreenhouseAsync(GreenhouseDTO greenhouse);
+    Task<List<Greenhouse>> GetGreenhouses();
+    Task<Greenhouse> GetGreenhouseById(int id);
+    Task<Greenhouse> GetGreenhouseByName(string name);
+    Task<Greenhouse> GetGreenhouseByGardenerId(int gardenerId);
+    Task<Greenhouse> AddGreenhouse(GreenhouseDTO greenhouse);
     Task<Greenhouse> UpdateGreenhouseName(int id, string name);
-    Task DeleteGreenhouseAsync(int id);
+    Task DeleteGreenhouse(int id);
 }

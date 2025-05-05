@@ -14,23 +14,28 @@ public class GreenhouseLogic : IGreenhouseInterface
     {
         _context = context;
     }
+    
+    public async Task<List<Greenhouse>> GetGreenhouses()
+    {
+        return await _context.Greenhouses.ToListAsync();
+    }
 
-    public async Task<Greenhouse?> GetGreenhouseByIdAsync(int id)
+    public async Task<Greenhouse?> GetGreenhouseById(int id)
     {
         return await _context.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
     }
 
-    public async Task<Greenhouse?> GetGreenhouseByNameAsync(string name)
+    public async Task<Greenhouse?> GetGreenhouseByName(string name)
     {
         return await _context.Greenhouses.FirstOrDefaultAsync(g => g.Name == name);
     }
 
-    public async Task<Greenhouse?> GetGreenhouseByGardenerIdAsync(int gardenerId)
+    public async Task<Greenhouse?> GetGreenhouseByGardenerId(int gardenerId)
     {
         return await _context.Greenhouses.FirstOrDefaultAsync(g => g.GardenerId == gardenerId);
     }
 
-    public async Task<Greenhouse> AddGreenhouseAsync(GreenhouseDTO greenhouse)
+    public async Task<Greenhouse> AddGreenhouse(GreenhouseDTO greenhouse)
     {
         var newGreenhouse = new Greenhouse()
         {
@@ -54,7 +59,7 @@ public class GreenhouseLogic : IGreenhouseInterface
         return greenhouse;
     }
 
-    public async Task<Greenhouse> UpdateGreenhouseAsync(Greenhouse greenhouse)
+    public async Task<Greenhouse> UpdateGreenhouse(Greenhouse greenhouse)
     {
         var existingGreenhouse = await _context.Greenhouses.FindAsync(greenhouse.Id);
 
@@ -65,7 +70,7 @@ public class GreenhouseLogic : IGreenhouseInterface
         return existingGreenhouse;
     }
 
-    public async Task DeleteGreenhouseAsync(int id)
+    public async Task DeleteGreenhouse(int id)
     {
         var greenhouseToDelete = await _context.Greenhouses.FirstOrDefaultAsync(s => s.Id == id);
         if (greenhouseToDelete != null)

@@ -15,6 +15,10 @@ public class PlantLogic : IPlantInterface
         _context = context;
     }
 
+    public async Task<List<Plant>> GetPlantsAsync()
+    {
+        return await _context.Plants.ToListAsync();
+    }
     public async Task<Plant?> GetPlantByIdAsync(int id)
     {
         return await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
