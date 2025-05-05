@@ -80,12 +80,10 @@ public class SensorReadingLogic : ISensorReadingInterface
                 s => s.Id,
                 (sr, s) => new { SensorReading = sr, Sensor = s }
             )
-            
             .GroupBy(
                 joined => new { joined.Sensor.Id, joined.Sensor.Type, joined.Sensor.MetricUnit },
                 joined => joined.SensorReading.Value
             )
-            
             .Select(g => new SensorReadingDataDTO
             {
                 SensorId = g.Key.Id,
@@ -111,12 +109,10 @@ public class SensorReadingLogic : ISensorReadingInterface
                 s => s.Id,
                 (sr, s) => new { SensorReading = sr, Sensor = s }
             )
-            
             .GroupBy(
                 joined => new { joined.Sensor.Id, joined.Sensor.Type, joined.Sensor.MetricUnit },
                 joined => joined.SensorReading.Value
             )
-
             .Select(g => new SensorReadingDataDTO
             {
                 SensorId = g.Key.Id,
@@ -142,12 +138,10 @@ public class SensorReadingLogic : ISensorReadingInterface
                 s => s.Id,
                 (sr, s) => new { SensorReading = sr, Sensor = s }
             )
-            
             .GroupBy(
                 joined => new { joined.Sensor.Id, joined.Sensor.Type, joined.Sensor.MetricUnit },
                 joined => joined.SensorReading.Value
             )
-
             .Select(g => new SensorReadingDataDTO
             {
                 SensorId = g.Key.Id,
