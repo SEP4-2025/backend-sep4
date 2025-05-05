@@ -46,11 +46,11 @@ public class SensorTests
     [Test]
     public async Task AddSensorAsync_Success_AddsSensorCorrectly()
     {
-        var sensorDto = new SensorDTO
+        var sensorDto = new AddSensorDTO
         {
             Type = "Humidity",
             MetricUnit = "Percentage",
-            greenHouseId = 3
+            GreenHouseId = 3
         };
 
         var result = await _sensorLogic.AddSensorAsync(sensorDto);
@@ -59,28 +59,25 @@ public class SensorTests
         Assert.That(result.Id, Is.GreaterThan(0));
         Assert.That(result.Type, Is.EqualTo(sensorDto.Type));
         Assert.That(result.MetricUnit, Is.EqualTo(sensorDto.MetricUnit));
-        Assert.That(result.GreenhouseId, Is.EqualTo(sensorDto.greenHouseId));
+        Assert.That(result.GreenhouseId, Is.EqualTo(sensorDto.GreenHouseId));
     }
 
     [Test]
     public async Task UpdateSensorAsync_Success_UpdatesSensorCorrectly()
     {
         var testSensor = await SensorSeeder.SeedSensorAsync();
-        var updatedSensor = new Sensor
+        var updatedSensor = new UpdateSensorDTO()
         {
-            Id = testSensor.Id,
             Type = "Light",
             MetricUnit = "Lux",
-            GreenhouseId = testSensor.GreenhouseId
         };
 
-        var result = await _sensorLogic.UpdateSensorAsync(updatedSensor);
+        var result = await _sensorLogic.UpdateSensorAsync(testSensor.Id, updatedSensor);
 
         Assert.IsNotNull(result);
         Assert.That(result.Id, Is.EqualTo(testSensor.Id));
         Assert.That(result.Type, Is.EqualTo(updatedSensor.Type));
         Assert.That(result.MetricUnit, Is.EqualTo(updatedSensor.MetricUnit));
-        Assert.That(result.GreenhouseId, Is.EqualTo(updatedSensor.GreenhouseId));
     }
 
     [Test]
@@ -105,7 +102,14 @@ public class SensorTests
             GreenhouseId = 1
         };
 
-        Assert.ThrowsAsync<Exception>(async () => await _sensorLogic.UpdateSensorAsync(nonExistentSensor));
+        Assert.ThrowsAsync<Exception>(async () =>
+            await _sensorLogic.UpdateSensorAsync(
+                nonExistentSensor.Id,
+                new UpdateSensorDTO
+                {
+                    Type = nonExistentSensor.Type,
+                    MetricUnit = nonExistentSensor.MetricUnit
+                }));
     }
 
     [TearDown]

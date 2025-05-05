@@ -1,4 +1,5 @@
 using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -24,13 +25,13 @@ public class PictureLogic : IPictureInterface
         return await _context.Pictures.Where(p => p.PlantId == plantId).ToListAsync();
     }
 
-    public async Task<Picture> AddPictureAsync(Picture picture)
+    public async Task<Picture> AddPictureAsync(PictureDTO picture)
     {
         var newPicture = new Picture()
         {
             Url = picture.Url,
             Note = picture.Note,
-            TimeStamp = picture.TimeStamp,
+            TimeStamp = DateTime.UtcNow,
             PlantId = picture.PlantId
         };
         _context.Pictures.Add(newPicture);

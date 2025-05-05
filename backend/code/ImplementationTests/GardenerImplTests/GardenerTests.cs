@@ -60,16 +60,15 @@ public class GardenerTests
     public async Task UpdateGardenerAsync_Success_UpdatesUsernameCorrectly()
     {
         var oldGardener = await GardenerSeeder.SeedGardenerAsync();
-        var newGardener = new Gardener
+        var newGardener = new GardenerDTO
         {
-            Id = oldGardener.Id,
             Username = "newGardener",
             Password = "123456"
         };
 
-        await _gardenerLogic.UpdateGardenerAsync(newGardener);
+        await _gardenerLogic.UpdateGardenerAsync(oldGardener.Id, newGardener);
 
-        var updatedGardener = await _gardenerLogic.GetGardenerByIdAsync(newGardener.Id);
+        var updatedGardener = await _gardenerLogic.GetGardenerByIdAsync(oldGardener.Id);
 
         Assert.IsNotNull(updatedGardener);
         Assert.That(updatedGardener.Username, Is.EqualTo(newGardener.Username));

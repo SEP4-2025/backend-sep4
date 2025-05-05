@@ -1,4 +1,5 @@
 using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ public class PredictionLogic : IPredictionInterface
         return await _context.Predictions.ToListAsync();
     }
 
-    public async Task AddPredictionAsync(Prediction prediction)
+    public async Task AddPredictionAsync(PredictionDTO prediction)
     {
         var newPrediction = new Prediction()
         {
@@ -39,7 +40,7 @@ public class PredictionLogic : IPredictionInterface
             OptimalHumidity = prediction.OptimalHumidity,
             OptimalLight = prediction.OptimalLight,
             OptimalWaterLevel = prediction.OptimalWaterLevel,
-            Date = prediction.Date,
+            Date = DateTime.UtcNow,
             GreenhouseId = prediction.GreenhouseId,
             SensorReadingId = prediction.SensorReadingId,
         };

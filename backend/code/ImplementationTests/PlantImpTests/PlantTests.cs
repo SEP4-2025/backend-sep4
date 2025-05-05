@@ -1,4 +1,5 @@
 ﻿using Database;
+using DTOs;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
@@ -31,7 +32,7 @@ public class PlantTests
     [Test]
     public async Task AddPlantAsync_AddsCorrectly()
     {
-        var plant = new Plant
+        var plant = new PlantDTO
         {
             Name = "NewPlant",
             Species = "NewSpecies",

@@ -25,14 +25,14 @@ public class SensorLogic : ISensorInterface
         return await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<Sensor> AddSensorAsync(SensorDTO sensor)
+    public async Task<Sensor> AddSensorAsync(AddSensorDTO addSensor)
     {
         var newSensor = new Sensor
         {
-            Type = sensor.Type,
-            MetricUnit = sensor.MetricUnit,
-            ThresholdValue = sensor.ThresholdValue,
-            GreenhouseId = sensor.greenHouseId
+            Type = addSensor.Type,
+            MetricUnit = addSensor.MetricUnit,
+            ThresholdValue = addSensor.ThresholdValue,
+            GreenhouseId = addSensor.GreenHouseId,
         };
 
         _context.Sensors.Add(newSensor);
@@ -41,17 +41,12 @@ public class SensorLogic : ISensorInterface
         return newSensor;
     }
 
-    public async Task<Sensor> UpdateSensorAsync(Sensor sensor)
+    public async Task<Sensor> UpdateSensorAsync(int id, UpdateSensorDTO addSensor)
     {
-        var existingSensor = await _context.Sensors.FindAsync(sensor.Id);
-        if (existingSensor == null)
-        {
-            throw new Exception($"Sensor with ID {sensor.Id} not found.");
-        }
+        var existingSensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
 
-        existingSensor.Type = sensor.Type;
-        existingSensor.MetricUnit = sensor.MetricUnit;
-        existingSensor.GreenhouseId = sensor.GreenhouseId;
+        if (addSensor.Type is not null) existingSensor.Type = addSensor.Type;
+        if (addSensor.MetricUnit is not null) existingSensor.MetricUnit = addSensor.MetricUnit;
 
         await _context.SaveChangesAsync();
 

@@ -25,12 +25,12 @@ public class GardenerLogic : IGardenerInterface
         return await _context.Gardeners.FindAsync(id);
     }
 
-    public async Task<Gardener> AddGardenerAsync(GardenerDTO gardener)
+    public async Task<Gardener> AddGardenerAsync(GardenerDTO addGardener)
     {
         var newGardener = new Gardener
         {
-            Username = gardener.Username,
-            Password = gardener.Password,
+            Username = addGardener.Username,
+            Password = addGardener.Password,
         };
 
         _context.Gardeners.Add(newGardener);
@@ -39,12 +39,13 @@ public class GardenerLogic : IGardenerInterface
         return newGardener;
     }
 
-    public async Task<Gardener> UpdateGardenerAsync(Gardener gardener)
+    public async Task<Gardener> UpdateGardenerAsync(int id, GardenerDTO gardener)
     {
-        var existingGardener = await _context.Gardeners.FindAsync(gardener.Id);
+        var existingGardener = await _context.Gardeners.FirstOrDefaultAsync(g => g.Id == id);
 
-        existingGardener.Username = gardener.Username;
-        existingGardener.Password = gardener.Password;
+        if (gardener.Username is not null) existingGardener.Username = gardener.Username;
+        if (gardener.Password is not null) existingGardener.Password = gardener.Password;
+
 
         await _context.SaveChangesAsync();
         return existingGardener;

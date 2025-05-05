@@ -1,4 +1,5 @@
 using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -19,13 +20,13 @@ public class PlantLogic : IPlantInterface
         return await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<Plant> AddPlantAsync(Plant plant)
+    public async Task<Plant> AddPlantAsync(PlantDTO plant)
     {
         var newPlant = new Plant()
         {
-            Id = plant.Id,
             Name = plant.Name,
             Species = plant.Species,
+            Pictures = new List<Picture>(),
             GreenhouseId = plant.GreenhouseId,
         };
 

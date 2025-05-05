@@ -7,7 +7,7 @@ public interface ISensorInterface
 {
     Task<List<Sensor>> GetAllSensorsAsync();
     Task<Sensor> GetSensorByIdAsync(int id);
-    Task<Sensor> AddSensorAsync(SensorDTO sensor);
-    Task<Sensor> UpdateSensorAsync(Sensor sensor);
+    Task<Sensor> AddSensorAsync(AddSensorDTO addSensor);
+    Task<Sensor> UpdateSensorAsync(int id, UpdateSensorDTO addSensor);
     Task DeleteSensorAsync(int id);
 }

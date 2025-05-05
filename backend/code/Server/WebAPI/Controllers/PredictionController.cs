@@ -1,3 +1,4 @@
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ public class PredictionController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> AddPrediction([FromBody] Prediction prediction)
+    public async Task<ActionResult> AddPrediction([FromQuery] PredictionDTO prediction)
     {
         if (prediction == null) return BadRequest("Prediction cannot be null");
         await _predictionInterface.AddPredictionAsync(prediction);

@@ -42,36 +42,36 @@ public class GardenerController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Gardener>> AddGardenerAsync([FromBody] GardenerDTO gardener)
+    public async Task<ActionResult<Gardener>> AddGardenerAsync([FromQuery] GardenerDTO addGardener)
     {
-        if (gardener == null)
+        if (addGardener.IsEmpty())
         {
             return BadRequest("Gardener data is required.");
         }
 
-        var addedGardener = await _gardener.AddGardenerAsync(gardener);
+        var addedGardener = await _gardener.AddGardenerAsync(addGardener);
         return CreatedAtAction(nameof(GetGardenerById), new { id = addedGardener.Id }, addedGardener);
     }
 
     [HttpPatch]
-    public async Task<ActionResult<Gardener>> UpdateGardener([FromBody] Gardener gardener)
+    public async Task<ActionResult<Gardener>> UpdateGardener([FromQuery] int id, [FromQuery] GardenerDTO gardener)
     {
-        if (gardener == null)
+        if (gardener.Username == null && gardener.Password == null)
         {
-            return BadRequest("Gardener data is required.");
+            return BadRequest("At least one field must be provided to update.");
         }
 
-        var gardenerToUpdate = await _gardener.GetGardenerByIdAsync(gardener.Id);
+        var gardenerToUpdate = await _gardener.GetGardenerByIdAsync(id);
         if (gardenerToUpdate == null)
         {
-            return NotFound($"Gardener with ID {gardener.Id} not found.");
+            return NotFound($"Gardener with ID {id} not found.");
         }
-        await _gardener.UpdateGardenerAsync(gardener);
+        await _gardener.UpdateGardenerAsync(id, gardener);
         return Ok(gardenerToUpdate);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Gardener>> DeleteGardener(int id)
+    public async Task<ActionResult> DeleteGardener(int id)
     {
         var gardener = await _gardener.GetGardenerByIdAsync(id);
         if (gardener == null)
