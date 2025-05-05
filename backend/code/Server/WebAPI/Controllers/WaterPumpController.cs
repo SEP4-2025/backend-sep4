@@ -71,7 +71,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/add-water")]
-    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync(int id, [FromRoute] int addedWaterAmount)
+    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync(int id, [FromBody] int addedWaterAmount)
     {
         var updatedPump = await _waterPumpLogic.UpdateCurrentWaterLevelAsync(id, addedWaterAmount);
         if (updatedPump == null)
