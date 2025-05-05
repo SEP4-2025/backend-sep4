@@ -6,5 +6,4 @@ public class SensorReadingDataDTO
     public string SensorType { get; set; }
     public string MetricUnit { get; set; }
     public double? AverageValue { get; set; }
-    public DateTime TimeStamp { get; set; }
 }

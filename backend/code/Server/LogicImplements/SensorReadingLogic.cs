@@ -90,7 +90,6 @@ public class SensorReadingLogic : ISensorReadingInterface
                 SensorType = g.Key.Type,
                 MetricUnit = g.Key.MetricUnit,
                 AverageValue = g.Any() ? g.Average() : null,
-                TimeStamp = DateTime.UtcNow
             })
             .ToListAsync();
 
@@ -119,7 +118,6 @@ public class SensorReadingLogic : ISensorReadingInterface
                 SensorType = g.Key.Type,
                 MetricUnit = g.Key.MetricUnit,
                 AverageValue = g.Any() ? g.Average() : null,
-                TimeStamp = DateTime.UtcNow
             })
             .ToListAsync();
 
@@ -148,7 +146,6 @@ public class SensorReadingLogic : ISensorReadingInterface
                 SensorType = g.Key.Type,
                 MetricUnit = g.Key.MetricUnit,
                 AverageValue = g.Any() ? g.Average() : null,
-                TimeStamp = DateTime.UtcNow
             })
             .ToListAsync();
 
