@@ -71,7 +71,7 @@ public class SensorReadingLogic : ISensorReadingInterface
     public async Task<List<SensorReadingDataDTO>> GetAverageSensorReadingsFromLast24Hours(int greenhouseId)
     {
         var timeLimit = DateTime.UtcNow.AddHours(-24);
-        
+
         var result = await _context.SensorReadings
             .Where(sr => sr.TimeStamp >= timeLimit)
             .Join(
@@ -93,14 +93,14 @@ public class SensorReadingLogic : ISensorReadingInterface
                 TimeStamp = DateTime.UtcNow
             })
             .ToListAsync();
-        
+
         return result;
     }
 
     public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast7Days(int greenhouseId)
     {
         var timeLimit = DateTime.UtcNow.AddDays(-7);
-    
+
         var result = await _context.SensorReadings
             .Where(sr => sr.TimeStamp >= timeLimit)
             .Join(
@@ -122,14 +122,14 @@ public class SensorReadingLogic : ISensorReadingInterface
                 TimeStamp = DateTime.UtcNow
             })
             .ToListAsync();
-        
+
         return result;
     }
 
     public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast30Days(int greenhouseId)
     {
         var timeLimit = DateTime.UtcNow.AddDays(-30);
-    
+
         var result = await _context.SensorReadings
             .Where(sr => sr.TimeStamp >= timeLimit)
             .Join(
@@ -151,7 +151,7 @@ public class SensorReadingLogic : ISensorReadingInterface
                 TimeStamp = DateTime.UtcNow
             })
             .ToListAsync();
-        
+
         return result;
     }
 }
