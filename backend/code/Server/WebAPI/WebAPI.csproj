@@ -8,7 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.4" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.9.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
+        <PackageReference Include="System.Security.Claims" Version="4.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
     </ItemGroup>
 
     <ItemGroup>

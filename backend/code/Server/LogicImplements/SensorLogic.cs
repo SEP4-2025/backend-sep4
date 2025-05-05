@@ -31,7 +31,8 @@ public class SensorLogic : ISensorInterface
         {
             Type = addSensor.Type,
             MetricUnit = addSensor.MetricUnit,
-            GreenhouseId = addSensor.GreenHouseId
+            ThresholdValue = addSensor.ThresholdValue,
+            GreenhouseId = addSensor.GreenHouseId,
         };
 
         _context.Sensors.Add(newSensor);
