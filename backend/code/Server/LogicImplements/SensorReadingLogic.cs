@@ -132,7 +132,7 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast30Days(int greenhouseId)
     {
-        var timeLimit = DateTime.UtcNow.AddDays(-7);
+        var timeLimit = DateTime.UtcNow.AddDays(-30);
     
         var result = await _context.SensorReadings
             .Where(sr => sr.TimeStamp >= timeLimit)
