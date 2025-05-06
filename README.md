@@ -11,6 +11,108 @@ The backend is structured as a collection of microservices:
 - **SenderService**: Service for sending commands to IoT devices through MQTT
 - **Database**: PostgreSQL database service with Entity Framework Core for data persistence
 
+## API Endpoints
+
+The GrowMate backend provides the following RESTful API endpoints:
+
+### Authentication
+
+| Method | Endpoint                | Description                      |
+| ------ | ----------------------- | -------------------------------- |
+| POST   | `/auth/login`           | Login with username and password |
+| PATCH  | `/auth/change-password` | Change user password             |
+
+### Gardener
+
+| Method | Endpoint         | Description           |
+| ------ | ---------------- | --------------------- |
+| GET    | `/gardener`      | Get all gardeners     |
+| GET    | `/gardener/{id}` | Get gardener by ID    |
+| POST   | `/gardener`      | Create a new gardener |
+| PATCH  | `/gardener`      | Update a gardener     |
+| DELETE | `/gardener/{id}` | Delete a gardener     |
+
+### Greenhouse
+
+| Method | Endpoint                            | Description                   |
+| ------ | ----------------------------------- | ----------------------------- |
+| GET    | `/greenhouse/{id}`                  | Get greenhouse by ID          |
+| GET    | `/greenhouse/gardener/{gardenerId}` | Get greenhouse by gardener ID |
+| GET    | `/greenhouse/name/{name}`           | Get greenhouse by name        |
+| POST   | `/greenhouse`                       | Create a new greenhouse       |
+| PUT    | `/greenhouse`                       | Update greenhouse name        |
+| DELETE | `/greenhouse/{id}`                  | Delete a greenhouse           |
+
+### Plant
+
+| Method | Endpoint           | Description        |
+| ------ | ------------------ | ------------------ |
+| GET    | `/plant/{plantId}` | Get plant by ID    |
+| POST   | `/plant`           | Create a new plant |
+| PUT    | `/plant`           | Update plant name  |
+| DELETE | `/plant/{id}`      | Delete a plant     |
+
+### Picture
+
+| Method | Endpoint             | Description              |
+| ------ | -------------------- | ------------------------ |
+| GET    | `/picture/{plantId}` | Get pictures by plant ID |
+| POST   | `/picture`           | Add a new picture        |
+| PUT    | `/picture`           | Update picture note      |
+| DELETE | `/picture/{id}`      | Delete a picture         |
+
+### Sensor
+
+| Method | Endpoint       | Description         |
+| ------ | -------------- | ------------------- |
+| GET    | `/sensor`      | Get all sensors     |
+| GET    | `/sensor/{id}` | Get sensor by ID    |
+| POST   | `/sensor`      | Create a new sensor |
+| PATCH  | `/sensor`      | Update a sensor     |
+| DELETE | `/sensor/{id}` | Delete a sensor     |
+
+### Sensor Reading
+
+| Method | Endpoint                           | Description               |
+| ------ | ---------------------------------- | ------------------------- |
+| GET    | `/sensorreading`                   | Get all sensor readings   |
+| GET    | `/sensorreading/{id}`              | Get sensor reading by ID  |
+| GET    | `/sensorreading/sensor/{sensorId}` | Get readings by sensor ID |
+| GET    | `/sensorreading/date/{date}`       | Get readings by date      |
+| POST   | `/sensorreading`                   | Add a new sensor reading  |
+| DELETE | `/sensorreading/{id}`              | Delete a sensor reading   |
+
+### Water Pump
+
+| Method | Endpoint                          | Description                 |
+| ------ | --------------------------------- | --------------------------- |
+| GET    | `/waterpump`                      | Get all water pumps         |
+| GET    | `/waterpump/{id}`                 | Get water pump by ID        |
+| POST   | `/waterpump`                      | Create a new water pump     |
+| PATCH  | `/waterpump/{id}/auto-watering`   | Update auto watering status |
+| PATCH  | `/waterpump/{id}/manual-watering` | Trigger manual watering     |
+| PATCH  | `/waterpump/{id}/add-water`       | Update current water level  |
+| PATCH  | `/waterpump/{id}/threshold`       | Update threshold value      |
+| DELETE | `/waterpump/{id}`                 | Delete a water pump         |
+
+### Prediction
+
+| Method | Endpoint                  | Description             |
+| ------ | ------------------------- | ----------------------- |
+| GET    | `/prediction`             | Get all predictions     |
+| GET    | `/prediction/{id}`        | Get prediction by ID    |
+| GET    | `/prediction/date/{date}` | Get predictions by date |
+| POST   | `/prediction`             | Add a new prediction    |
+| DELETE | `/prediction/{id}`        | Delete a prediction     |
+
+### Log
+
+| Method | Endpoint           | Description      |
+| ------ | ------------------ | ---------------- |
+| GET    | `/log`             | Get all logs     |
+| GET    | `/log/date/{date}` | Get logs by date |
+| DELETE | `/log/{id}`        | Delete a log     |
+
 ## Project Structure
 
 The solution is organized into several projects:
@@ -64,10 +166,12 @@ This will start:
 The project uses GitHub Actions for continuous integration:
 
 1. **C#-linter**: Verifies code style and formatting
+
    - Runs `dotnet format` to ensure code meets style guidelines
    - Triggers on PRs to master branch
 
 2. **Dockerization validation & build test**:
+
    - Tests Docker builds for all services
    - Verifies container functionality
    - Validates cloudbuild.yaml structure
@@ -136,12 +240,14 @@ SenderService
 ### Key Dependencies
 
 1. **WebAPI** depends on:
+
    - LogicInterfaces (for business logic contracts)
    - LogicImplements (for business logic implementation)
    - Database (for data access)
    - DTOs (for data transfer objects)
 
 2. **ReceiverService** depends on:
+
    - LogicInterfaces
    - LogicImplements
    - Database
@@ -149,15 +255,18 @@ SenderService
    - External MQTT library for IoT communication
 
 3. **LogicImplements** depends on:
+
    - LogicInterfaces (implements these interfaces)
    - Database (for data access)
    - DTOs (for data transformation)
 
 4. **LogicInterfaces** depends on:
+
    - Entities (for domain models)
    - DTOs (for data transfer contracts)
 
 5. **Database** depends on:
+
    - Entities (for domain models to persist)
    - Entity Framework Core (external)
 
