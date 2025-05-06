@@ -17,13 +17,13 @@ public class PictureController : ControllerBase
         _pictureInterface = pictureInterface;
     }
 
-    [HttpPost]
-    public async Task<ActionResult<Picture>> AddPicture([FromBody] PictureDTO picture)
-    {
-        if (picture.IsEmpty()) return BadRequest("Picture is null");
-        var newPicture = await _pictureInterface.AddPictureAsync(picture);
-        return CreatedAtAction(nameof(GetPicturesByPlantId), new { plantId = newPicture.PlantId }, newPicture);
-    }
+    // [HttpPost]
+    // public async Task<ActionResult<Picture>> AddPicture([FromBody] PictureDTO picture)
+    // {
+    //     if (picture.IsEmpty()) return BadRequest("Picture is null");
+    //     var newPicture = await _pictureInterface.AddPictureAsync(picture);
+    //     return CreatedAtAction(nameof(GetPicturesByPlantId), new { plantId = newPicture.PlantId }, newPicture);
+    // }
 
     [HttpGet("{plantId}")]
     public async Task<ActionResult<List<Picture>>> GetPicturesByPlantId(int plantId)

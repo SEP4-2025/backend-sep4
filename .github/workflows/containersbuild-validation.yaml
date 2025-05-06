@@ -1,88 +1,88 @@
-name: Dockerization validation & build test
-
-on:
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
-
-jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: "read"
-      id-token: "write"
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build WebAPI Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./backend/code
-          file: ./backend/code/Server/WebAPI/Dockerfile
-          push: false
-          tags: webapi:test
-          load: true
-
-      - name: Build Receiver Service Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./backend/code
-          file: ./backend/code/Server/ReceiverService/Dockerfile
-          push: false
-          tags: receiver:test
-          load: true
-
-      - name: Build MQTT Broker Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./mqtt
-          file: ./mqtt/Dockerfile
-          push: false
-          tags: mqtt:test
-          load: true
-
-      - name: List built Docker images
-        run: docker images
-
-      # Optional: Run basic tests on the built containers
-      - name: Test WebAPI container
-        run: |
-          docker run --name webapi-test -d webapi:test
-          sleep 5
-          docker ps | grep webapi-test
-          docker logs webapi-test
-          docker stop webapi-test
-          
-      - name: Test Receiver container
-        run: |
-          docker run --name receiver-test -d receiver:test
-          sleep 5
-          docker ps | grep receiver-test
-          docker logs receiver-test
-          docker stop receiver-test
-          
-      - name: Test MQTT container
-        run: |
-          docker run --name mqtt-test -d mqtt:test
-          sleep 5
-          docker ps | grep mqtt-test
-          docker logs mqtt-test
-          docker stop mqtt-test
-
-      - name: Validate cloudbuild.yaml structure
-        run: |
-          # Simple validation of YAML syntax
-          if ! cat cloudbuild.yaml | grep -q "steps:"; then
-            echo "Error: cloudbuild.yaml is missing required 'steps' section"
-            exit 1
-          fi
-
-      - name: Success message
-        run: |
-          echo "✅ All Docker images built successfully!"
-          echo "When merged to master, these images should build correctly on Google Cloud Build."
+  name: Dockerization validation & build test
+  
+  on:
+    pull_request:
+      branches:
+        - master
+    workflow_dispatch:
+  
+  jobs:
+    build-test:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: "read"
+        id-token: "write"
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v2
+  
+        - name: Build WebAPI Docker Image
+          uses: docker/build-push-action@v3
+          with:
+            context: ./backend/code
+            file: ./backend/code/Server/WebAPI/Dockerfile
+            push: false
+            tags: webapi:test
+            load: true
+  
+        - name: Build Receiver Service Docker Image
+          uses: docker/build-push-action@v3
+          with:
+            context: ./backend/code
+            file: ./backend/code/Server/ReceiverService/Dockerfile
+            push: false
+            tags: receiver:test
+            load: true
+  
+        - name: Build MQTT Broker Docker Image
+          uses: docker/build-push-action@v3
+          with:
+            context: ./mqtt
+            file: ./mqtt/Dockerfile
+            push: false
+            tags: mqtt:test
+            load: true
+  
+        - name: List built Docker images
+          run: docker images
+  
+        # Optional: Run basic tests on the built containers
+        - name: Test WebAPI container
+          run: |
+            docker run --name webapi-test -d webapi:test
+            sleep 5
+            docker ps | grep webapi-test
+            docker logs webapi-test
+            docker stop webapi-test
+            
+        - name: Test Receiver container
+          run: |
+            docker run --name receiver-test -d receiver:test
+            sleep 5
+            docker ps | grep receiver-test
+            docker logs receiver-test
+            docker stop receiver-test
+            
+        - name: Test MQTT container
+          run: |
+            docker run --name mqtt-test -d mqtt:test
+            sleep 5
+            docker ps | grep mqtt-test
+            docker logs mqtt-test
+            docker stop mqtt-test
+  
+        - name: Validate cloudbuild.yaml structure
+          run: |
+            # Simple validation of YAML syntax
+            if ! cat cloudbuild.yaml | grep -q "steps:"; then
+              echo "Error: cloudbuild.yaml is missing required 'steps' section"
+              exit 1
+            fi
+  
+        - name: Success message
+          run: |
+            echo "✅ All Docker images built successfully!"
+            echo "When merged to master, these images should build correctly on Google Cloud Build."

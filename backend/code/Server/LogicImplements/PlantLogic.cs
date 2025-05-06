@@ -39,6 +39,17 @@ public class PlantLogic : IPlantInterface
         return newPlant;
     }
 
+    public async Task<Plant> UploadPicture(int id, Picture picture)
+    {
+        var existingPlant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
+        if (existingPlant == null) return null;
+        
+        await _context.Pictures.AddAsync(picture);
+        await _context.SaveChangesAsync();
+        
+        return existingPlant;
+    }
+
     public async Task<Plant> UpdatePlantNameAsync(int id, string plantName)
     {
         var existingPlant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);

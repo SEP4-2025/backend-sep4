@@ -1,7 +1,10 @@
 using DTOs;
 using Entities;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace WebAPI.Controllers;
 
@@ -25,6 +28,7 @@ public class PlantController : ControllerBase
         {
             return NotFound("No plants found.");
         }
+
         return Ok(plants);
     }
 
@@ -46,8 +50,46 @@ public class PlantController : ControllerBase
         {
             return BadRequest("You can only create one plant.");
         }
+
         var addedPlant = await _plantInterface.AddPlantAsync(plant);
         return Ok(addedPlant);
+    }
+
+    [HttpPost("{id}/UploadPicture")]
+    public async Task<ActionResult<Plant>> UploadPicture(int id, [FromForm] IFormFile image, [FromForm] string? note)
+    {
+        var plant = await _plantInterface.GetPlantByIdAsync(id);
+        if (plant == null) return NotFound($"No plant found with id {id}");
+
+        if (image == null || image.Length == 0)
+            return BadRequest("No image file provided.");
+
+        // Authenticate using the credentials in the environment variable
+        var credential = GoogleCredential.GetApplicationDefault();
+        var storageClient = await StorageClient.CreateAsync(credential);
+
+        var bucketName = "plant-picture-upload";
+        var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+        using var stream = image.OpenReadStream();
+
+        await storageClient.UploadObjectAsync(bucketName, fileName, image.ContentType, stream, new UploadObjectOptions
+        {
+            PredefinedAcl = PredefinedObjectAcl.PublicRead
+        });
+
+        var url = $"https://storage.googleapis.com/{bucketName}/{fileName}";
+
+        var picture = new Picture
+        {
+            Url = url,
+            Note = note,
+            TimeStamp = DateTime.UtcNow,
+            PlantId = id
+        };
+
+        await _plantInterface.UploadPicture(id, picture);
+
+        return Ok(plant);
     }
 
     [HttpPut("{id}")]
