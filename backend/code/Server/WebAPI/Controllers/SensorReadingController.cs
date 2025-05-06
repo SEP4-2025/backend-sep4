@@ -50,9 +50,7 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("date/{date}")]
-    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(
-        [FromRoute] DateTime date
-    )
+    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(DateTime date)
     {
         var utcDate = DateTime.SpecifyKind(date, DateTimeKind.Utc);
         var readings = await sensorReading.GetSensorReadingsByDateAsync(utcDate);
@@ -64,13 +62,11 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<SensorReading>> AddSensorReading(
-        [FromBody] SensorReadingDTO sensorReading
-    )
+    public async Task<ActionResult<SensorReading>> AddSensorReading([FromBody] SensorReadingDTO sensorReading)
     {
-        if (sensorReading == null)
+        if (sensorReading.IsMissingValues())
         {
-            return BadRequest("Sensor reading cannot be null.");
+            return BadRequest("Sensor reading data is required.");
         }
 
         var addedSensorReading = await this.sensorReading.AddSensorReadingAsync(sensorReading);
@@ -91,6 +87,6 @@ public class SensorReadingController : ControllerBase
         }
 
         await sensorReading.DeleteSensorReadingAsync(id);
-        return NoContent();
+        return Ok("Sensor reading deleted successfully.");
     }
 }

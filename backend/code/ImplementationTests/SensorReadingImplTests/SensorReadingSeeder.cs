@@ -13,7 +13,6 @@ public static class SensorReadingSeeder
         {
             Value = 25,
             TimeStamp = DateTime.Today,
-            ThresholdValue = 30,
             SensorId = sensorId
         };
 

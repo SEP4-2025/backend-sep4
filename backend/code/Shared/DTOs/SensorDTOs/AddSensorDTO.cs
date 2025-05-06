@@ -7,4 +7,9 @@ public class AddSensorDTO
     public int ThresholdValue { get; set; }
     public string MetricUnit { get; set; }
     public int GreenHouseId { get; set; }
+
+    public bool IsEmpty()
+    {
+        return string.IsNullOrWhiteSpace(Type) || string.IsNullOrWhiteSpace(MetricUnit) || GreenHouseId <= 0;
+    }
 }

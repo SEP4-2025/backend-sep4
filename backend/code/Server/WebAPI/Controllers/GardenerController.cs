@@ -42,21 +42,26 @@ public class GardenerController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Gardener>> AddGardenerAsync([FromQuery] GardenerDTO addGardener)
+    public async Task<ActionResult<Gardener>> AddGardenerAsync([FromBody] GardenerDTO addGardener)
     {
         if (addGardener.IsEmpty())
         {
             return BadRequest("Gardener data is required.");
         }
-
+        var gardeners = await _gardener.GetGardeners();
+        var gardenerCount = gardeners.Count();
+        if (gardenerCount > 0)
+        {
+            return BadRequest("You can only create one gardener.");
+        }
         var addedGardener = await _gardener.AddGardenerAsync(addGardener);
         return CreatedAtAction(nameof(GetGardenerById), new { id = addedGardener.Id }, addedGardener);
     }
 
-    [HttpPatch]
-    public async Task<ActionResult<Gardener>> UpdateGardener([FromQuery] int id, [FromQuery] GardenerDTO gardener)
+    [HttpPatch("update/{id}")]
+    public async Task<ActionResult<Gardener>> UpdateGardener(int id, [FromBody] GardenerDTO gardener)
     {
-        if (gardener.Username == null && gardener.Password == null)
+        if (gardener.ValueMissing())
         {
             return BadRequest("At least one field must be provided to update.");
         }
@@ -90,7 +95,7 @@ public class GardenerController : ControllerBase
             }
             throw;
         }
-        return NoContent();
+        return Ok("Gardener deleted successfully.");
     }
 
 }

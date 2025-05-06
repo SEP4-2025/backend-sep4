@@ -65,7 +65,6 @@ public static class ReceiverUtil
                         SensorId = sensorId,
                         Value = value,
                         TimeStamp = DateTime.UtcNow,
-
                     };
 
                     logger.LogInformation(

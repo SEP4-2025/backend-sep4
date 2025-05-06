@@ -59,7 +59,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/manual-watering")]
-    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync([FromRoute] int id, int waterAmount)
+    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync(int id, [FromQuery] int waterAmount)
     {
         var pump = await _waterPumpLogic.GetWaterPumpByIdAsync(id);
         if (pump == null)
@@ -71,7 +71,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/add-water")]
-    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync([FromRoute] int id, int addedWaterAmount)
+    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync(int id, [FromBody] int addedWaterAmount)
     {
         var updatedPump = await _waterPumpLogic.UpdateCurrentWaterLevelAsync(id, addedWaterAmount);
         if (updatedPump == null)
@@ -82,7 +82,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/threshold")]
-    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync([FromRoute] int id, int newThresholdValue)
+    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(int id, [FromBody] int newThresholdValue)
     {
         var updatedPump = await _waterPumpLogic.UpdateThresholdValueAsync(id, newThresholdValue);
         if (updatedPump == null)

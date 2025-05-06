@@ -5,6 +5,7 @@ namespace LogicInterfaces;
 
 public interface IPlantInterface
 {
+    Task<List<Plant>> GetPlantsAsync();
     Task<Plant> GetPlantByIdAsync(int id);
     Task<Plant> AddPlantAsync(PlantDTO plant);
 
