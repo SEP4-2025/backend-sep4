@@ -7,7 +7,7 @@ public class PictureDTO
     public IFormFile File { get; set; }
     public string Note { get; set; }
     public int PlantId { get; set; }
-    
+
     public bool IsEmpty()
     {
         return File == null || File.Length == 0 || PlantId == 0;

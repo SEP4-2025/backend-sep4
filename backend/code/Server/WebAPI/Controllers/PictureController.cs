@@ -32,7 +32,7 @@ public class PictureController : ControllerBase
         await _pictureInterface.UpdateNote(id, note);
         return Ok(picture);
     }
-    
+
     [HttpPost("UploadPicture")]
     public async Task<ActionResult<Picture>> AddPicture([FromForm] PictureDTO pictureDto)
     {

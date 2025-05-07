@@ -35,7 +35,7 @@ public class PictureLogic : IPictureInterface
         await _context.SaveChangesAsync();
         return picture;
     }
-    
+
     public async Task<Picture> AddPictureAsync(PictureDTO pictureDto)
     {
         if (pictureDto.IsEmpty())
