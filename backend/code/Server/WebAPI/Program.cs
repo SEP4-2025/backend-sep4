@@ -1,5 +1,6 @@
 using System.Text;
 using Database;
+using DotNetEnv;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
@@ -36,7 +37,37 @@ builder.Services.AddCors(options =>
     );
 });
 //Add Google Cloud Storage credentials
-var keyPath = Path.Combine(Directory.GetCurrentDirectory(), "gcs-key.json");
+var basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\"));
+var envPath = Path.Combine(basePath, ".env");
+
+
+Console.WriteLine("Current basePath: " + basePath);
+Console.WriteLine("Looking for .env at: " + envPath);
+
+
+Env.Load(envPath);
+
+
+var b64 = Environment.GetEnvironmentVariable("GCS_KEY_JSON");
+if (string.IsNullOrWhiteSpace(b64))
+{
+    Console.WriteLine("GCS_KEY_JSON missing or empty");
+    return;
+}
+else
+{
+    Console.WriteLine("GCS_KEY_JSON loaded with length: " + b64.Length);
+}
+
+var appRoot = Directory.GetCurrentDirectory();
+var keyPath = Path.Combine(appRoot, "gcs-key.json");
+
+File.WriteAllBytes(keyPath, Convert.FromBase64String(b64));
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
+
+Console.WriteLine("Key written to: " + keyPath);
+
+
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 
 builder.Services.AddDbContext<AppDbContext>(options =>

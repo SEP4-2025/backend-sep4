@@ -11,4 +11,12 @@
       <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.3.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="gcs-key.json">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
