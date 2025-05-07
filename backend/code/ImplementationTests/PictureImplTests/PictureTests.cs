@@ -45,25 +45,6 @@ public class PictureTests
     }
 
     [Test]
-    public async Task AddPictureAsync_Success_AddsPictureCorrectly()
-    {
-        var picture = new PictureDTO
-        {
-            Url = "http://new-image.com/test.jpg",
-            Note = "New test picture",
-            PlantId = 3
-        };
-
-        var result = await _pictureLogic.AddPictureAsync(picture);
-
-        Assert.IsNotNull(result);
-        Assert.That(result.Id, Is.GreaterThan(0));
-        Assert.That(result.Url, Is.EqualTo(picture.Url));
-        Assert.That(result.Note, Is.EqualTo(picture.Note));
-        Assert.That(result.PlantId, Is.EqualTo(picture.PlantId));
-    }
-
-    [Test]
     public async Task UpdateNote_Success_UpdatesNoteCorrectly()
     {
         var testPicture = await PictureSeeder.SeedPictureAsync();

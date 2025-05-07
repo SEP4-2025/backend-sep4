@@ -25,20 +25,6 @@ public class PictureLogic : IPictureInterface
         return await _context.Pictures.Where(p => p.PlantId == plantId).ToListAsync();
     }
 
-    public async Task<Picture> AddPictureAsync(PictureDTO picture)
-    {
-        var newPicture = new Picture()
-        {
-            Url = picture.Url,
-            Note = picture.Note,
-            TimeStamp = DateTime.UtcNow,
-            PlantId = picture.PlantId
-        };
-        _context.Pictures.Add(newPicture);
-        await _context.SaveChangesAsync();
-        return newPicture;
-    }
-
     public async Task<Picture> UpdateNote(int id, string note)
     {
         var picture = await _context.Pictures.FirstOrDefaultAsync(p => p.Id == id);

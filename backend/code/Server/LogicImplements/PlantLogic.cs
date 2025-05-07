@@ -39,6 +39,11 @@ public class PlantLogic : IPlantInterface
         return newPlant;
     }
 
+    public Task<Plant> UploadPlantPicture(int id, Picture file)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Plant> UpdatePlantNameAsync(int id, string plantName)
     {
         var existingPlant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);

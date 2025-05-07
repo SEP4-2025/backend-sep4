@@ -1,5 +1,6 @@
 using DTOs;
 using Entities;
+using Google.Cloud.Storage.V1;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,6 +49,43 @@ public class PlantController : ControllerBase
         }
         var addedPlant = await _plantInterface.AddPlantAsync(plant);
         return Ok(addedPlant);
+    }
+    
+    [HttpPost("{id}/UploadPicture")]
+    public async Task<ActionResult<Plant>> UploadPicture(int id, [FromForm] IFormFile image, [FromForm] string? note)
+    {
+        var plant = await _plantInterface.GetPlantByIdAsync(id);
+        if (plant == null) return NotFound($"No plant found with id {id}");
+    
+        if (image == null || image.Length == 0)
+            return BadRequest("No image file provided.");
+    
+        // Upload to Google Cloud bucket (your existing logic)
+        var storage = await StorageClient.CreateAsync();
+        var bucketName = "plant-picture-upload";
+        var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+        using var stream = image.OpenReadStream();
+    
+        await storage.UploadObjectAsync(bucketName, fileName, image.ContentType, stream, new UploadObjectOptions
+        {
+            PredefinedAcl = PredefinedObjectAcl.PublicRead
+        });
+
+        var url = $"https://storage.googleapis.com/{bucketName}/{fileName}";
+    
+        var picture = new Picture
+        {
+            Url = url,
+            Note = note,
+            TimeStamp = DateTime.UtcNow,
+            PlantId = id
+        };
+
+        await _plantInterface.UploadPlantPicture(id, picture);
+
+        var updatedPlant = await _plantInterface.GetPlantByIdAsync(id);
+        return Ok(updatedPlant);
+
     }
 
     [HttpPut("{id}")]
