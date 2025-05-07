@@ -1,13 +1,15 @@
-﻿namespace DTOs;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace DTOs;
 
 public class PictureDTO
 {
-    public string? Url { get; set; }
-    public string? Note { get; set; }
+    public IFormFile File { get; set; }
+    public string Note { get; set; }
     public int PlantId { get; set; }
-
+    
     public bool IsEmpty()
     {
-        return string.IsNullOrEmpty(Url) || string.IsNullOrEmpty(Note) || PlantId == 0;
+        return File == null || File.Length == 0 || PlantId == 0;
     }
 }

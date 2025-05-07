@@ -1,6 +1,7 @@
 using Database;
 using DTOs;
 using Entities;
+using GoogleCloud;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,6 +32,28 @@ public class PictureLogic : IPictureInterface
         if (picture == null) throw new Exception($"Sensor with ID {picture.Id} not found.");
         picture.Note = note;
 
+        await _context.SaveChangesAsync();
+        return picture;
+    }
+    
+    public async Task<Picture> AddPictureAsync(PictureDTO pictureDto)
+    {
+        if (pictureDto.IsEmpty())
+            throw new Exception("Picture data is invalid.");
+
+        var uploader = new GcsUploader();
+        var fileName = Guid.NewGuid().ToString();
+        var url = await uploader.UploadImageAsync(pictureDto.File, fileName);
+
+        var picture = new Picture
+        {
+            Url = url,
+            Note = pictureDto.Note,
+            PlantId = pictureDto.PlantId,
+            TimeStamp = DateTime.UtcNow
+        };
+
+        await _context.Pictures.AddAsync(picture);
         await _context.SaveChangesAsync();
         return picture;
     }

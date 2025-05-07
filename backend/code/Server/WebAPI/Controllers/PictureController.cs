@@ -24,13 +24,21 @@ public class PictureController : ControllerBase
         return Ok(pictures);
     }
 
-    [HttpPut]
+    [HttpPut("UpdatePictureNote/{id}")]
     public async Task<ActionResult<Picture>> UpdatePictureNote(int id, string note)
     {
         var picture = _pictureInterface.GetPictureByPlantIdAsync(id);
         if (picture == null) return NotFound($"Picture with id {id} not found");
         await _pictureInterface.UpdateNote(id, note);
         return Ok(picture);
+    }
+    
+    [HttpPost("UploadPicture")]
+    public async Task<ActionResult<Picture>> AddPicture([FromForm] PictureDTO pictureDto)
+    {
+        if (pictureDto.IsEmpty()) return BadRequest("Picture data is invalid");
+        var picture = await _pictureInterface.AddPictureAsync(pictureDto);
+        return CreatedAtAction(nameof(GetPicturesByPlantId), new { plantId = picture.PlantId }, picture);
     }
 
     [HttpDelete("{Id}")]

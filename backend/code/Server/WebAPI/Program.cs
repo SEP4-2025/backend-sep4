@@ -35,6 +35,9 @@ builder.Services.AddCors(options =>
         }
     );
 });
+//Add Google Cloud Storage credentials
+var keyPath = Path.Combine(Directory.GetCurrentDirectory(), "gcs-key.json");
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))

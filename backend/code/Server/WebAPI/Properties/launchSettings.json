@@ -36,6 +36,16 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "ServerWebAPI": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\MarioRiderProjects\\backend-sep4\\backend\\code\\ServerWebAPI\\gcs-key.json"
+      }
     }
   }
+
+  
+   
+  
 }
