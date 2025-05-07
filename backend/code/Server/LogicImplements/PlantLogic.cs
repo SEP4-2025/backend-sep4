@@ -17,7 +17,20 @@ public class PlantLogic : IPlantInterface
 
     public async Task<List<Plant>> GetPlantsAsync()
     {
-        return await _context.Plants.ToListAsync();
+        //add include for pictures
+        var plants = await _context.Plants.Include(p => p.Pictures).ToListAsync();
+        if (plants == null || !plants.Any())
+        {
+            return new List<Plant>();
+        }
+
+        foreach (var plant in plants)
+        {
+            var pictures = await _context.Pictures.Where(p => p.PlantId == plant.Id).ToListAsync();
+            plant.Pictures = pictures;
+        }
+        return plants;
+
     }
     public async Task<Plant?> GetPlantByIdAsync(int id)
     {
@@ -37,6 +50,11 @@ public class PlantLogic : IPlantInterface
         await _context.Plants.AddAsync(newPlant);
         await _context.SaveChangesAsync();
         return newPlant;
+    }
+
+    public Task<Plant> UploadPlantPicture(int id, Picture file)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<Plant> UpdatePlantNameAsync(int id, string plantName)

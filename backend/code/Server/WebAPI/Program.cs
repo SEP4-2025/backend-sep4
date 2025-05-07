@@ -1,5 +1,6 @@
 using System.Text;
 using Database;
+using DotNetEnv;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,12 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Plant API", Version = "v1" });
+    c.OperationFilter<FileUploadOperationFilter>();
+});
+
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -29,6 +36,39 @@ builder.Services.AddCors(options =>
         }
     );
 });
+//Add Google Cloud Storage credentials
+var basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\"));
+var envPath = Path.Combine(basePath, ".env");
+
+
+Console.WriteLine("Current basePath: " + basePath);
+Console.WriteLine("Looking for .env at: " + envPath);
+
+
+Env.Load(envPath);
+
+
+var b64 = Environment.GetEnvironmentVariable("GCS_KEY_JSON");
+if (string.IsNullOrWhiteSpace(b64))
+{
+    Console.WriteLine("GCS_KEY_JSON missing or empty");
+    return;
+}
+else
+{
+    Console.WriteLine("GCS_KEY_JSON loaded with length: " + b64.Length);
+}
+
+var appRoot = Directory.GetCurrentDirectory();
+var keyPath = Path.Combine(appRoot, "gcs-key.json");
+
+File.WriteAllBytes(keyPath, Convert.FromBase64String(b64));
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
+
+Console.WriteLine("Key written to: " + keyPath);
+
+
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -114,4 +154,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.Run();
+

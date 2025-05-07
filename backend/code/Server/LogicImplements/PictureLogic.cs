@@ -1,6 +1,7 @@
 using Database;
 using DTOs;
 using Entities;
+using GoogleCloud;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,26 +26,34 @@ public class PictureLogic : IPictureInterface
         return await _context.Pictures.Where(p => p.PlantId == plantId).ToListAsync();
     }
 
-    public async Task<Picture> AddPictureAsync(PictureDTO picture)
-    {
-        var newPicture = new Picture()
-        {
-            Url = picture.Url,
-            Note = picture.Note,
-            TimeStamp = DateTime.UtcNow,
-            PlantId = picture.PlantId
-        };
-        _context.Pictures.Add(newPicture);
-        await _context.SaveChangesAsync();
-        return newPicture;
-    }
-
     public async Task<Picture> UpdateNote(int id, string note)
     {
         var picture = await _context.Pictures.FirstOrDefaultAsync(p => p.Id == id);
         if (picture == null) throw new Exception($"Sensor with ID {picture.Id} not found.");
         picture.Note = note;
 
+        await _context.SaveChangesAsync();
+        return picture;
+    }
+
+    public async Task<Picture> AddPictureAsync(PictureDTO pictureDto)
+    {
+        if (pictureDto.IsEmpty())
+            throw new Exception("Picture data is invalid.");
+
+        var uploader = new GcsUploader();
+        var fileName = Guid.NewGuid().ToString();
+        var url = await uploader.UploadImageAsync(pictureDto.File, fileName);
+
+        var picture = new Picture
+        {
+            Url = url,
+            Note = pictureDto.Note,
+            PlantId = pictureDto.PlantId,
+            TimeStamp = DateTime.UtcNow
+        };
+
+        await _context.Pictures.AddAsync(picture);
         await _context.SaveChangesAsync();
         return picture;
     }
