@@ -83,7 +83,7 @@ namespace APITests
 
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
         }
-        
+
 
         [Test]
         public async Task DeletePicture_ReturnsNoContent_WhenPictureExists()

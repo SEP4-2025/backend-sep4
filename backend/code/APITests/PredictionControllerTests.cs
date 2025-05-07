@@ -13,8 +13,10 @@ namespace APITests
         private Mock<IPredictionInterface> _mockPredictionLogic;
         private PredictionController _controller;
         private readonly Prediction _testPrediction = new() { Id = 1, Date = DateTime.Today, SensorReadingId = 1 };
-        private readonly PredictionDTO _testPredictionDto = new() { 
-            SensorReadingId = 1 };
+        private readonly PredictionDTO _testPredictionDto = new()
+        {
+            SensorReadingId = 1
+        };
 
         [SetUp]
         public void Setup()

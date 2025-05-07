@@ -93,7 +93,7 @@ namespace APITests
             Assert.That(notFoundResult.StatusCode, Is.EqualTo(404));
             Assert.That(notFoundResult.Value, Is.EqualTo("Sensor with ID 99 not found."));
         }
-        
+
         [Test]
         public async Task AddSensor_ReturnsBadRequest_WhenDtoIsEmpty()
         {
@@ -140,7 +140,7 @@ namespace APITests
         {
             // Create a concrete class that extends UpdateSensorDTO and overrides IsEmpty
             var emptyDtoMock = new EmptyUpdateSensorDTO();
-            
+
             // Also need to setup the update to handle the logical issue in the controller
             _mockSensorLogic.Setup(x => x.UpdateSensorAsync(1, emptyDtoMock))
                 .ReturnsAsync(new Sensor { Id = 1, Type = "Updated" });
@@ -185,13 +185,13 @@ namespace APITests
             // Verify DeleteSensorAsync was not called
             _mockSensorLogic.Verify(x => x.DeleteSensorAsync(It.IsAny<int>()), Times.Never);
         }
-        
+
         // Helper test classes to avoid Moq limitations with non-virtual methods
         private class EmptyAddSensorDTO : AddSensorDTO
         {
             public new bool IsEmpty() => true;
         }
-        
+
         private class EmptyUpdateSensorDTO : UpdateSensorDTO
         {
             public new bool IsEmpty() => true;
