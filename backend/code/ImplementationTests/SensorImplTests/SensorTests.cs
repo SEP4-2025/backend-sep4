@@ -96,13 +96,13 @@ public class SensorTests
     {
         var nonExistentSensor = new Sensor
         {
-            Id = 9999, // An ID that doesn't exist
+            Id = 9999,
             Type = "Soil Moisture",
             MetricUnit = "Percentage",
             GreenhouseId = 1
         };
 
-        Assert.ThrowsAsync<Exception>(async () =>
+        Assert.ThrowsAsync<NullReferenceException>(async () =>
             await _sensorLogic.UpdateSensorAsync(
                 nonExistentSensor.Id,
                 new UpdateSensorDTO

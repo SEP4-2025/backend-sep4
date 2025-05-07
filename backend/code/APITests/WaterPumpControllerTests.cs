@@ -1,0 +1,246 @@
+﻿using DTOs;
+using Entities;
+using LogicInterfaces;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using NUnit.Framework;
+using WebAPI.Controllers;
+
+namespace APITests
+{
+    [TestFixture]
+    public class WaterPumpControllerTests
+    {
+        private Mock<IWaterPumpInterface> _mockWaterPumpLogic;
+        private WaterPumpController _controller;
+        private WaterPump _testPump;
+        private WaterPumpDTO _testPumpDto;
+
+        [SetUp]
+        public void Setup()
+        {
+            _mockWaterPumpLogic = new Mock<IWaterPumpInterface>();
+            _controller = new WaterPumpController(_mockWaterPumpLogic.Object);
+            _testPump = new WaterPump
+            {
+                Id = 1,
+                ThresholdValue = 200,
+            };
+            _testPumpDto = new WaterPumpDTO
+            {
+                CurrentWaterLevel = 500,
+                ThresholdValue = 200,
+                AutoWatering = true
+            };
+        }
+
+        [Test]
+        public async Task GetWaterPumpByIdAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.GetWaterPumpByIdAsync(1);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
+        }
+
+        [Test]
+        public async Task GetWaterPumpByIdAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.GetWaterPumpByIdAsync(1);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task GetAllWaterPumpsAsync_ReturnsOk_WithAllPumps()
+        {
+            // Arrange
+            var pumps = new List<WaterPump> { _testPump };
+            _mockWaterPumpLogic.Setup(x => x.GetAllWaterPumpsAsync()).ReturnsAsync(pumps);
+
+            // Act
+            var result = await _controller.GetAllWaterPumpsAsync();
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(pumps));
+        }
+
+        [Test]
+        public async Task AddWaterPumpAsync_ReturnsBadRequest_WhenDtoIsNull()
+        {
+            // Act
+            var result = await _controller.AddWaterPumpAsync(null);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public async Task AddWaterPumpAsync_ReturnsOk_WhenDtoIsValid()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.AddWaterPumpAsync(_testPumpDto)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.AddWaterPumpAsync(_testPumpDto);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
+        }
+
+        [Test]
+        public async Task UpdateAutoWateringStatusAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateAutoWateringStatusAsync(1, true)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.UpdateAutoWateringStatusAsync(1, true);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
+        }
+
+        [Test]
+        public async Task UpdateAutoWateringStatusAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateAutoWateringStatusAsync(1, true)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.UpdateAutoWateringStatusAsync(1, true);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task TriggerManualWateringAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
+            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1, 100)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.TriggerManualWateringAsync(1, 100);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
+        }
+
+        [Test]
+        public async Task TriggerManualWateringAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.TriggerManualWateringAsync(1, 100);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task UpdateCurrentWaterLevelAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateCurrentWaterLevelAsync(1, 100)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.UpdateCurrentWaterLevelAsync(1, 100);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
+        }
+
+        [Test]
+        public async Task UpdateCurrentWaterLevelAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateCurrentWaterLevelAsync(1, 100)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.UpdateCurrentWaterLevelAsync(1, 100);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task UpdateThresholdValueAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateThresholdValueAsync(1, 150)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.UpdateThresholdValueAsync(1, 150);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
+        }
+
+        [Test]
+        public async Task UpdateThresholdValueAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateThresholdValueAsync(1, 150)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.UpdateThresholdValueAsync(1, 150);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task DeleteWaterPumpAsync_ReturnsNoContent_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
+            _mockWaterPumpLogic.Setup(x => x.DeleteWaterPumpAsync(1)).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.DeleteWaterPumpAsync(1);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
+        }
+
+        [Test]
+        public async Task DeleteWaterPumpAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.DeleteWaterPumpAsync(1);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+    }
+}
