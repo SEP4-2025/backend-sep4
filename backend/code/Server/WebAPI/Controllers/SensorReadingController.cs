@@ -1,5 +1,6 @@
 using DTOs;
 using Entities;
+using LogicImplements;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -88,5 +89,26 @@ public class SensorReadingController : ControllerBase
 
         await sensorReading.DeleteSensorReadingAsync(id);
         return Ok("Sensor reading deleted successfully.");
+    }
+
+    [HttpGet("average/{greenhouseId}/last24hours")]
+    public async Task<ActionResult<List<SensorReadingDataDTO>>> GetAverageSensorReadings(int greenhouseId)
+    {
+        var result = await sensorReading.GetAverageSensorReadingsFromLast24Hours(greenhouseId);
+        return Ok(result);
+    }
+
+    [HttpGet("average/{greenhouseId}/last7days")]
+    public async Task<ActionResult<List<SensorReadingDataDTO>>> GetAverageReadingFromLast7Days(int greenhouseId)
+    {
+        var average = await sensorReading.GetAverageReadingFromLast7Days(greenhouseId);
+        return Ok(average);
+    }
+
+    [HttpGet("average/{greenhouseId}/last30days")]
+    public async Task<ActionResult<List<SensorReadingDataDTO>>> GetAverageReadingFromLast30Days(int greenhouseId)
+    {
+        var average = await sensorReading.GetAverageReadingFromLast30Days(greenhouseId);
+        return Ok(average);
     }
 }

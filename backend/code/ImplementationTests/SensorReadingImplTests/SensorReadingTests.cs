@@ -3,7 +3,6 @@ using DTOs;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace ImplementationTests.SensorReadingImplTests;
 
