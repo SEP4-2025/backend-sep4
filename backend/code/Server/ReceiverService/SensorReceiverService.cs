@@ -4,6 +4,7 @@ using DTOs;
 using LogicImplements;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MQTTnet;
+using MQTTnet.Internal;
 
 namespace ReceiverService;
 
@@ -115,24 +116,8 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
             await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
 
-            // Notification logic v1
-            var notificationPayload = new NotificationDTO
-            {
-                SensorId = sensorReading.SensorId,
-                Message = "sensor read: " + sensorReading.Value.ToString(),
-                TimeStamp = sensorReading.TimeStamp,
-            };
-            var httpClient = _httpClientFactory.CreateClient();
-            var json = JsonSerializer.Serialize(notificationPayload);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            try
-            {
-                var response = await httpClient.PostAsync(_webApiEndpoint, content);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send notification");
-            }
+            // Notification logic v2
+            await HandlePostNotifications(sensorReading);
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
@@ -193,5 +178,47 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         }
 
         return Task.FromResult(HealthCheckResult.Unhealthy("MQTT client is not connected"));
+    }
+
+    public async Task HandlePostNotifications(SensorReadingDTO sensorReading)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sensorLogic = new SensorLogic(dbContext);
+
+        var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
+
+        if (
+            sensorReading.Value > sensor.ThresholdValue + 3
+            || sensorReading.Value < sensor.ThresholdValue - 3
+        )
+        {
+            var notificationPayload = new NotificationDTO
+            {
+                SensorId = sensorReading.SensorId,
+                Message =
+                    "Warning: "
+                    + sensorReading.Value.ToString()
+                    + sensor.MetricUnit
+                    + " is deviation from the set norm",
+                TimeStamp = sensorReading.TimeStamp,
+                Type = sensor.Type,
+            };
+            var httpClient = _httpClientFactory.CreateClient();
+            var json = JsonSerializer.Serialize(notificationPayload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            try
+            {
+                var response = await httpClient.PostAsync(_webApiEndpoint, content);
+                _logger.LogInformation(
+                    "Notification {notificationPayload} sent to Web API: {StatusCode}",
+                    response.StatusCode
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send notification");
+            }
+        }
     }
 }
