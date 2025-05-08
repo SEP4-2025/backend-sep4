@@ -22,6 +22,12 @@ The GrowMate backend provides the following RESTful API endpoints:
 | POST   | `/auth/login`           | Login with username and password |
 | PATCH  | `/auth/change-password` | Change user password             |
 
+### Notification
+
+| Method | Endpoint                | Description                      |
+| ------ | ----------------------- | -------------------------------- |
+| POST   | `/notification/trigger` | Send notification to frontend    |
+
 ### Gardener
 
 | Method | Endpoint         | Description           |
