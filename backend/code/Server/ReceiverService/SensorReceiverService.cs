@@ -257,7 +257,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         {
             var response = await httpClient.PostAsync(_webApiEndpoint, content);
             _logger.LogInformation(
-                "Notification {notificationPayload} sent to Web API: {StatusCode}",
+                "Notification sent to Web API: {StatusCode}",
                 response.StatusCode
             );
         }
