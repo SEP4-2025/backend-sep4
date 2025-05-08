@@ -51,7 +51,6 @@ public class SensorReadingLogic : ISensorReadingInterface
         return newSensorReading;
     }
 
-
     public async Task DeleteSensorReadingAsync(int id)
     {
         var sensorReading = await _context.SensorReadings.FindAsync(id);
@@ -62,18 +61,19 @@ public class SensorReadingLogic : ISensorReadingInterface
         }
     }
 
-
     public async Task<List<SensorReading>> GetSensorReadingsAsync()
     {
         return await _context.SensorReadings.ToListAsync();
     }
 
-    public async Task<List<SensorReadingDataDTO>> GetAverageSensorReadingsFromLast24Hours(int greenhouseId)
+    public async Task<List<SensorReadingDataDTO>> GetAverageSensorReadingsFromLast24Hours(
+        int greenhouseId
+    )
     {
         var timeLimit = DateTime.UtcNow.AddHours(-24);
 
-        var result = await _context.SensorReadings
-            .Where(sr => sr.TimeStamp >= timeLimit)
+        var result = await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= timeLimit)
             .Join(
                 _context.Sensors.Where(s => s.GreenhouseId == greenhouseId),
                 sr => sr.SensorId,
@@ -81,7 +81,12 @@ public class SensorReadingLogic : ISensorReadingInterface
                 (sr, s) => new { SensorReading = sr, Sensor = s }
             )
             .GroupBy(
-                joined => new { joined.Sensor.Id, joined.Sensor.Type, joined.Sensor.MetricUnit },
+                joined => new
+                {
+                    joined.Sensor.Id,
+                    joined.Sensor.Type,
+                    joined.Sensor.MetricUnit,
+                },
                 joined => joined.SensorReading.Value
             )
             .Select(g => new SensorReadingDataDTO
@@ -100,8 +105,8 @@ public class SensorReadingLogic : ISensorReadingInterface
     {
         var timeLimit = DateTime.UtcNow.AddDays(-7);
 
-        var result = await _context.SensorReadings
-            .Where(sr => sr.TimeStamp >= timeLimit)
+        var result = await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= timeLimit)
             .Join(
                 _context.Sensors.Where(s => s.GreenhouseId == greenhouseId),
                 sr => sr.SensorId,
@@ -109,7 +114,12 @@ public class SensorReadingLogic : ISensorReadingInterface
                 (sr, s) => new { SensorReading = sr, Sensor = s }
             )
             .GroupBy(
-                joined => new { joined.Sensor.Id, joined.Sensor.Type, joined.Sensor.MetricUnit },
+                joined => new
+                {
+                    joined.Sensor.Id,
+                    joined.Sensor.Type,
+                    joined.Sensor.MetricUnit,
+                },
                 joined => joined.SensorReading.Value
             )
             .Select(g => new SensorReadingDataDTO
@@ -128,8 +138,8 @@ public class SensorReadingLogic : ISensorReadingInterface
     {
         var timeLimit = DateTime.UtcNow.AddDays(-30);
 
-        var result = await _context.SensorReadings
-            .Where(sr => sr.TimeStamp >= timeLimit)
+        var result = await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= timeLimit)
             .Join(
                 _context.Sensors.Where(s => s.GreenhouseId == greenhouseId),
                 sr => sr.SensorId,
@@ -137,7 +147,12 @@ public class SensorReadingLogic : ISensorReadingInterface
                 (sr, s) => new { SensorReading = sr, Sensor = s }
             )
             .GroupBy(
-                joined => new { joined.Sensor.Id, joined.Sensor.Type, joined.Sensor.MetricUnit },
+                joined => new
+                {
+                    joined.Sensor.Id,
+                    joined.Sensor.Type,
+                    joined.Sensor.MetricUnit,
+                },
                 joined => joined.SensorReading.Value
             )
             .Select(g => new SensorReadingDataDTO

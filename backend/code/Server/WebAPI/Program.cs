@@ -17,15 +17,20 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "AllowAllOrigins",
-        builder =>
+        policyBuilder =>
         {
-            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            policyBuilder
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
         }
     );
 });
@@ -43,6 +48,7 @@ builder.Services.AddScoped<IPredictionInterface, PredictionLogic>();
 builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
+builder.Services.AddSingleton<INotificationService, NotificationService>();
 
 builder
     .Services.AddAuthentication(options =>
@@ -113,5 +119,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

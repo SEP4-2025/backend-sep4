@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Database;
 using DTOs;
 using LogicImplements;
@@ -11,6 +12,8 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private readonly IMqttClient _mqttClient;
     private readonly MqttClientFactory _mqttFactory = new();
     private readonly List<string> _topics;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string _webApiEndpoint;
     private readonly string _server;
     private readonly int _port;
     private readonly ILogger<SensorReceiverService> _logger;
@@ -19,12 +22,15 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
     public SensorReceiverService(
         ILogger<SensorReceiverService> logger,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration
     )
     {
         _mqttClient = _mqttFactory.CreateMqttClient();
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _httpClientFactory = httpClientFactory;
 
         _server = "35.204.67.247";
         _port = 1883;
@@ -38,6 +44,8 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             "humidity/reading",
             "soil/reading",
         };
+
+        _webApiEndpoint = configuration["WebApiEndpoint"]; //Use CloudWebAPIEnpoint from appsettings.json when testing deployment
 
         _logger.LogInformation(
             "ReceiverService configured with MQTT broker at {Server}:{Port}",
@@ -106,6 +114,25 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             var sensorReadingLogic = new SensorReadingLogic(dbContext);
 
             await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
+
+            // Notification logic v1
+            var notificationPayload = new NotificationDTO
+            {
+                SensorId = sensorReading.SensorId,
+                Message = "sensor read: " + sensorReading.Value.ToString(),
+                TimeStamp = sensorReading.TimeStamp,
+            };
+            var httpClient = _httpClientFactory.CreateClient();
+            var json = JsonSerializer.Serialize(notificationPayload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            try
+            {
+                var response = await httpClient.PostAsync(_webApiEndpoint, content);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send notification");
+            }
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
