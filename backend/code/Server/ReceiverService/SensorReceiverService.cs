@@ -4,7 +4,6 @@ using DTOs;
 using LogicImplements;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MQTTnet;
-using MQTTnet.Internal;
 
 namespace ReceiverService;
 
@@ -46,7 +45,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             "soil/reading",
         };
 
-        _webApiEndpoint = configuration["WebApiEndpoint"]; //Use CloudWebAPIEnpoint from appsettings.json when testing deployment
+        // Use CloudWebAPIEnpoint from appsettings.json when testing deployment
+        // Use WebApiEndpoint from appsettings.json when testing in local
+        _webApiEndpoint = configuration["CloudWebAPIEnpoint"];
 
         _logger.LogInformation(
             "ReceiverService configured with MQTT broker at {Server}:{Port}",
@@ -188,37 +189,81 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
         var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
 
-        if (
-            sensorReading.Value > sensor.ThresholdValue + 3
-            || sensorReading.Value < sensor.ThresholdValue - 3
-        )
+        switch (sensor.Type)
         {
-            var notificationPayload = new NotificationDTO
-            {
-                SensorId = sensorReading.SensorId,
-                Message =
-                    "Warning: "
-                    + sensorReading.Value.ToString()
-                    + sensor.MetricUnit
-                    + " is deviation from the set norm",
-                TimeStamp = sensorReading.TimeStamp,
-                Type = sensor.Type,
-            };
-            var httpClient = _httpClientFactory.CreateClient();
-            var json = JsonSerializer.Serialize(notificationPayload);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            try
-            {
-                var response = await httpClient.PostAsync(_webApiEndpoint, content);
-                _logger.LogInformation(
-                    "Notification {notificationPayload} sent to Web API: {StatusCode}",
-                    response.StatusCode
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send notification");
-            }
+            case "Light":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 150
+                    || sensorReading.Value < sensor.ThresholdValue - 150
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+                break;
+            case "Temperature":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 4
+                    || sensorReading.Value < sensor.ThresholdValue - 4
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+
+                break;
+            case "Humidity":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 7
+                    || sensorReading.Value < sensor.ThresholdValue - 7
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+                break;
+            case "Soil Moisture":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 20
+                    || sensorReading.Value < sensor.ThresholdValue - 20
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+                break;
+        }
+    }
+
+    public async Task createNotification(SensorReadingDTO sensorReading)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sensorLogic = new SensorLogic(dbContext);
+
+        var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
+
+        var notificationPayload = new NotificationDTO
+        {
+            SensorId = sensorReading.SensorId,
+            Message =
+                "Warning: "
+                + sensorReading.Value.ToString()
+                + sensor.MetricUnit
+                + " is deviation from the set norm",
+            TimeStamp = sensorReading.TimeStamp,
+            Type = sensor.Type,
+        };
+        var httpClient = _httpClientFactory.CreateClient();
+        var json = JsonSerializer.Serialize(notificationPayload);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        try
+        {
+            var response = await httpClient.PostAsync(_webApiEndpoint, content);
+            _logger.LogInformation(
+                "Notification {notificationPayload} sent to Web API: {StatusCode}",
+                response.StatusCode
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send notification");
         }
     }
 }

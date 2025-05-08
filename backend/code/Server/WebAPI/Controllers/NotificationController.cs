@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+//Will turn on authorization later, after initial testing on cloud
 // [Authorize]
 [ApiController]
 [Route("[controller]")]
@@ -18,11 +19,6 @@ public class NotificationController : ControllerBase
         [FromBody] NotificationDTO notificationPayload
     )
     {
-        if (notificationPayload == null)
-        {
-            return BadRequest("Notification payload cannot be null.");
-        }
-
         try
         {
             await _notificationService.SendNotification(notificationPayload);

@@ -112,8 +112,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Type).HasColumnName("type");
             entity.Property(e => e.Message).HasColumnName("message");
             entity.Property(e => e.TimeStamp).HasColumnName("date");
-            entity.Property(e => e.IsRead).HasColumnName("isread");
-            entity.Property(e => e.SensorId).HasColumnName("sensorreadingid");
+            entity.Property(e => e.IsRead).HasColumnName("isread"); // This should be deleted, frontend will handle it
+            entity.Property(e => e.SensorId).HasColumnName("sensorreadingid"); // This should be sensorid column name
             entity.Property(e => e.WaterPumpId).HasColumnName("waterpumpid");
         });
         modelBuilder.Entity<NotificationPreferences>(entity =>
