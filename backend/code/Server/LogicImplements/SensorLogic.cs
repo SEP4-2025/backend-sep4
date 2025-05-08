@@ -45,8 +45,10 @@ public class SensorLogic : ISensorInterface
     {
         var existingSensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
 
-        if (addSensor.Type is not null) existingSensor.Type = addSensor.Type;
-        if (addSensor.MetricUnit is not null) existingSensor.MetricUnit = addSensor.MetricUnit;
+        if (addSensor.Type is not null)
+            existingSensor.Type = addSensor.Type;
+        if (addSensor.MetricUnit is not null)
+            existingSensor.MetricUnit = addSensor.MetricUnit;
 
         await _context.SaveChangesAsync();
 
@@ -58,7 +60,6 @@ public class SensorLogic : ISensorInterface
         var sensorToDelete = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
         if (sensorToDelete != null)
         {
-
             _context.Sensors.Remove(sensorToDelete);
             await _context.SaveChangesAsync();
         }
