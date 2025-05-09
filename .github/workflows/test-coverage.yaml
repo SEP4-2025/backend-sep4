@@ -165,7 +165,6 @@ jobs:
           else
             git add README.md
             # Add [skip ci] to prevent this commit from re-triggering CI workflows
-            skip ci
             git commit -m "docs: Update test coverage badge [skip ci]"
             # Push changes to the head_ref (the source branch of the PR)
             git push origin HEAD:${{ github.head_ref }}
