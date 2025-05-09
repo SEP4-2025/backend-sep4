@@ -123,61 +123,63 @@ jobs:
           # Store the full Markdown for the badge
           echo "COVERAGE_BADGE_MARKDOWN=![Coverage]($BADGE_URL)" >> $GITHUB_ENV
 
+      # 9. Update README.md in workspace
       - name: Update README.md
         if: steps.coverage_badge.outputs.url
         run: |
           README_FILE="README.md"
-          # Define the placeholder text that will be replaced in your README.md
-          # IMPORTANT: Add this exact placeholder line to your README.md where you want the badge.
-          PLACEHOLDER="Coverage-badge-placeholder" 
+          # IMPORTANT: Ensure this exact placeholder is in your README.md on its own line for the FIRST run.
+          PLACEHOLDER="placeholder"
+          # Regex to find an existing coverage badge (from shields.io, with "Coverage" alt text)
+          EXISTING_BADGE_REGEX="^\!\[Coverage\]\(https://img\.shields\.io/badge/coverage-.*\)$"
           BADGE_MARKDOWN="${{ env.COVERAGE_BADGE_MARKDOWN }}"
+          TEMP_README="tmp_readme.md"
 
           if [ ! -f "$README_FILE" ]; then
             echo "$README_FILE not found! Cannot update badge."
-            exit 1
+            exit 1 # Fail the step if README doesn't exist
           fi
 
-          # Check if the placeholder exists in the README
+          # Try to replace the placeholder first
           if grep -qF "$PLACEHOLDER" "$README_FILE"; then
-            # Use awk for safer replacement of the placeholder line.
-            # This approach replaces the line containing the placeholder with the new badge.
+            echo "Placeholder found. Replacing with new badge."
+            # Use awk to replace the placeholder line
             awk -v placeholder_pattern="^${PLACEHOLDER}$" -v badge="$BADGE_MARKDOWN" '
-              BEGIN { replaced=0 }
-              $0 ~ placeholder_pattern {
-                print badge;
-                replaced=1;
-                next; # Skip printing the original placeholder line
-              }
+              $0 ~ placeholder_pattern { print badge; next }
               { print }
-              END {
-                if (replaced==0) {
-                  print "Warning: Placeholder pattern not matched exactly, badge not updated as expected." > "/dev/stderr";
-                  # Exit with 0 to not fail the job, but indicate an issue.
-                  exit 0;
-                }
-              }
-            ' "$README_FILE" > tmp_readme.md && mv tmp_readme.md "$README_FILE"
-            echo "README.md updated with new coverage badge."
+            ' "$README_FILE" > "$TEMP_README" && mv "$TEMP_README" "$README_FILE"
+          # If placeholder not found, try to replace an existing badge
+          elif grep -qE "$EXISTING_BADGE_REGEX" "$README_FILE"; then
+            echo "Existing badge found. Replacing with new badge."
+            # Use awk to replace the line matching the existing badge regex
+            awk -v badge_regex="$EXISTING_BADGE_REGEX" -v new_badge="$BADGE_MARKDOWN" '
+              $0 ~ badge_regex { print new_badge; next }
+              { print }
+            ' "$README_FILE" > "$TEMP_README" && mv "$TEMP_README" "$README_FILE"
           else
-            echo "Placeholder '$PLACEHOLDER' not found in $README_FILE. Badge not updated."
-            echo "Please add '$PLACEHOLDER' (exactly as written) to your README.md file on its own line."
-            # Not failing the job, but indicating the issue.
+            echo "Neither placeholder nor existing badge pattern found in $README_FILE."
+            echo "Please add '$PLACEHOLDER' to your README.md file on its own line."
+            # Or, if you want to append it if nothing is found:
+            # echo "$BADGE_MARKDOWN" >> "$README_FILE"
+            # echo "Badge appended to README.md as no placeholder or existing badge was found."
           fi
+          echo "README.md processed for badge update."
 
+      # 10. Commit and Push README changes if they exist
       - name: Commit and Push README changes
-        if: steps.coverage_badge.outputs.url
+        if: steps.coverage_badge.outputs.url # Only run if badge was generated
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-          # Check if README.md was actually modified by the previous step
+          # Check if README.md was actually modified
           if git diff --quiet README.md; then
-            echo "No changes to README.md to commit."
+            echo "No changes to README.md to commit. Badge was already up-to-date or placeholder/existing badge was not found/updated correctly."
           else
+            echo "README.md was modified. Committing changes..."
             git add README.md
-            # Add [skip ci] to prevent this commit from re-triggering CI workflows
+            # The '[skip ci]' in the commit message is a convention to prevent CI loops.
             git commit -m "docs: Update test coverage badge [skip ci]"
-            # Push changes to the head_ref (the source branch of the PR)
             git push origin HEAD:${{ github.head_ref }}
             echo "Pushed README.md changes to branch ${{ github.head_ref }}."
           fi
