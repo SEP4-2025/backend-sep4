@@ -43,27 +43,27 @@ jobs:
       - name: Locate Cobertura coverage file
         id: locate_coverage_file
         run: |
-          EXPECTED_COVERAGE_FILE="./coverage/coverage.cobertura.xml"
-          if [ -f "$EXPECTED_COVERAGE_FILE" ]; then
-            echo "Coverage file found at: $EXPECTED_COVERAGE_FILE"
-            echo "file_path=$EXPECTED_COVERAGE_FILE" >> $GITHUB_OUTPUT
+          # First check for the coverage file in the direct output location
+          if [ -f "./coverage/coverage.cobertura.xml" ]; then
+            echo "Coverage file found at ./coverage/coverage.cobertura.xml"
+            echo "file_path=./coverage/coverage.cobertura.xml" >> $GITHUB_OUTPUT
             echo "file_exists=true" >> $GITHUB_OUTPUT
           else
-            # Fallback: Search recursively if the explicitly named file isn't found
-            echo "Expected coverage file $EXPECTED_COVERAGE_FILE not found. Searching recursively..."
-            # Look for any file named coverage.cobertura.xml in subdirectories of ./coverage
-            COVERAGE_FILE_PATH=$(find ./coverage -type f -name "coverage.cobertura.xml" -print -quit)
+            # Fall back to searching in the coverage directory
+            # Use a broader search to find any cobertura XML files
+            COVERAGE_FILE_PATH=$(find ./coverage -type f -name "*.cobertura.xml" -o -name "coverage.cobertura.xml" -o -name "cobertura.xml" -print -quit)
             if [ -f "$COVERAGE_FILE_PATH" ]; then
-              echo "Fallback: Coverage file found at: $COVERAGE_FILE_PATH"
+              echo "Coverage file found at: $COVERAGE_FILE_PATH"
               echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
               echo "file_exists=true" >> $GITHUB_OUTPUT
             else
-              echo "Coverage file (coverage.cobertura.xml) not found in ./coverage directory or its subdirectories."
-              # Create a dummy file with 0% coverage
+              echo "Coverage file not found in ./coverage directory."
+              # Create a dummy file with 0% coverage to prevent downstream errors
+              # and ensure the badge shows 0% instead of failing.
               mkdir -p ./coverage/dummy
               echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
-              echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT
-              echo "file_exists=false" >> $GITHUB_OUTPUT
+              echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT # Path to dummy file
+              echo "file_exists=false" >> $GITHUB_OUTPUT # Indicate actual file wasn't found
             fi
           fi
 
@@ -128,40 +128,44 @@ jobs:
         if: steps.coverage_badge.outputs.url
         run: |
           README_FILE="README.md"
-          # IMPORTANT: Ensure this exact placeholder is in your README.md on its own line for the FIRST run.
-          PLACEHOLDER="placeholder"
-          # Regex to find an existing coverage badge (from shields.io, with "Coverage" alt text)
-          EXISTING_BADGE_REGEX="^\!\[Coverage\]\(https://img\.shields\.io/badge/coverage-.*\)$"
+          # Multiple placeholder options to check
+          PLACEHOLDERS=("placeholder" "Coverage-badge-placeholder" "![Coverage]")
           BADGE_MARKDOWN="${{ env.COVERAGE_BADGE_MARKDOWN }}"
           TEMP_README="tmp_readme.md"
+          BADGE_UPDATED=0
 
           if [ ! -f "$README_FILE" ]; then
             echo "$README_FILE not found! Cannot update badge."
             exit 1 # Fail the step if README doesn't exist
           fi
 
-          # Try to replace the placeholder first
-          if grep -qF "$PLACEHOLDER" "$README_FILE"; then
-            echo "Placeholder found. Replacing with new badge."
-            # Use awk to replace the placeholder line
-            awk -v placeholder_pattern="^${PLACEHOLDER}$" -v badge="$BADGE_MARKDOWN" '
-              $0 ~ placeholder_pattern { print badge; next }
-              { print }
-            ' "$README_FILE" > "$TEMP_README" && mv "$TEMP_README" "$README_FILE"
-          # If placeholder not found, try to replace an existing badge
-          elif grep -qE "$EXISTING_BADGE_REGEX" "$README_FILE"; then
-            echo "Existing badge found. Replacing with new badge."
-            # Use awk to replace the line matching the existing badge regex
-            awk -v badge_regex="$EXISTING_BADGE_REGEX" -v new_badge="$BADGE_MARKDOWN" '
-              $0 ~ badge_regex { print new_badge; next }
-              { print }
-            ' "$README_FILE" > "$TEMP_README" && mv "$TEMP_README" "$README_FILE"
+          # Check for existing coverage badge with a more flexible regex
+          # This will match any line containing ![Coverage] followed by any URL with "badge/coverage"
+          EXISTING_BADGE_FOUND=$(grep -l "!\[Coverage\].*badge/coverage" "$README_FILE" || echo "")
+          
+          if [ -n "$EXISTING_BADGE_FOUND" ]; then
+            echo "Existing coverage badge found. Replacing it with new badge."
+            # Use sed to replace the existing badge line with the new badge
+            sed -i -E 's|!\[Coverage\]\(https://img\.shields\.io/badge/coverage-[0-9.]+%25-[a-z]+\)|'"$BADGE_MARKDOWN"'|g' "$README_FILE"
+            BADGE_UPDATED=1
           else
-            echo "Neither placeholder nor existing badge pattern found in $README_FILE."
-            echo "Please add '$PLACEHOLDER' to your README.md file on its own line."
-            # Or, if you want to append it if nothing is found:
-            # echo "$BADGE_MARKDOWN" >> "$README_FILE"
-            # echo "Badge appended to README.md as no placeholder or existing badge was found."
+            # Try each placeholder in sequence
+            for PLACEHOLDER in "${PLACEHOLDERS[@]}"; do
+              if grep -q "$PLACEHOLDER" "$README_FILE"; then
+                echo "Found placeholder: $PLACEHOLDER. Replacing with coverage badge."
+                sed -i "s|$PLACEHOLDER|$BADGE_MARKDOWN|g" "$README_FILE"
+                BADGE_UPDATED=1
+                break
+              fi
+            done
+          fi
+
+          # If no placeholder or existing badge was found
+          if [ "$BADGE_UPDATED" -eq 0 ]; then
+            echo "No placeholder or existing badge found in $README_FILE."
+            # Insert badge at the top of the file (optional)
+            echo -e "$BADGE_MARKDOWN\n$(cat "$README_FILE")" > "$README_FILE"
+            echo "Badge inserted at the top of README.md."
           fi
           echo "README.md processed for badge update."
 
