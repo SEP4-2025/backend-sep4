@@ -1,4 +1,4 @@
-![Coverage](https://img.shields.io/badge/coverage-0.0%25-red)
+![Coverage](https://img.shields.io/badge/coverage-31.72%25-red)
 
 # GrowMate Backend
 
