@@ -32,41 +32,38 @@ jobs:
 
       - name: Run tests and collect coverage
         run: |
-          # Install coverlet.collector if not already included in project
-          dotnet add backend/code/ImplementationTests/ImplementationTests.csproj package coverlet.collector || true
-          dotnet add backend/code/APITests/APITests.csproj package coverlet.collector || true
-
           dotnet test backend/code/code.sln --configuration Release --no-build \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --logger "trx;LogFileName=testresults.trx" \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=cobertura \
-            /p:CoverletOutput=./coverage/
+            /p:CoverletOutput=./coverage/coverage.cobertura.xml
 
       - name: Locate Cobertura coverage file
         id: locate_coverage_file
         run: |
-          # First check for the coverage file in the direct output location
-          if [ -f "./coverage/coverage.cobertura.xml" ]; then
-            echo "Coverage file found at ./coverage/coverage.cobertura.xml"
-            echo "file_path=./coverage/coverage.cobertura.xml" >> $GITHUB_OUTPUT
+          EXPECTED_COVERAGE_FILE="./coverage/coverage.cobertura.xml"
+          if [ -f "$EXPECTED_COVERAGE_FILE" ]; then
+            echo "Coverage file found at: $EXPECTED_COVERAGE_FILE"
+            echo "file_path=$EXPECTED_COVERAGE_FILE" >> $GITHUB_OUTPUT
             echo "file_exists=true" >> $GITHUB_OUTPUT
           else
-            # Search recursively for coverage files in all subdirectories
-            COVERAGE_FILE_PATH=$(find ./coverage -type f -name "coverage.cobertura.xml" -o -name "*.cobertura.xml" -print -quit)
+            # Fallback: Search recursively if the explicitly named file isn't found
+            echo "Expected coverage file $EXPECTED_COVERAGE_FILE not found. Searching recursively..."
+            # Look for any file named coverage.cobertura.xml in subdirectories of ./coverage
+            COVERAGE_FILE_PATH=$(find ./coverage -type f -name "coverage.cobertura.xml" -print -quit)
             if [ -f "$COVERAGE_FILE_PATH" ]; then
-              echo "Coverage file found at: $COVERAGE_FILE_PATH"
+              echo "Fallback: Coverage file found at: $COVERAGE_FILE_PATH"
               echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
               echo "file_exists=true" >> $GITHUB_OUTPUT
             else
-              echo "Coverage file not found in ./coverage directory or subdirectories."
-              # Create a dummy file with 0% coverage to prevent downstream errors
-              # and ensure the badge shows 0% instead of failing.
+              echo "Coverage file (coverage.cobertura.xml) not found in ./coverage directory or its subdirectories."
+              # Create a dummy file with 0% coverage
               mkdir -p ./coverage/dummy
               echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
-              echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT # Path to dummy file
-              echo "file_exists=false" >> $GITHUB_OUTPUT # Indicate actual file wasn't found
+              echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT
+              echo "file_exists=false" >> $GITHUB_OUTPUT
             fi
           fi
 
