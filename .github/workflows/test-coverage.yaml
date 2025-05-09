@@ -25,7 +25,7 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore backend/code/code.sln
+        run: dotnet restore backend/code/code.sln -v diag
 
       - name: Build project
         run: dotnet build backend/code/code.sln --configuration Release --no-restore
