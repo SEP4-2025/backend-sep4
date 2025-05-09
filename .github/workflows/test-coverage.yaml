@@ -1,0 +1,173 @@
+name: Run tests and coverage
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  build-test-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.4"
+
+      - name: Restore dependencies
+        run: dotnet restore code.sln
+
+      - name: Build project
+        run: dotnet build code.sln --configuration Release --no-restore
+
+      - name: Run tests and collect coverage
+        run: |
+          dotnet test code.sln --configuration Release --no-build \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage \
+            --logger "trx;LogFileName=testresults.trx" \
+            -p:CoverletOutputFormat=cobertura
+
+      - name: Locate Cobertura coverage file
+        id: locate_coverage_file
+        run: |
+          COVERAGE_FILE_PATH=$(find ./coverage -name "cobertura.xml" -print -quit)
+          if [ -f "$COVERAGE_FILE_PATH" ]; then
+            echo "Coverage file found at: $COVERAGE_FILE_PATH"
+            echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
+            echo "file_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Coverage file (cobertura.xml) not found in ./coverage directory."
+            # Create a dummy file with 0% coverage to prevent downstream errors
+            # and ensure the badge shows 0% instead of failing.
+            mkdir -p ./coverage/dummy
+            echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
+            echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT # Path to dummy file
+            echo "file_exists=false" >> $GITHUB_OUTPUT # Indicate actual file wasn't found
+          fi
+
+      - name: Calculate coverage percentage
+        id: coverage_percentage
+        if: steps.locate_coverage_file.outputs.file_path
+        run: |
+          COVERAGE_FILE="${{ steps.locate_coverage_file.outputs.file_path }}"
+          echo "Parsing coverage data from: $COVERAGE_FILE"
+          # Using Python to parse XML as it's cross-platform and handles XML robustly.
+          # Python is available on GitHub's ubuntu-latest runners.
+          PERCENTAGE=$(python -c "
+          import xml.etree.ElementTree as ET
+          import sys
+          try:
+              tree = ET.parse('$COVERAGE_FILE')
+              root = tree.getroot()
+              line_rate = float(root.get('line-rate', '0')) # Default to 0 if attribute missing
+              percentage = round(line_rate * 100, 2)
+              print(percentage)
+          except Exception as e:
+              print(f'Error parsing XML: {e}', file=sys.stderr)
+              print('0.00') # Default to 0.00 on any parsing error
+          ")
+          echo "Raw percentage from Python: $PERCENTAGE"
+          # Validate that PERCENTAGE is a number, default to 0 if not
+          if ! [[ "$PERCENTAGE" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "Warning: Python script output was not a valid number ('$PERCENTAGE'). Defaulting to 0."
+            PERCENTAGE="0.00"
+          fi
+          echo "Calculated Coverage: $PERCENTAGE%"
+          echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+          # Set an environment variable for easy use in subsequent steps
+          echo "COVERAGE_PERCENTAGE_VALUE=$PERCENTAGE" >> $GITHUB_ENV
+
+      - name: Generate Coverage Badge URL
+        id: coverage_badge
+        if: steps.coverage_percentage.outputs.percentage # Proceed if percentage was calculated
+        run: |
+          PERCENTAGE=${{ env.COVERAGE_PERCENTAGE_VALUE }}
+          # Determine color based on percentage for the badge
+          COLOR="red" # Default color
+          if (( $(echo "$PERCENTAGE >= 90" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$PERCENTAGE >= 80" | bc -l) )); then
+            COLOR="green"
+          elif (( $(echo "$PERCENTAGE >= 70" | bc -l) )); then
+            COLOR="yellowgreen"
+          elif (( $(echo "$PERCENTAGE >= 60" | bc -l) )); then
+            COLOR="yellow"
+          elif (( $(echo "$PERCENTAGE >= 50" | bc -l) )); then
+            COLOR="orange"
+          fi
+          BADGE_URL="https://img.shields.io/badge/coverage-$PERCENTAGE%25-$COLOR"
+          echo "Badge URL: $BADGE_URL"
+          echo "url=$BADGE_URL" >> $GITHUB_OUTPUT
+          # Store the full Markdown for the badge
+          echo "COVERAGE_BADGE_MARKDOWN=![Coverage]($BADGE_URL)" >> $GITHUB_ENV
+
+      - name: Update README.md
+        if: steps.coverage_badge.outputs.url
+        run: |
+          README_FILE="README.md"
+          # Define the placeholder text that will be replaced in your README.md
+          # IMPORTANT: Add this exact placeholder line to your README.md where you want the badge.
+          PLACEHOLDER="" 
+          BADGE_MARKDOWN="${{ env.COVERAGE_BADGE_MARKDOWN }}"
+
+          if [ ! -f "$README_FILE" ]; then
+            echo "$README_FILE not found! Cannot update badge."
+            exit 1
+          fi
+
+          # Check if the placeholder exists in the README
+          if grep -qF "$PLACEHOLDER" "$README_FILE"; then
+            # Use awk for safer replacement of the placeholder line.
+            # This approach replaces the line containing the placeholder with the new badge.
+            awk -v placeholder_pattern="^${PLACEHOLDER}$" -v badge="$BADGE_MARKDOWN" '
+              BEGIN { replaced=0 }
+              $0 ~ placeholder_pattern {
+                print badge;
+                replaced=1;
+                next; # Skip printing the original placeholder line
+              }
+              { print }
+              END {
+                if (replaced==0) {
+                  print "Warning: Placeholder pattern not matched exactly, badge not updated as expected." > "/dev/stderr";
+                  # Exit with 0 to not fail the job, but indicate an issue.
+                  exit 0;
+                }
+              }
+            ' "$README_FILE" > tmp_readme.md && mv tmp_readme.md "$README_FILE"
+            echo "README.md updated with new coverage badge."
+          else
+            echo "Placeholder '$PLACEHOLDER' not found in $README_FILE. Badge not updated."
+            echo "Please add '$PLACEHOLDER' (exactly as written) to your README.md file on its own line."
+            # Not failing the job, but indicating the issue.
+          fi
+
+      - name: Commit and Push README changes
+        if: steps.coverage_badge.outputs.url
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Check if README.md was actually modified by the previous step
+          if git diff --quiet README.md; then
+            echo "No changes to README.md to commit."
+          else
+            git add README.md
+            # Add [skip ci] to prevent this commit from re-triggering CI workflows
+            skip ci
+            git commit -m "docs: Update test coverage badge [skip ci]"
+            # Push changes to the head_ref (the source branch of the PR)
+            git push origin HEAD:${{ github.head_ref }}
+            echo "Pushed README.md changes to branch ${{ github.head_ref }}."
+          fi

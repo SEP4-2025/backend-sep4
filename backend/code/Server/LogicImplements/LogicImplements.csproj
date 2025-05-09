@@ -12,4 +12,9 @@
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
     </ItemGroup>
 
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
 </Project>
