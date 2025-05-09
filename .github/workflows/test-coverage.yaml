@@ -40,31 +40,37 @@ jobs:
             /p:CoverletOutputFormat=cobertura \
             /p:CoverletOutput=./coverage/coverage.cobertura.xml
 
-      - name: Locate Cobertura coverage file
+      - name: Locate and merge Cobertura coverage files
         id: locate_coverage_file
         run: |
-          EXPECTED_COVERAGE_FILE="./coverage/coverage.cobertura.xml"
-          if [ -f "$EXPECTED_COVERAGE_FILE" ]; then
-            echo "Coverage file found at: $EXPECTED_COVERAGE_FILE"
-            echo "file_path=$EXPECTED_COVERAGE_FILE" >> $GITHUB_OUTPUT
-            echo "file_exists=true" >> $GITHUB_OUTPUT
+          # Find all coverage files
+          COVERAGE_FILES=$(find ./coverage -type f -name "coverage.cobertura.xml")
+          
+          if [ -z "$COVERAGE_FILES" ]; then
+            echo "No coverage files found. Creating dummy file."
+            mkdir -p ./coverage/dummy
+            echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
+            echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT
+            echo "file_exists=false" >> $GITHUB_OUTPUT
           else
-            # Fallback: Search recursively if the explicitly named file isn't found
-            echo "Expected coverage file $EXPECTED_COVERAGE_FILE not found. Searching recursively..."
-            # Look for any file named coverage.cobertura.xml in subdirectories of ./coverage
-            COVERAGE_FILE_PATH=$(find ./coverage -type f -name "coverage.cobertura.xml" -print -quit)
-            if [ -f "$COVERAGE_FILE_PATH" ]; then
-              echo "Fallback: Coverage file found at: $COVERAGE_FILE_PATH"
-              echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
-              echo "file_exists=true" >> $GITHUB_OUTPUT
-            else
-              echo "Coverage file (coverage.cobertura.xml) not found in ./coverage directory or its subdirectories."
-              # Create a dummy file with 0% coverage
-              mkdir -p ./coverage/dummy
-              echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
-              echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT
-              echo "file_exists=false" >> $GITHUB_OUTPUT
-            fi
+            echo "Found coverage files:"
+            echo "$COVERAGE_FILES"
+            
+            # If we have multiple files, merge them
+            MERGED_FILE="./coverage/merged-coverage.cobertura.xml"
+            echo "Merging coverage files to $MERGED_FILE"
+            
+            # Install ReportGenerator tool if needed
+            dotnet tool install --global dotnet-reportgenerator-globaltool || true
+            
+            # Create a file with all coverage file paths
+            echo "$COVERAGE_FILES" > ./coverage-files.txt
+            
+            # Merge coverage files using ReportGenerator
+            reportgenerator "-reports:@./coverage-files.txt" "-targetdir:./coverage" "-reporttypes:Cobertura"
+            
+            echo "file_path=$MERGED_FILE" >> $GITHUB_OUTPUT
+            echo "file_exists=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Calculate coverage percentage
@@ -186,4 +192,3 @@ jobs:
             git commit -m "docs: Update test coverage badge [skip ci]"
             git push origin HEAD:${{ github.head_ref }}
             echo "Pushed README.md changes to branch ${{ github.head_ref }}."
-          fi
