@@ -1,4 +1,6 @@
-# GrowMate Backend 
+![Coverage](https://img.shields.io/badge/coverage-31.72%25-red)
+
+# GrowMate Backend
 
 The GrowMate backend is a .NET 8-based microservice architecture that powers the GrowMate plant monitoring and management system. It enables data collection from sensors, data processing, and provides a REST API for client applications.
 
@@ -24,9 +26,9 @@ The GrowMate backend provides the following RESTful API endpoints:
 
 ### Notification
 
-| Method | Endpoint                | Description                      |
-| ------ | ----------------------- | -------------------------------- |
-| POST   | `/notification/trigger` | Send notification to frontend    |
+| Method | Endpoint                | Description                   |
+| ------ | ----------------------- | ----------------------------- |
+| POST   | `/notification/trigger` | Send notification to frontend |
 
 ### Gardener
 
@@ -154,7 +156,6 @@ The project includes Docker containerization for local development and testing:
 ```bash
 # Navigate to the code directory
 cd backend/code
-
 # Start the Docker containers
 docker-compose up
 ```
@@ -172,17 +173,13 @@ This will start:
 The project uses GitHub Actions for continuous integration:
 
 1. **C#-linter**: Verifies code style and formatting
-
    - Runs `dotnet format` to ensure code meets style guidelines
    - Triggers on PRs to master branch
-
 2. **Dockerization validation & build test**:
-
    - Tests Docker builds for all services
    - Verifies container functionality
    - Validates cloudbuild.yaml structure
    - Triggers on PRs to master branch
-
 3. **Trigger Cloud Build**:
    - Automatically triggers Google Cloud Build pipeline
    - Authenticates with Google Cloud Platform using service account
@@ -214,31 +211,24 @@ WebAPI
 ├── LogicImplements
 ├── DTOs
 └── Database
-
 ReceiverService
 ├── LogicInterfaces
 ├── LogicImplements
 ├── DTOs
 └── Database
-
 LogicImplements
 ├── LogicInterfaces
 ├── DTOs
 └── Database
-
 LogicInterfaces
 ├── Entities
 └── DTOs
-
 Database
 └── Entities
-
 DTOs
 └── (No dependencies)
-
 Entities
 └── (No dependencies)
-
 SenderService
 └── (Only external MQTTnet dependency)
 ```
@@ -246,40 +236,29 @@ SenderService
 ### Key Dependencies
 
 1. **WebAPI** depends on:
-
    - LogicInterfaces (for business logic contracts)
    - LogicImplements (for business logic implementation)
    - Database (for data access)
    - DTOs (for data transfer objects)
-
 2. **ReceiverService** depends on:
-
    - LogicInterfaces
    - LogicImplements
    - Database
    - DTOs
    - External MQTT library for IoT communication
-
 3. **LogicImplements** depends on:
-
    - LogicInterfaces (implements these interfaces)
    - Database (for data access)
    - DTOs (for data transformation)
-
 4. **LogicInterfaces** depends on:
-
    - Entities (for domain models)
    - DTOs (for data transfer contracts)
-
 5. **Database** depends on:
-
    - Entities (for domain models to persist)
    - Entity Framework Core (external)
-
 6. **SenderService** is relatively independent and primarily depends on the external MQTT library.
-
-This layered architecture facilitates separation of concerns and allows for easier testing and maintenance.
+   This layered architecture facilitates separation of concerns and allows for easier testing and maintenance.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details. 

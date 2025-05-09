@@ -1,0 +1,194 @@
+name: Run tests and coverage
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  build-test-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore backend/code/code.sln
+
+      - name: Build project
+        run: dotnet build backend/code/code.sln --configuration Release --no-restore
+
+      - name: Run tests and collect coverage
+        run: |
+          dotnet test backend/code/code.sln --configuration Release --no-build \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage \
+            --logger "trx;LogFileName=testresults.trx" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:CoverletOutput=./coverage/coverage.cobertura.xml
+
+      - name: Locate and merge Cobertura coverage files
+        id: locate_coverage_file
+        run: |
+          # Find all coverage files
+          COVERAGE_FILES=$(find ./coverage -type f -name "coverage.cobertura.xml")
+          
+          if [ -z "$COVERAGE_FILES" ]; then
+            echo "No coverage files found. Creating dummy file."
+            mkdir -p ./coverage/dummy
+            echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
+            echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT
+            echo "file_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found coverage files:"
+            echo "$COVERAGE_FILES"
+            
+            # If we have multiple files, merge them
+            MERGED_FILE="./coverage/merged-coverage.cobertura.xml"
+            echo "Merging coverage files to $MERGED_FILE"
+            
+            # Install ReportGenerator tool if needed
+            dotnet tool install --global dotnet-reportgenerator-globaltool || true
+            
+            # Create a file with all coverage file paths
+            echo "$COVERAGE_FILES" > ./coverage-files.txt
+            
+            # Merge coverage files using ReportGenerator
+            reportgenerator "-reports:@./coverage-files.txt" "-targetdir:./coverage" "-reporttypes:Cobertura"
+            
+            echo "file_path=$MERGED_FILE" >> $GITHUB_OUTPUT
+            echo "file_exists=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Calculate coverage percentage
+        id: coverage_percentage
+        if: steps.locate_coverage_file.outputs.file_path
+        run: |
+          COVERAGE_FILE="${{ steps.locate_coverage_file.outputs.file_path }}"
+          echo "Parsing coverage data from: $COVERAGE_FILE"
+          # Using Python to parse XML as it's cross-platform and handles XML robustly.
+          # Python is available on GitHub's ubuntu-latest runners.
+          PERCENTAGE=$(python -c "
+          import xml.etree.ElementTree as ET
+          import sys
+          try:
+              tree = ET.parse('$COVERAGE_FILE')
+              root = tree.getroot()
+              line_rate = float(root.get('line-rate', '0')) # Default to 0 if attribute missing
+              percentage = round(line_rate * 100, 2)
+              print(percentage)
+          except Exception as e:
+              print(f'Error parsing XML: {e}', file=sys.stderr)
+              print('0.00') # Default to 0.00 on any parsing error
+          ")
+          echo "Raw percentage from Python: $PERCENTAGE"
+          # Validate that PERCENTAGE is a number, default to 0 if not
+          if ! [[ "$PERCENTAGE" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "Warning: Python script output was not a valid number ('$PERCENTAGE'). Defaulting to 0."
+            PERCENTAGE="0.00"
+          fi
+          echo "Calculated Coverage: $PERCENTAGE%"
+          echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+          # Set an environment variable for easy use in subsequent steps
+          echo "COVERAGE_PERCENTAGE_VALUE=$PERCENTAGE" >> $GITHUB_ENV
+
+      - name: Generate Coverage Badge URL
+        id: coverage_badge
+        if: steps.coverage_percentage.outputs.percentage # Proceed if percentage was calculated
+        run: |
+          PERCENTAGE=${{ env.COVERAGE_PERCENTAGE_VALUE }}
+          # Determine color based on percentage for the badge
+          COLOR="red" # Default color
+          if (( $(echo "$PERCENTAGE >= 90" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$PERCENTAGE >= 80" | bc -l) )); then
+            COLOR="green"
+          elif (( $(echo "$PERCENTAGE >= 70" | bc -l) )); then
+            COLOR="yellowgreen"
+          elif (( $(echo "$PERCENTAGE >= 60" | bc -l) )); then
+            COLOR="yellow"
+          elif (( $(echo "$PERCENTAGE >= 50" | bc -l) )); then
+            COLOR="orange"
+          fi
+          BADGE_URL="https://img.shields.io/badge/coverage-$PERCENTAGE%25-$COLOR"
+          echo "Badge URL: $BADGE_URL"
+          echo "url=$BADGE_URL" >> $GITHUB_OUTPUT
+          # Store the full Markdown for the badge
+          echo "COVERAGE_BADGE_MARKDOWN=![Coverage]($BADGE_URL)" >> $GITHUB_ENV
+
+      # 9. Update README.md in workspace
+      - name: Update README.md
+        if: steps.coverage_badge.outputs.url
+        run: |
+          README_FILE="README.md"
+          # Multiple placeholder options to check
+          PLACEHOLDERS=("placeholder" "Coverage-badge-placeholder" "![Coverage]")
+          BADGE_MARKDOWN="${{ env.COVERAGE_BADGE_MARKDOWN }}"
+          TEMP_README="tmp_readme.md"
+          BADGE_UPDATED=0
+
+          if [ ! -f "$README_FILE" ]; then
+            echo "$README_FILE not found! Cannot update badge."
+            exit 1 # Fail the step if README doesn't exist
+          fi
+
+          # Check for existing coverage badge with a more flexible regex
+          # This will match any line containing ![Coverage] followed by any URL with "badge/coverage"
+          EXISTING_BADGE_FOUND=$(grep -l "!\[Coverage\].*badge/coverage" "$README_FILE" || echo "")
+          
+          if [ -n "$EXISTING_BADGE_FOUND" ]; then
+            echo "Existing coverage badge found. Replacing it with new badge."
+            # Use sed to replace the existing badge line with the new badge
+            sed -i -E 's|!\[Coverage\]\(https://img\.shields\.io/badge/coverage-[0-9.]+%25-[a-z]+\)|'"$BADGE_MARKDOWN"'|g' "$README_FILE"
+            BADGE_UPDATED=1
+          else
+            # Try each placeholder in sequence
+            for PLACEHOLDER in "${PLACEHOLDERS[@]}"; do
+              if grep -q "$PLACEHOLDER" "$README_FILE"; then
+                echo "Found placeholder: $PLACEHOLDER. Replacing with coverage badge."
+                sed -i "s|$PLACEHOLDER|$BADGE_MARKDOWN|g" "$README_FILE"
+                BADGE_UPDATED=1
+                break
+              fi
+            done
+          fi
+
+          # If no placeholder or existing badge was found
+          if [ "$BADGE_UPDATED" -eq 0 ]; then
+            echo "No placeholder or existing badge found in $README_FILE."
+            # Insert badge at the top of the file (optional)
+            echo -e "$BADGE_MARKDOWN\n$(cat "$README_FILE")" > "$README_FILE"
+            echo "Badge inserted at the top of README.md."
+          fi
+          echo "README.md processed for badge update."
+
+      # 10. Commit and Push README changes if they exist
+      - name: Commit and Push README changes
+        if: steps.coverage_badge.outputs.url # Only run if badge was generated
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Check if README.md was actually modified
+          if git diff --quiet README.md; then
+            echo "No changes to README.md to commit. Badge was already up-to-date or placeholder/existing badge was not found/updated correctly."
+          else
+            echo "README.md was modified. Committing changes..."
+            git add README.md
+            # The '[skip ci]' in the commit message is a convention to prevent CI loops.
+            git commit -m "docs: Update test coverage badge [skip ci]"
+            git push origin HEAD:${{ github.head_ref }}
+            echo "Pushed README.md changes to branch ${{ github.head_ref }}."
