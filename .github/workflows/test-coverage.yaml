@@ -118,7 +118,7 @@ jobs:
           README_FILE="README.md"
           # Define the placeholder text that will be replaced in your README.md
           # IMPORTANT: Add this exact placeholder line to your README.md where you want the badge.
-          PLACEHOLDER="" 
+          PLACEHOLDER="Coverage-badge-placeholder" 
           BADGE_MARKDOWN="${{ env.COVERAGE_BADGE_MARKDOWN }}"
 
           if [ ! -f "$README_FILE" ]; then

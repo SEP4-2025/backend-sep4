@@ -1,3 +1,4 @@
+Coverage-badge-placeholder
 # GrowMate Backend 
 ![Coverage](https://img.shields.io/badge/coverage-0.0%25-red)
 The GrowMate backend is a .NET 8-based microservice architecture that powers the GrowMate plant monitoring and management system. It enables data collection from sensors, data processing, and provides a REST API for client applications.
