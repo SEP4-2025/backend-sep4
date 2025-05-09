@@ -12,7 +12,6 @@
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
     </ItemGroup>
 
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
-    </PackageReference>
+
 
 </Project>
