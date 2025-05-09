@@ -12,9 +12,9 @@ public static class ReceiverUtil
     // Only for Proof of concept, will be in .ENV file in future (??)
     private static readonly Dictionary<string, int> TopicToSensorIdMap = new()
     {
+        { "air/temperature", 1 },
+        { "air/humidity", 2 },
         { "light/reading", 3 },
-        { "temperature/reading", 1 },
-        { "humidity/reading", 2 },
         { "soil/reading", 4 },
     };
 
