@@ -25,14 +25,14 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore code.sln
+        run: dotnet restore backend/code/code.sln
 
       - name: Build project
-        run: dotnet build code.sln --configuration Release --no-restore
+        run: dotnet build backend/code/code.sln --configuration Release --no-restore
 
       - name: Run tests and collect coverage
         run: |
-          dotnet test code.sln --configuration Release --no-build \
+          dotnet test backend/code/code.sln --configuration Release --no-build \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --logger "trx;LogFileName=testresults.trx" \
