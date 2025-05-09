@@ -32,6 +32,10 @@ jobs:
 
       - name: Run tests and collect coverage
         run: |
+          # Install coverlet.collector if not already included in project
+          dotnet add backend/code/ImplementationTests/ImplementationTests.csproj package coverlet.collector || true
+          dotnet add backend/code/APITests/APITests.csproj package coverlet.collector || true
+
           dotnet test backend/code/code.sln --configuration Release --no-build \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
@@ -49,14 +53,14 @@ jobs:
             echo "file_path=./coverage/coverage.cobertura.xml" >> $GITHUB_OUTPUT
             echo "file_exists=true" >> $GITHUB_OUTPUT
           else
-            # Fall back to searching in the coverage directory
-            COVERAGE_FILE_PATH=$(find ./coverage -name "*.cobertura.xml" -o -name "cobertura.xml" -print -quit)
+            # Search recursively for coverage files in all subdirectories
+            COVERAGE_FILE_PATH=$(find ./coverage -type f -name "coverage.cobertura.xml" -o -name "*.cobertura.xml" -print -quit)
             if [ -f "$COVERAGE_FILE_PATH" ]; then
               echo "Coverage file found at: $COVERAGE_FILE_PATH"
               echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
               echo "file_exists=true" >> $GITHUB_OUTPUT
             else
-              echo "Coverage file not found in ./coverage directory."
+              echo "Coverage file not found in ./coverage directory or subdirectories."
               # Create a dummy file with 0% coverage to prevent downstream errors
               # and ensure the badge shows 0% instead of failing.
               mkdir -p ./coverage/dummy
