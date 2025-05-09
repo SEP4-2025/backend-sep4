@@ -36,24 +36,34 @@ jobs:
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --logger "trx;LogFileName=testresults.trx" \
-            -p:CoverletOutputFormat=cobertura
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:CoverletOutput=./coverage/
 
       - name: Locate Cobertura coverage file
         id: locate_coverage_file
         run: |
-          COVERAGE_FILE_PATH=$(find ./coverage -name "cobertura.xml" -print -quit)
-          if [ -f "$COVERAGE_FILE_PATH" ]; then
-            echo "Coverage file found at: $COVERAGE_FILE_PATH"
-            echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
+          # First check for the coverage file in the direct output location
+          if [ -f "./coverage/coverage.cobertura.xml" ]; then
+            echo "Coverage file found at ./coverage/coverage.cobertura.xml"
+            echo "file_path=./coverage/coverage.cobertura.xml" >> $GITHUB_OUTPUT
             echo "file_exists=true" >> $GITHUB_OUTPUT
           else
-            echo "Coverage file (cobertura.xml) not found in ./coverage directory."
-            # Create a dummy file with 0% coverage to prevent downstream errors
-            # and ensure the badge shows 0% instead of failing.
-            mkdir -p ./coverage/dummy
-            echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
-            echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT # Path to dummy file
-            echo "file_exists=false" >> $GITHUB_OUTPUT # Indicate actual file wasn't found
+            # Fall back to searching in the coverage directory
+            COVERAGE_FILE_PATH=$(find ./coverage -name "*.cobertura.xml" -o -name "cobertura.xml" -print -quit)
+            if [ -f "$COVERAGE_FILE_PATH" ]; then
+              echo "Coverage file found at: $COVERAGE_FILE_PATH"
+              echo "file_path=$COVERAGE_FILE_PATH" >> $GITHUB_OUTPUT
+              echo "file_exists=true" >> $GITHUB_OUTPUT
+            else
+              echo "Coverage file not found in ./coverage directory."
+              # Create a dummy file with 0% coverage to prevent downstream errors
+              # and ensure the badge shows 0% instead of failing.
+              mkdir -p ./coverage/dummy
+              echo '<coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="1" complexity="0" version="0" timestamp="0"></coverage>' > ./coverage/dummy/cobertura.xml
+              echo "file_path=./coverage/dummy/cobertura.xml" >> $GITHUB_OUTPUT # Path to dummy file
+              echo "file_exists=false" >> $GITHUB_OUTPUT # Indicate actual file wasn't found
+            fi
           fi
 
       - name: Calculate coverage percentage
