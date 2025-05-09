@@ -45,9 +45,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             "soil/reading",
         };
 
-        // Use CloudWebAPIEnpoint from appsettings.json when testing deployment
+        // Use CloudWebApiEndpoint from appsettings.json when testing deployment
         // Use WebApiEndpoint from appsettings.json when testing in local
-        _webApiEndpoint = configuration["CloudWebAPIEnpoint"];
+        _webApiEndpoint = configuration["CloudWebApiEndpoint"];
 
         _logger.LogInformation(
             "ReceiverService configured with MQTT broker at {Server}:{Port}",
@@ -253,6 +253,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         var httpClient = _httpClientFactory.CreateClient();
         var json = JsonSerializer.Serialize(notificationPayload);
         var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        _logger.LogInformation("Sending notification to Web API: {Payload}", json);
         try
         {
             var response = await httpClient.PostAsync(_webApiEndpoint, content);
