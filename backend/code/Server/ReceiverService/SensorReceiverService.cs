@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Database;
 using DTOs;
@@ -13,7 +14,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private readonly MqttClientFactory _mqttFactory = new();
     private readonly List<string> _topics;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly string _webApiEndpoint;
+    private readonly string? _webApiEndpoint;
     private readonly string _server;
     private readonly int _port;
     private readonly ILogger<SensorReceiverService> _logger;
@@ -40,13 +41,11 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         _topics = new List<string>
         {
             "light/reading",
-            "temperature/reading",
-            "humidity/reading",
+            "air/temperature",
+            "air/humidity",
             "soil/reading",
         };
 
-        // Use CloudWebApiEndpoint from appsettings.json when testing deployment
-        // Use WebApiEndpoint from appsettings.json when testing in local
         _webApiEndpoint = configuration["CloudWebApiEndpoint"];
 
         _logger.LogInformation(
