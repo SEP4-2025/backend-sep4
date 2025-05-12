@@ -1,3 +1,4 @@
+using LogicInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,15 @@ using Microsoft.AspNetCore.Mvc;
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _notificationService;
+    private readonly INotificationPrefInterface _notificationPrefLogic;
 
-    public NotificationController(INotificationService notificationService)
+    public NotificationController(
+        INotificationService notificationService,
+        INotificationPrefInterface notificationPrefLogic
+    )
     {
         _notificationService = notificationService;
+        _notificationPrefLogic = notificationPrefLogic;
     }
 
     [HttpPost("trigger")]
@@ -21,7 +27,18 @@ public class NotificationController : ControllerBase
     {
         try
         {
-            await _notificationService.SendNotification(notificationPayload);
+            var notificationPrefs = await _notificationPrefLogic.GetNotificationPrefs();
+            var gardenerPrefs = notificationPrefs
+                .Where(p => p.Type == notificationPayload.Type && p.IsEnabled == true)
+                .ToList();
+            if (gardenerPrefs.Count == 0)
+            {
+                return NotFound("Notification disabled");
+            }
+            else
+            {
+                await _notificationService.SendNotification(notificationPayload);
+            }
 
             return Ok(new { status = "Notification triggered successfully" });
         }
@@ -29,7 +46,7 @@ public class NotificationController : ControllerBase
         {
             return StatusCode(
                 500,
-                "An internal error occurred while dispatching the notification."
+                ex + "An internal error occurred while dispatching the notification."
             );
         }
     }
