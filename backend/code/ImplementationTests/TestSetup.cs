@@ -26,10 +26,10 @@ public static class TestSetup
         );
 
         services.AddScoped<DbContext, AppDbContext>();
-        
+
         var provider = services.BuildServiceProvider();
         _context = provider.GetRequiredService<AppDbContext>();
-        
+
         Logger.Initialize(_context);
     }
 
