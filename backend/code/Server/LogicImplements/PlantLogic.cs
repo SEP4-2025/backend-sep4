@@ -3,6 +3,8 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Tools;
 
 namespace LogicImplements;
 
@@ -46,6 +48,9 @@ public class PlantLogic : IPlantInterface
         existingPlant.Name = plantName;
 
         await _context.SaveChangesAsync();
+
+        Logger.Log($"Plant with id: {id} updated.");
+
         return existingPlant;
     }
 

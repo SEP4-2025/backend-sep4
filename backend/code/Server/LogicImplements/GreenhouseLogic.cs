@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Tools;
 
 namespace LogicImplements;
 
@@ -56,6 +57,9 @@ public class GreenhouseLogic : IGreenhouseInterface
         greenhouse.Name = name;
 
         await _context.SaveChangesAsync();
+
+        Logger.Log("Greenhouse name updated.");
+
         return greenhouse;
     }
 

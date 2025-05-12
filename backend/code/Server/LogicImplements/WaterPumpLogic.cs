@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Tools;
 
 namespace LogicImplements;
 
@@ -46,6 +47,8 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         await _context.SaveChangesAsync();
 
+        Logger.Log($"Water pump with id: {id} manually watered with {waterAmount} ml.");
+
         return waterPump;
     }
 
@@ -60,6 +63,8 @@ public class WaterPumpLogic : IWaterPumpInterface
             waterPump.WaterLevel = waterPump.WaterTankCapacity;
         }
 
+        Logger.Log($"Water pump water level updated to {waterPump.WaterLevel} ml.");
+
         await _context.SaveChangesAsync();
         return waterPump;
     }
@@ -71,6 +76,8 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         waterPump.ThresholdValue = newThresholdValue;
         await _context.SaveChangesAsync();
+
+        Logger.Log($"Water pump threshold value updated to {newThresholdValue} ml.");
 
         return waterPump;
     }

@@ -3,6 +3,8 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Tools;
 
 namespace LogicImplements;
 
@@ -47,6 +49,8 @@ public class SensorReadingLogic : ISensorReadingInterface
 
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
+
+        Logger.Log($"New sensor reading with id: {newSensorReading.Id} added.");
 
         return newSensorReading;
     }
@@ -98,6 +102,8 @@ public class SensorReadingLogic : ISensorReadingInterface
             })
             .ToListAsync();
 
+        Logger.Log("Average sensor readings from the last 24 hours retrieved.");
+
         return result;
     }
 
@@ -131,6 +137,8 @@ public class SensorReadingLogic : ISensorReadingInterface
             })
             .ToListAsync();
 
+        Logger.Log("Average sensor readings from the last 7 days retrieved.");
+
         return result;
     }
 
@@ -163,6 +171,8 @@ public class SensorReadingLogic : ISensorReadingInterface
                 AverageValue = g.Any() ? g.Average() : null,
             })
             .ToListAsync();
+
+        Logger.Log("Average sensor readings from the last 30 days retrieved.");
 
         return result;
     }
