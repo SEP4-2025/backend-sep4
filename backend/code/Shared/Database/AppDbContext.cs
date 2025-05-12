@@ -118,9 +118,11 @@ public class AppDbContext : DbContext
         });
         modelBuilder.Entity<NotificationPreferences>(entity =>
         {
-            entity.ToTable("NotificationPreferences");
+            entity.ToTable("NotificationPreference");
+            entity.HasKey(e => new { e.GardenerId, e.Type });
             entity.Property(e => e.GardenerId).HasColumnName("gardenerid");
             entity.Property(e => e.IsEnabled).HasColumnName("isenabled");
+            entity.Property(e => e.Type).HasColumnName("type");
         });
     }
 }
