@@ -32,7 +32,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         _serviceProvider = serviceProvider;
         _httpClientFactory = httpClientFactory;
 
-        _server = "35.204.67.247";
+        _server = "34.27.128.90";
         _port = 1883;
 
         // Only for Proof of concept, will be in .ENV file in future
