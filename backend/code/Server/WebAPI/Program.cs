@@ -50,6 +50,7 @@ builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
 builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationPrefInterface, NotificationPrefLogic>();
+builder.Services.AddScoped<INotificationInterface, NotificationLogic>();
 
 builder
     .Services.AddAuthentication(options =>
