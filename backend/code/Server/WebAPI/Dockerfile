@@ -4,20 +4,21 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Server/WebAPI/WebAPI.csproj", "Server/WebAPI/"]
-RUN dotnet restore "Server/WebAPI/WebAPI.csproj"
+
 COPY . .
-WORKDIR "/src/Server/WebAPI"
-RUN dotnet build "WebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "WebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR "/src/WebAPI"
+RUN dotnet restore "/src/WebAPI/WebAPI.csproj"
 
-FROM base AS final
+RUN dotnet publish "/src/WebAPI/WebAPI.csproj" -c Release -o /app/publish
+
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS runtime
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
+
 ENTRYPOINT ["dotnet", "WebAPI.dll"]
