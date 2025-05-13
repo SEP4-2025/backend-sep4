@@ -59,3 +59,4 @@ nunit-*.xml
 
 #GCS file
 gcs-key.json
+backend/code/.env
