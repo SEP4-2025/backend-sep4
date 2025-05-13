@@ -1,4 +1,4 @@
-# GrowMate Backend 
+# GrowMate Backend
 
 The GrowMate backend is a .NET 8-based microservice architecture that powers the GrowMate plant monitoring and management system. It enables data collection from sensors, data processing, and provides a REST API for client applications.
 
@@ -24,9 +24,18 @@ The GrowMate backend provides the following RESTful API endpoints:
 
 ### Notification
 
-| Method | Endpoint                | Description                      |
-| ------ | ----------------------- | -------------------------------- |
-| POST   | `/notification/trigger` | Send notification to frontend    |
+| Method | Endpoint                | Description                   |
+| ------ | ----------------------- | ----------------------------- |
+| POST   | `/notification/trigger` | Send notification to frontend |
+| GET    | `/notification/all`     | Get all notifications         |
+| GET    | `/notification/byType`  | Get notification by type      |
+
+### Notification Preferences
+
+| Method | Endpoint                   | Description                      |
+| ------ | -------------------------- | -------------------------------- |
+| GET    | `/notificationpref`        | Get all notification preferences |
+| PATCH  | `/notificationpref/toggle` | Toggle notification preference   |
 
 ### Gardener
 
