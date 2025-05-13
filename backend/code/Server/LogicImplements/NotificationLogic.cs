@@ -31,4 +31,24 @@ public class NotificationLogic : INotificationInterface
 
         return notification;
     }
+
+    public async Task<Notification> AddNotification(NotificationDTO notificationDto)
+    {
+        // Map DTO to entity
+        var notification = new Notification
+        {
+            Type = notificationDto.Type,
+            Message = notificationDto.Message,
+            TimeStamp = notificationDto.TimeStamp,
+            IsRead = notificationDto.IsRead,
+            SensorId = notificationDto.SensorId,
+            WaterPumpId = notificationDto.WaterPumpId,
+        };
+
+        // Add to database
+        _context.Notifications.Add(notification);
+        await _context.SaveChangesAsync();
+
+        return notification;
+    }
 }

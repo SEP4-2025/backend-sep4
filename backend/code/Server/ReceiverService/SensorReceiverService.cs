@@ -36,7 +36,6 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         _server = "34.27.128.90";
         _port = 1883;
 
-        // Only for Proof of concept, will be in .ENV file in future
         // Define topics to subscribe to
         _topics = new List<string>
         {
@@ -65,6 +64,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             isConnected => _isHealthy = isConnected
         );
 
+        int reconnectAttempts = 0;
+        const int maxReconnectDelay = 60000; // 1 minute max delay
+
         try
         {
             await ConnectAndSubscribe(stoppingToken);
@@ -76,11 +78,35 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
                     if (!_mqttClient.IsConnected)
                     {
                         _isHealthy = false;
-                        _logger.LogWarning("Connection lost. Attempting to reconnect...");
-                        await ConnectAndSubscribe(stoppingToken);
-                    }
 
-                    await Task.Delay(5000, stoppingToken);
+                        // Calculate backoff delay with exponential backoff
+                        int delayMs = Math.Min(
+                            (int)(1000 * Math.Pow(2, reconnectAttempts)),
+                            maxReconnectDelay
+                        );
+                        reconnectAttempts++;
+
+                        _logger.LogWarning(
+                            "Connection lost. Attempting to reconnect in {DelaySeconds} seconds (attempt {Attempt})...",
+                            delayMs / 1000,
+                            reconnectAttempts
+                        );
+
+                        await Task.Delay(delayMs, stoppingToken);
+                        await ConnectAndSubscribe(stoppingToken);
+
+                        if (_mqttClient.IsConnected)
+                        {
+                            // Reset reconnect counter on successful connection
+                            reconnectAttempts = 0;
+                        }
+                    }
+                    else
+                    {
+                        // If connected, reset reconnect counter and wait
+                        reconnectAttempts = 0;
+                        await Task.Delay(5000, stoppingToken);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -100,7 +126,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         }
         finally
         {
-            await Task.Delay(5000);
+            await ReceiverUtil.DisconnectMqttClient(_mqttClient, _logger, CancellationToken.None);
         }
     }
 
@@ -129,7 +155,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
     private async Task ConnectAndSubscribe(CancellationToken stoppingToken)
     {
-        string clientId = $"SensorReceiver_{Guid.NewGuid().ToString("N")}";
+        // Use a stable client ID to prevent constant reconnections
+        string clientId =
+            $"GrowMateSensorReceiverService-{Guid.NewGuid().ToString().Substring(0, 6)}";
 
         bool connected = await ReceiverUtil.ConnectMqttClient(
             _mqttClient,
