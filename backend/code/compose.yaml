@@ -20,7 +20,7 @@
   #      - growmate-network
 
   webapi:
-    image: webapi
+    image: webapi:latest
     build:
       context: .
       dockerfile: Server/WebAPI/Dockerfile
