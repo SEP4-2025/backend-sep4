@@ -8,6 +8,5 @@ public class Sensor
     public int ThresholdValue { get; set; }
     public string MetricUnit { get; set; }
 
-
     public int GreenhouseId { get; set; }
 }

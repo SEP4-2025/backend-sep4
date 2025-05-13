@@ -2,6 +2,7 @@ namespace DTOs;
 
 public class WaterPumpDTO
 {
+    public int Id { get; set; }
     public DateTime LastWatered { get; set; }
     public int LastWaterAmount { get; set; }
     public bool AutoWatering { get; set; }
