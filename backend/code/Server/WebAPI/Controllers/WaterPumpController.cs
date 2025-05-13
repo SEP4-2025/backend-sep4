@@ -48,9 +48,9 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/toggle-automation")]
-    public async Task<ActionResult<WaterPump>> UpdateAutoWateringStatusAsync(int id, [FromBody] bool autoWatering)
+    public async Task<ActionResult<WaterPump>> ToggleAutomationStatusAsync(int id, [FromBody] bool autoWatering)
     {
-        var updatedPump = await _waterPumpLogic.UpdateAutoWateringStatusAsync(id, autoWatering);
+        var updatedPump = await _waterPumpLogic.ToggleAutomationStatusAsync(id, autoWatering);
         if (updatedPump == null)
         {
             return NotFound($"Water pump with id {id} not found.");
