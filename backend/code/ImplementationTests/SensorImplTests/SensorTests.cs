@@ -50,7 +50,7 @@ public class SensorTests
         {
             Type = "Humidity",
             MetricUnit = "Percentage",
-            GreenHouseId = 3
+            GreenHouseId = 3,
         };
 
         var result = await _sensorLogic.AddSensorAsync(sensorDto);
@@ -66,11 +66,7 @@ public class SensorTests
     public async Task UpdateSensorAsync_Success_UpdatesSensorCorrectly()
     {
         var testSensor = await SensorSeeder.SeedSensorAsync();
-        var updatedSensor = new UpdateSensorDTO()
-        {
-            Type = "Light",
-            MetricUnit = "Lux",
-        };
+        var updatedSensor = new UpdateSensorDTO() { Type = "Light", MetricUnit = "Lux" };
 
         var result = await _sensorLogic.UpdateSensorAsync(testSensor.Id, updatedSensor);
 
@@ -96,20 +92,23 @@ public class SensorTests
     {
         var nonExistentSensor = new Sensor
         {
-            Id = 9999, // An ID that doesn't exist
+            Id = 9999,
             Type = "Soil Moisture",
             MetricUnit = "Percentage",
-            GreenhouseId = 1
+            GreenhouseId = 1,
         };
 
-        Assert.ThrowsAsync<Exception>(async () =>
-            await _sensorLogic.UpdateSensorAsync(
-                nonExistentSensor.Id,
-                new UpdateSensorDTO
-                {
-                    Type = nonExistentSensor.Type,
-                    MetricUnit = nonExistentSensor.MetricUnit
-                }));
+        Assert.ThrowsAsync<NullReferenceException>(
+            async () =>
+                await _sensorLogic.UpdateSensorAsync(
+                    nonExistentSensor.Id,
+                    new UpdateSensorDTO
+                    {
+                        Type = nonExistentSensor.Type,
+                        MetricUnit = nonExistentSensor.MetricUnit,
+                    }
+                )
+        );
     }
 
     [TearDown]

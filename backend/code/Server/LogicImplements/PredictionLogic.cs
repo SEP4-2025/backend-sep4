@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Tools;
 
 namespace LogicImplements;
 
@@ -46,6 +47,9 @@ public class PredictionLogic : IPredictionInterface
         };
 
         await _context.Predictions.AddAsync(newPrediction);
+
+        Logger.Log(newPrediction.GreenhouseId, $"New prediction with id: {newPrediction.Id} added.");
+
         await _context.SaveChangesAsync();
     }
 

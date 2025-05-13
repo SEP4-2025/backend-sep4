@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using Database;
 using DTOs;
 using LogicImplements;
@@ -11,6 +13,8 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     private readonly IMqttClient _mqttClient;
     private readonly MqttClientFactory _mqttFactory = new();
     private readonly List<string> _topics;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string? _webApiEndpoint;
     private readonly string _server;
     private readonly int _port;
     private readonly ILogger<SensorReceiverService> _logger;
@@ -19,25 +23,29 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
     public SensorReceiverService(
         ILogger<SensorReceiverService> logger,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration
     )
     {
         _mqttClient = _mqttFactory.CreateMqttClient();
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _httpClientFactory = httpClientFactory;
 
-        _server = "35.204.67.247";
+        _server = "34.27.128.90";
         _port = 1883;
 
-        // Only for Proof of concept, will be in .ENV file in future
         // Define topics to subscribe to
         _topics = new List<string>
         {
             "light/reading",
-            "temperature/reading",
-            "humidity/reading",
+            "air/temperature",
+            "air/humidity",
             "soil/reading",
         };
+
+        _webApiEndpoint = configuration["CloudWebApiEndpoint"];
 
         _logger.LogInformation(
             "ReceiverService configured with MQTT broker at {Server}:{Port}",
@@ -56,6 +64,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             isConnected => _isHealthy = isConnected
         );
 
+        int reconnectAttempts = 0;
+        const int maxReconnectDelay = 60000; // 1 minute max delay
+
         try
         {
             await ConnectAndSubscribe(stoppingToken);
@@ -67,11 +78,35 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
                     if (!_mqttClient.IsConnected)
                     {
                         _isHealthy = false;
-                        _logger.LogWarning("Connection lost. Attempting to reconnect...");
-                        await ConnectAndSubscribe(stoppingToken);
-                    }
 
-                    await Task.Delay(5000, stoppingToken);
+                        // Calculate backoff delay with exponential backoff
+                        int delayMs = Math.Min(
+                            (int)(1000 * Math.Pow(2, reconnectAttempts)),
+                            maxReconnectDelay
+                        );
+                        reconnectAttempts++;
+
+                        _logger.LogWarning(
+                            "Connection lost. Attempting to reconnect in {DelaySeconds} seconds (attempt {Attempt})...",
+                            delayMs / 1000,
+                            reconnectAttempts
+                        );
+
+                        await Task.Delay(delayMs, stoppingToken);
+                        await ConnectAndSubscribe(stoppingToken);
+
+                        if (_mqttClient.IsConnected)
+                        {
+                            // Reset reconnect counter on successful connection
+                            reconnectAttempts = 0;
+                        }
+                    }
+                    else
+                    {
+                        // If connected, reset reconnect counter and wait
+                        reconnectAttempts = 0;
+                        await Task.Delay(5000, stoppingToken);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -91,7 +126,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         }
         finally
         {
-            await Task.Delay(5000);
+            await ReceiverUtil.DisconnectMqttClient(_mqttClient, _logger, CancellationToken.None);
         }
     }
 
@@ -107,6 +142,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
             await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
 
+            // Notification logic v2
+            await HandlePostNotifications(sensorReading);
+
             _logger.LogInformation("Successfully added sensor reading to database");
         }
         catch (Exception ex)
@@ -117,7 +155,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
     private async Task ConnectAndSubscribe(CancellationToken stoppingToken)
     {
-        string clientId = $"SensorReceiver_{Guid.NewGuid().ToString("N")}";
+        // Use a stable client ID to prevent constant reconnections
+        string clientId =
+            $"GrowMateSensorReceiverService-{Guid.NewGuid().ToString().Substring(0, 6)}";
 
         bool connected = await ReceiverUtil.ConnectMqttClient(
             _mqttClient,
@@ -166,5 +206,92 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         }
 
         return Task.FromResult(HealthCheckResult.Unhealthy("MQTT client is not connected"));
+    }
+
+    public async Task HandlePostNotifications(SensorReadingDTO sensorReading)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sensorLogic = new SensorLogic(dbContext);
+
+        var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
+
+        switch (sensor.Type)
+        {
+            case "Light":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 150
+                    || sensorReading.Value < sensor.ThresholdValue - 150
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+                break;
+            case "Temperature":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 4
+                    || sensorReading.Value < sensor.ThresholdValue - 4
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+
+                break;
+            case "Humidity":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 7
+                    || sensorReading.Value < sensor.ThresholdValue - 7
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+                break;
+            case "Soil Moisture":
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 20
+                    || sensorReading.Value < sensor.ThresholdValue - 20
+                )
+                {
+                    await createNotification(sensorReading);
+                }
+                break;
+        }
+    }
+
+    public async Task createNotification(SensorReadingDTO sensorReading)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sensorLogic = new SensorLogic(dbContext);
+
+        var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
+
+        var notificationPayload = new NotificationDTO
+        {
+            SensorId = sensorReading.SensorId,
+            Message =
+                "Warning: "
+                + sensorReading.Value.ToString()
+                + sensor.MetricUnit
+                + " is deviation from the set norm",
+            TimeStamp = sensorReading.TimeStamp,
+            Type = sensor.Type,
+        };
+        var httpClient = _httpClientFactory.CreateClient();
+        var json = JsonSerializer.Serialize(notificationPayload);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        _logger.LogInformation("Sending notification to Web API: {Payload}", json);
+        try
+        {
+            var response = await httpClient.PostAsync(_webApiEndpoint, content);
+            _logger.LogInformation(
+                "Notification sent to Web API: {StatusCode}",
+                response.StatusCode
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send notification");
+        }
     }
 }

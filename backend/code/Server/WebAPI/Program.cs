@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,16 +25,20 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Plant API", Version = "v1" });
     c.OperationFilter<FileUploadOperationFilter>();
 });
-
+builder.Services.AddSignalR();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "AllowAllOrigins",
-        builder =>
+        policyBuilder =>
         {
-            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            policyBuilder
+                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io/frontend-sep4")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
         }
     );
 });
@@ -83,6 +88,9 @@ builder.Services.AddScoped<IPredictionInterface, PredictionLogic>();
 builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
+builder.Services.AddSingleton<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationPrefInterface, NotificationPrefLogic>();
+builder.Services.AddScoped<INotificationInterface, NotificationLogic>();
 
 builder
     .Services.AddAuthentication(options =>
@@ -114,6 +122,7 @@ var app = builder.Build();
 // Configure default gardner in the database if doesnt exist yet
 using var scope = app.Services.CreateScope();
 var DbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+Logger.Initialize(DbContext);
 
 if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
 {
@@ -146,11 +155,14 @@ else
     app.UseHttpsRedirection();
     app.UseCors("AllowAllOrigins");
 }
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseSwagger();
 app.UseSwaggerUI();

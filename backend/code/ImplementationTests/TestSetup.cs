@@ -2,6 +2,7 @@
 using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Tools;
 
 namespace ImplementationTests;
 
@@ -28,6 +29,8 @@ public static class TestSetup
 
         var provider = services.BuildServiceProvider();
         _context = provider.GetRequiredService<AppDbContext>();
+
+        Logger.Initialize(_context);
     }
 
     [OneTimeTearDown]
