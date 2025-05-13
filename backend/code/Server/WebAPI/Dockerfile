@@ -15,7 +15,7 @@ COPY . .
 RUN dotnet restore "Server/WebAPI/WebAPI.csproj"
 
 # Build & publish the WebAPI project to /app/publish
-RUN dotnet publish "/Server/WebAPI/WebAPI.csproj" -c Release -o /app/publish
+RUN dotnet publish "./Server/WebAPI/WebAPI.csproj" -c Release -o /app/publish
 
 # Runtime stage (small ASP.NET runtime image)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
