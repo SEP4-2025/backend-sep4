@@ -38,8 +38,6 @@ public class PictureLogic : IPictureInterface
         };
         _context.Pictures.Add(newPicture);
 
-        Logger.Log($"New picture with id: {newPicture.Id} added.");
-
         await _context.SaveChangesAsync();
         return newPicture;
     }
@@ -49,8 +47,6 @@ public class PictureLogic : IPictureInterface
         var picture = await _context.Pictures.FirstOrDefaultAsync(p => p.Id == id);
         if (picture == null) throw new Exception($"Sensor with ID {picture.Id} not found.");
         picture.Note = note;
-
-        Logger.Log($"Picture with id: {id} updated.");
 
         await _context.SaveChangesAsync();
         return picture;
@@ -62,8 +58,6 @@ public class PictureLogic : IPictureInterface
         if (picture != null)
         {
             _context.Pictures.Remove(picture);
-
-            Logger.Log("Picture with id: {id} deleted.");
 
             await _context.SaveChangesAsync();
         }

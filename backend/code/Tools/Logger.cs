@@ -12,12 +12,15 @@ public static class Logger
         _context = context;
     }
 
-    public static void Log(string message)
+    public static void Log(int greenhouseId, string message)
     {
         _context.Logs.AddAsync(new Log
         {
-            Timestamp = DateTime.Now,
+            GreenhouseId = greenhouseId,
+            Timestamp = DateTime.UtcNow,
             Message = message
         });
+
+        _context.SaveChangesAsync();
     }
 }

@@ -33,6 +33,9 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         waterPump.AutoWateringEnabled = autoWatering;
         await _context.SaveChangesAsync();
+
+        Logger.Log(1, $"Automatic watering changed to {autoWatering}.");
+
         return waterPump;
     }
 
@@ -47,7 +50,7 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         await _context.SaveChangesAsync();
 
-        Logger.Log($"Water pump with id: {id} manually watered with {waterAmount} ml.");
+        Logger.Log(1, $"Manually watered with amount: {waterAmount}.");
 
         return waterPump;
     }
@@ -63,8 +66,6 @@ public class WaterPumpLogic : IWaterPumpInterface
             waterPump.WaterLevel = waterPump.WaterTankCapacity;
         }
 
-        Logger.Log($"Water pump water level updated to {waterPump.WaterLevel} ml.");
-
         await _context.SaveChangesAsync();
         return waterPump;
     }
@@ -76,8 +77,6 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         waterPump.ThresholdValue = newThresholdValue;
         await _context.SaveChangesAsync();
-
-        Logger.Log($"Water pump threshold value updated to {newThresholdValue} ml.");
 
         return waterPump;
     }

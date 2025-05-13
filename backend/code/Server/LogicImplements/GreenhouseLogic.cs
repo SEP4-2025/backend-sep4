@@ -58,8 +58,6 @@ public class GreenhouseLogic : IGreenhouseInterface
 
         await _context.SaveChangesAsync();
 
-        Logger.Log("Greenhouse name updated.");
-
         return greenhouse;
     }
 

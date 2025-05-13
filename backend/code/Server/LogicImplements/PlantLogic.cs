@@ -49,8 +49,6 @@ public class PlantLogic : IPlantInterface
 
         await _context.SaveChangesAsync();
 
-        Logger.Log($"Plant with id: {id} updated.");
-
         return existingPlant;
     }
 
