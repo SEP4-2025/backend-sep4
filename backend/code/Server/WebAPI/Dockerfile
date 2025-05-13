@@ -12,7 +12,7 @@ WORKDIR /src
 COPY . .
 
 # Restore dependencies (correct project path)
-RUN dotnet restore "Server/WebAPI/WebAPI.csproj"
+RUN dotnet restore "./Server/WebAPI/WebAPI.csproj"
 
 # Build & publish the WebAPI project to /app/publish
 RUN dotnet publish "./Server/WebAPI/WebAPI.csproj" -c Release -o /app/publish
