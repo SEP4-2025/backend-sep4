@@ -23,6 +23,7 @@ WORKDIR /app
 
 # Copy published output from build stage
 COPY --from=build /app/publish .
+COPY .env .env
 
 # Run the WebAPI
 ENTRYPOINT ["dotnet", "WebAPI.dll"]
