@@ -3,6 +3,8 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Tools;
 
 namespace LogicImplements;
 
@@ -50,9 +52,10 @@ public class SensorReadingLogic : ISensorReadingInterface
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
 
+        Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
+
         return newSensorReading;
     }
-
 
     public async Task DeleteSensorReadingAsync(int id)
     {
@@ -64,9 +67,109 @@ public class SensorReadingLogic : ISensorReadingInterface
         }
     }
 
-
     public async Task<List<SensorReading>> GetSensorReadingsAsync()
     {
         return await _context.SensorReadings.ToListAsync();
+    }
+
+    public async Task<List<SensorReadingDataDTO>> GetAverageSensorReadingsFromLast24Hours(
+        int greenhouseId
+    )
+    {
+        var timeLimit = DateTime.UtcNow.AddHours(-24);
+
+        var result = await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= timeLimit)
+            .Join(
+                _context.Sensors.Where(s => s.GreenhouseId == greenhouseId),
+                sr => sr.SensorId,
+                s => s.Id,
+                (sr, s) => new { SensorReading = sr, Sensor = s }
+            )
+            .GroupBy(
+                joined => new
+                {
+                    joined.Sensor.Id,
+                    joined.Sensor.Type,
+                    joined.Sensor.MetricUnit,
+                },
+                joined => joined.SensorReading.Value
+            )
+            .Select(g => new SensorReadingDataDTO
+            {
+                SensorId = g.Key.Id,
+                SensorType = g.Key.Type,
+                MetricUnit = g.Key.MetricUnit,
+                AverageValue = g.Any() ? g.Average() : null,
+            })
+            .ToListAsync();
+
+        return result;
+    }
+
+    public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast7Days(int greenhouseId)
+    {
+        var timeLimit = DateTime.UtcNow.AddDays(-7);
+
+        var result = await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= timeLimit)
+            .Join(
+                _context.Sensors.Where(s => s.GreenhouseId == greenhouseId),
+                sr => sr.SensorId,
+                s => s.Id,
+                (sr, s) => new { SensorReading = sr, Sensor = s }
+            )
+            .GroupBy(
+                joined => new
+                {
+                    joined.Sensor.Id,
+                    joined.Sensor.Type,
+                    joined.Sensor.MetricUnit,
+                },
+                joined => joined.SensorReading.Value
+            )
+            .Select(g => new SensorReadingDataDTO
+            {
+                SensorId = g.Key.Id,
+                SensorType = g.Key.Type,
+                MetricUnit = g.Key.MetricUnit,
+                AverageValue = g.Any() ? g.Average() : null,
+            })
+            .ToListAsync();
+
+        return result;
+    }
+
+    public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast30Days(int greenhouseId)
+    {
+        var timeLimit = DateTime.UtcNow.AddDays(-30);
+
+        var result = await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= timeLimit)
+            .Join(
+                _context.Sensors.Where(s => s.GreenhouseId == greenhouseId),
+                sr => sr.SensorId,
+                s => s.Id,
+                (sr, s) => new { SensorReading = sr, Sensor = s }
+            )
+            .GroupBy(
+                joined => new
+                {
+                    joined.Sensor.Id,
+                    joined.Sensor.Type,
+                    joined.Sensor.MetricUnit,
+                },
+                joined => joined.SensorReading.Value
+            )
+            .Select(g => new SensorReadingDataDTO
+            {
+                SensorId = g.Key.Id,
+                SensorType = g.Key.Type,
+                MetricUnit = g.Key.MetricUnit,
+                AverageValue = g.Any() ? g.Average() : null,
+            })
+            .ToListAsync();
+
+        return result;
     }
 }

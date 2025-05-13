@@ -16,6 +16,7 @@ namespace ReceiverService
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
+            builder.Services.AddHttpClient();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))

@@ -12,9 +12,9 @@ public static class ReceiverUtil
     // Only for Proof of concept, will be in .ENV file in future (??)
     private static readonly Dictionary<string, int> TopicToSensorIdMap = new()
     {
+        { "air/temperature", 1 },
+        { "air/humidity", 2 },
         { "light/reading", 3 },
-        { "temperature/reading", 1 },
-        { "humidity/reading", 2 },
         { "soil/reading", 4 },
     };
 
@@ -35,11 +35,12 @@ public static class ReceiverUtil
         mqttClient.DisconnectedAsync += e =>
         {
             logger.LogInformation("### DISCONNECTED FROM BROKER ###");
+            logger.LogInformation("Disconnect reason: {Reason}", e.Reason);
             setHealthStatus?.Invoke(false);
             return Task.CompletedTask;
         };
 
-        mqttClient.ApplicationMessageReceivedAsync += e =>
+        mqttClient.ApplicationMessageReceivedAsync += async e =>
         {
             logger.LogInformation("### RECEIVED MESSAGE ###");
 
@@ -55,7 +56,7 @@ public static class ReceiverUtil
                 if (!TopicToSensorIdMap.TryGetValue(topic, out int sensorId))
                 {
                     logger.LogWarning("Unknown topic: {Topic}, cannot map to sensor ID", topic);
-                    return Task.CompletedTask;
+                    return;
                 }
 
                 if (int.TryParse(message, out var value))
@@ -74,7 +75,7 @@ public static class ReceiverUtil
                         newSensorReading.TimeStamp
                     );
 
-                    handleSensorReading(newSensorReading).Wait();
+                    await handleSensorReading(newSensorReading);
                 }
                 else
                 {
@@ -89,7 +90,7 @@ public static class ReceiverUtil
                 logger.LogWarning(ex, "Error parsing message: {Message}", message);
             }
 
-            return Task.CompletedTask;
+            return;
         };
     }
 
@@ -107,7 +108,9 @@ public static class ReceiverUtil
             var mqttClientOptions = new MqttClientOptionsBuilder()
                 .WithTcpServer(server, port)
                 .WithClientId(clientId)
-                .WithCleanSession()
+                .WithCleanSession(false) // Use persistent sessions to maintain connection
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(120)) // Increase keep-alive to 2 minutes
+                .WithTimeout(TimeSpan.FromSeconds(60)) // Longer timeout
                 .Build();
 
             await mqttClient.ConnectAsync(mqttClientOptions, cancellationToken);
@@ -121,7 +124,7 @@ public static class ReceiverUtil
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to connect to MQTT broker");
+            logger.LogError(ex, "Failed to connect to MQTT broker: {Message}", ex.Message);
             return false;
         }
     }

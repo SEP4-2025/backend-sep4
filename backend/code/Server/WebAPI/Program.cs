@@ -18,6 +18,7 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Plant API", Version = "v1" });
@@ -25,14 +26,22 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
+
+builder.Services.AddSignalR();
+
+
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "AllowAllOrigins",
-        builder =>
+        policyBuilder =>
         {
-            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            policyBuilder
+                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io/frontend-sep4")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
         }
     );
 });
@@ -83,6 +92,9 @@ builder.Services.AddScoped<IPredictionInterface, PredictionLogic>();
 builder.Services.AddScoped<ISensorInterface, SensorLogic>();
 builder.Services.AddScoped<ISensorReadingInterface, SensorReadingLogic>();
 builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
+builder.Services.AddSingleton<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationPrefInterface, NotificationPrefLogic>();
+builder.Services.AddScoped<INotificationInterface, NotificationLogic>();
 
 builder
     .Services.AddAuthentication(options =>
@@ -146,11 +158,14 @@ else
     app.UseHttpsRedirection();
     app.UseCors("AllowAllOrigins");
 }
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseSwagger();
 app.UseSwaggerUI();

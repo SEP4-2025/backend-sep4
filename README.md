@@ -22,6 +22,21 @@ The GrowMate backend provides the following RESTful API endpoints:
 | POST   | `/auth/login`           | Login with username and password |
 | PATCH  | `/auth/change-password` | Change user password             |
 
+### Notification
+
+| Method | Endpoint                | Description                   |
+| ------ | ----------------------- | ----------------------------- |
+| POST   | `/notification/trigger` | Send notification to frontend |
+| GET    | `/notification/all`     | Get all notifications         |
+| GET    | `/notification/byType`  | Get notification by type      |
+
+### Notification Preferences
+
+| Method | Endpoint                   | Description                      |
+| ------ | -------------------------- | -------------------------------- |
+| GET    | `/notificationpref`        | Get all notification preferences |
+| PATCH  | `/notificationpref/toggle` | Toggle notification preference   |
+
 ### Gardener
 
 | Method | Endpoint         | Description           |
@@ -85,11 +100,11 @@ The GrowMate backend provides the following RESTful API endpoints:
 ### Water Pump
 
 | Method | Endpoint                          | Description                 |
-| ------ | --------------------------------- | --------------------------- |
+| ------ |-----------------------------------| --------------------------- |
 | GET    | `/waterpump`                      | Get all water pumps         |
 | GET    | `/waterpump/{id}`                 | Get water pump by ID        |
 | POST   | `/waterpump`                      | Create a new water pump     |
-| PATCH  | `/waterpump/{id}/auto-watering`   | Update auto watering status |
+| PATCH  | `/waterpump/{id}/toggle-automation`| Update auto watering status |
 | PATCH  | `/waterpump/{id}/manual-watering` | Trigger manual watering     |
 | PATCH  | `/waterpump/{id}/add-water`       | Update current water level  |
 | PATCH  | `/waterpump/{id}/threshold`       | Update threshold value      |
