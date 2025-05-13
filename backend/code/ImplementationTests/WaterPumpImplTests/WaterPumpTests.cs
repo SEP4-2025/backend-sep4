@@ -73,7 +73,7 @@ public class WaterPumpTests
         var testWaterPump = await WaterPumpSeeder.SeedWaterPumpAsync();
         bool newStatus = !testWaterPump.AutoWateringEnabled;
 
-        var result = await _waterPumpLogic.UpdateAutoWateringStatusAsync(testWaterPump.Id, newStatus);
+        var result = await _waterPumpLogic.ToggleAutomationStatusAsync(testWaterPump.Id, newStatus);
 
         Assert.IsNotNull(result);
         Assert.That(result.AutoWateringEnabled, Is.EqualTo(newStatus));

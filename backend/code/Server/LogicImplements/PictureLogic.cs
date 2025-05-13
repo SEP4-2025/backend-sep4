@@ -4,6 +4,8 @@ using Entities;
 using GoogleCloud;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Tools;
 
 namespace LogicImplements;
 
@@ -25,6 +27,24 @@ public class PictureLogic : IPictureInterface
     {
         return await _context.Pictures.Where(p => p.PlantId == plantId).ToListAsync();
     }
+
+
+
+    public async Task<Picture> AddPictureAsync(PictureDTO picture)
+    {
+        var newPicture = new Picture()
+        {
+            Url = picture.Url,
+            Note = picture.Note,
+            TimeStamp = DateTime.UtcNow,
+            PlantId = picture.PlantId
+        };
+        _context.Pictures.Add(newPicture);
+
+        await _context.SaveChangesAsync();
+        return newPicture;
+    }
+
 
     public async Task<Picture> UpdateNote(int id, string note)
     {
@@ -64,6 +84,7 @@ public class PictureLogic : IPictureInterface
         if (picture != null)
         {
             _context.Pictures.Remove(picture);
+
             await _context.SaveChangesAsync();
         }
     }

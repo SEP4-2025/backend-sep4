@@ -9,7 +9,11 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Shared\Database\Database.csproj" />
       <ProjectReference Include="..\..\Shared\DTOs\DTOs.csproj" />
+
       <ProjectReference Include="..\..\Shared\GoogleCloud\GoogleCloud.csproj" />
+
+      <ProjectReference Include="..\..\Tools\Tools.csproj" />
+
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
     </ItemGroup>
 

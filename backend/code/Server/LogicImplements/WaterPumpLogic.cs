@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Tools;
 
 namespace LogicImplements;
 
@@ -25,13 +26,16 @@ public class WaterPumpLogic : IWaterPumpInterface
         return await _context.WaterPumps.ToListAsync();
     }
 
-    public async Task<WaterPump> UpdateAutoWateringStatusAsync(int id, bool autoWatering)
+    public async Task<WaterPump> ToggleAutomationStatusAsync(int id, bool autoWatering)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
         if (waterPump == null) return null;
 
         waterPump.AutoWateringEnabled = autoWatering;
         await _context.SaveChangesAsync();
+
+        Logger.Log(1, $"Automatic watering changed to {autoWatering}.");
+
         return waterPump;
     }
 
@@ -45,6 +49,8 @@ public class WaterPumpLogic : IWaterPumpInterface
         waterPump.LastWaterAmount = waterAmount;
 
         await _context.SaveChangesAsync();
+
+        Logger.Log(1, $"Manually watered with amount: {waterAmount}.");
 
         return waterPump;
     }
@@ -79,6 +85,7 @@ public class WaterPumpLogic : IWaterPumpInterface
     {
         var waterPump = new WaterPump
         {
+            Id = waterPumpDTO.Id,
             LastWateredTime = waterPumpDTO.LastWatered,
             LastWaterAmount = waterPumpDTO.LastWaterAmount,
             AutoWateringEnabled = waterPumpDTO.AutoWatering,
