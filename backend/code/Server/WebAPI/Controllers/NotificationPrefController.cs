@@ -51,4 +51,19 @@ public class NotificationPrefController : ControllerBase
             return NotFound("Notification preference not found.");
         }
     }
+
+    [HttpGet("{gardenerId}")]
+    public async Task<ActionResult<NotificationPreferences>> GetNotificationPrefsByGardenerId(
+        int gardenerId
+    )
+    {
+        var notificationPrefs = await _notificationPrefLogic.GetNotificationPrefsByGardenerId(
+            gardenerId
+        );
+        if (notificationPrefs == null || !notificationPrefs.Any())
+        {
+            return NotFound($"No notification preferences found for gardener {gardenerId}.");
+        }
+        return Ok(notificationPrefs);
+    }
 }
