@@ -79,6 +79,7 @@ public class WaterPumpLogic : IWaterPumpInterface
     {
         var waterPump = new WaterPump
         {
+            Id = waterPumpDTO.Id,
             LastWateredTime = waterPumpDTO.LastWatered,
             LastWaterAmount = waterPumpDTO.LastWaterAmount,
             AutoWateringEnabled = waterPumpDTO.AutoWatering,
