@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,7 +82,6 @@ var app = builder.Build();
 // Configure default gardner in the database if doesnt exist yet
 using var scope = app.Services.CreateScope();
 var DbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-Logger.Initialize(DbContext);
 
 if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
 {

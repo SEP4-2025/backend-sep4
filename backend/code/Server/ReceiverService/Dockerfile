@@ -1,6 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["Server/ReceiverService/ReceiverService.csproj", "Server/ReceiverService/", "Shared/"]
+COPY ["Server/ReceiverService/ReceiverService.csproj", "Server/ReceiverService/"]
+COPY ["Shared/Database/Database.csproj", "Shared/Database/"]
+COPY ["Shared/DTOs/DTOs.csproj", "Shared/DTOs/"]
+COPY ["Server/LogicImplements/LogicImplements.csproj", "Server/LogicImplements/"]
+COPY ["Server/LogicInterfaces/LogicInterfaces.csproj", "Server/LogicInterfaces/"]
 RUN dotnet restore "Server/ReceiverService/ReceiverService.csproj"
 COPY . .
 WORKDIR "/src/Server/ReceiverService"
