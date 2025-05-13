@@ -66,7 +66,7 @@ public class SensorReadingTests
         await SensorReadingSeeder.SeedSensorReadingAsync();
         await SensorReadingSeeder.SeedSensorReadingAsync();
 
-        var result = await _sensorReadingLogic.GetSensorReadingsByDateAsync(DateTime.Today);
+        var result = await _sensorReadingLogic.GetSensorReadingsByDateAsync(DateTime.Today, DateTime.Today.AddDays(1));
 
         Assert.IsNotNull(result);
         Assert.That(result.Count, Is.EqualTo(2));
