@@ -100,11 +100,11 @@ The GrowMate backend provides the following RESTful API endpoints:
 ### Water Pump
 
 | Method | Endpoint                          | Description                 |
-| ------ | --------------------------------- | --------------------------- |
+| ------ |-----------------------------------| --------------------------- |
 | GET    | `/waterpump`                      | Get all water pumps         |
 | GET    | `/waterpump/{id}`                 | Get water pump by ID        |
 | POST   | `/waterpump`                      | Create a new water pump     |
-| PATCH  | `/waterpump/{id}/auto-watering`   | Update auto watering status |
+| PATCH  | `/waterpump/{id/toggle-automation`| Update auto watering status |
 | PATCH  | `/waterpump/{id}/manual-watering` | Trigger manual watering     |
 | PATCH  | `/waterpump/{id}/add-water`       | Update current water level  |
 | PATCH  | `/waterpump/{id}/threshold`       | Update threshold value      |

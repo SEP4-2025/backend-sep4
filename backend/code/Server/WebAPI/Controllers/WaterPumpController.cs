@@ -47,7 +47,7 @@ public class WaterPumpController : ControllerBase
         return Ok(addedPump);
     }
 
-    [HttpPatch("{id}/auto-watering")]
+    [HttpPatch("{id}/toggle-automation")]
     public async Task<ActionResult<WaterPump>> UpdateAutoWateringStatusAsync(int id, [FromBody] bool autoWatering)
     {
         var updatedPump = await _waterPumpLogic.UpdateAutoWateringStatusAsync(id, autoWatering);
