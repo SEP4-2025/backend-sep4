@@ -230,6 +230,26 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         }
     }
 
+    public async Task TriggerWateringAsync(int ms)
+    {
+        if (_mqttClient.IsConnected != true)
+        {
+            _logger.LogWarning("MQTT client is not connected. Cannot trigger watering.");
+            return;
+        }
+
+        var topic = $"pump/command";
+        
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(topic)
+            .WithPayload(ms.ToString())
+            .Build();
+
+        await _mqttClient.PublishAsync(message);
+        _logger.LogInformation("Published watering command to topic {Topic}: {Payload}", topic, ms.ToString());
+    }
+
+
     public async Task createNotification(SensorReadingDTO sensorReading)
     {
         using var scope = _serviceProvider.CreateScope();

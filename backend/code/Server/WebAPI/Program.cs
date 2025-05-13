@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ReceiverService;
 using Tools;
 using WebAPI.Services;
 
@@ -53,6 +54,13 @@ builder.Services.AddScoped<IWaterPumpInterface, WaterPumpLogic>();
 builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationPrefInterface, NotificationPrefLogic>();
 builder.Services.AddScoped<INotificationInterface, NotificationLogic>();
+
+// Add HttpClient support
+builder.Services.AddHttpClient();
+
+// Add MQTT services
+builder.Services.AddSingleton<SensorReceiverService>();
+builder.Services.AddSingleton<IMqttWateringService, MqttWateringService>();
 
 builder
     .Services.AddAuthentication(options =>

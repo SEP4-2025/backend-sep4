@@ -28,6 +28,7 @@
       <ProjectReference Include="..\..\Shared\DTOs\DTOs.csproj" />
       <ProjectReference Include="..\LogicImplements\LogicImplements.csproj" />
       <ProjectReference Include="..\LogicInterfaces\LogicInterfaces.csproj" />
+      <ProjectReference Include="..\ReceiverService\ReceiverService.csproj" />
     </ItemGroup>
 
 </Project>
