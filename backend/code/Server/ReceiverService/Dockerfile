@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["Server/ReceiverService/ReceiverService.csproj", "Server/ReceiverService/"]
+COPY ["Server/ReceiverService/ReceiverService.csproj", "Server/ReceiverService/", "Shared/"]
 RUN dotnet restore "Server/ReceiverService/ReceiverService.csproj"
 COPY . .
 WORKDIR "/src/Server/ReceiverService"
