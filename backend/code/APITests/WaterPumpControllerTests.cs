@@ -107,10 +107,10 @@ namespace APITests
         public async Task UpdateAutoWateringStatusAsync_ReturnsOk_WhenPumpExists()
         {
             // Arrange
-            _mockWaterPumpLogic.Setup(x => x.UpdateAutoWateringStatusAsync(1, true)).ReturnsAsync(_testPump);
+            _mockWaterPumpLogic.Setup(x => x.ToggleAutomationStatusAsync(1, true)).ReturnsAsync(_testPump);
 
             // Act
-            var result = await _controller.UpdateAutoWateringStatusAsync(1, true);
+            var result = await _controller.ToggleAutomationStatusAsync(1, true);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
@@ -122,10 +122,10 @@ namespace APITests
         public async Task UpdateAutoWateringStatusAsync_ReturnsNotFound_WhenPumpDoesNotExist()
         {
             // Arrange
-            _mockWaterPumpLogic.Setup(x => x.UpdateAutoWateringStatusAsync(1, true)).ReturnsAsync((WaterPump)null);
+            _mockWaterPumpLogic.Setup(x => x.ToggleAutomationStatusAsync(1, true)).ReturnsAsync((WaterPump)null);
 
             // Act
-            var result = await _controller.UpdateAutoWateringStatusAsync(1, true);
+            var result = await _controller.ToggleAutomationStatusAsync(1, true);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());

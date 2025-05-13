@@ -26,7 +26,7 @@ public class WaterPumpLogic : IWaterPumpInterface
         return await _context.WaterPumps.ToListAsync();
     }
 
-    public async Task<WaterPump> UpdateAutoWateringStatusAsync(int id, bool autoWatering)
+    public async Task<WaterPump> ToggleAutomationStatusAsync(int id, bool autoWatering)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
         if (waterPump == null) return null;
