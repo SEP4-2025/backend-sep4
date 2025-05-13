@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
 using WebAPI.Controllers;
+using WebAPI.Services;
 
 namespace APITests
 {
@@ -12,6 +13,7 @@ namespace APITests
     public class WaterPumpControllerTests
     {
         private Mock<IWaterPumpInterface> _mockWaterPumpLogic;
+        private Mock<INotificationService> _mockNotificationService;
         private WaterPumpController _controller;
         private WaterPump _testPump;
         private WaterPumpDTO _testPumpDto;
@@ -20,7 +22,8 @@ namespace APITests
         public void Setup()
         {
             _mockWaterPumpLogic = new Mock<IWaterPumpInterface>();
-            _controller = new WaterPumpController(_mockWaterPumpLogic.Object);
+            _mockNotificationService = new Mock<INotificationService>();
+            _controller = new WaterPumpController(_mockWaterPumpLogic.Object, _mockNotificationService.Object);
             _testPump = new WaterPump
             {
                 Id = 1,

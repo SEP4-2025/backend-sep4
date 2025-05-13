@@ -48,7 +48,8 @@ public class PredictionLogic : IPredictionInterface
 
         await _context.Predictions.AddAsync(newPrediction);
 
-        Logger.Log(newPrediction.GreenhouseId, $"New prediction with id: {newPrediction.Id} added.");
+        //hardcoded because we do not handle greenhouseId correctly
+        Logger.Log(1, $"New prediction added.");
 
         await _context.SaveChangesAsync();
     }
