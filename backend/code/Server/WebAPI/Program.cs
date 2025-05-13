@@ -2,6 +2,7 @@ using System.Text;
 using Database;
 using DotNetEnv;
 using Entities;
+using Google.Apis.Auth.OAuth2;
 using LogicImplements;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,38 +38,37 @@ builder.Services.AddCors(options =>
     );
 });
 //Add Google Cloud Storage credentials
-var basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\"));
-var envPath = Path.Combine(basePath, ".env");
+var json = Environment.GetEnvironmentVariable("GCS_BACKEND_KEY");
 
-
-Console.WriteLine("Current basePath: " + basePath);
-Console.WriteLine("Looking for .env at: " + envPath);
-
-
-Env.Load(envPath);
-
-
-var b64 = Environment.GetEnvironmentVariable("GCS_KEY_JSON");
-if (string.IsNullOrWhiteSpace(b64))
+if (string.IsNullOrWhiteSpace(json))
 {
-    Console.WriteLine("GCS_KEY_JSON missing or empty");
+    Console.WriteLine("❌ GCS_KEY_JSON not set");
     return;
 }
-else
+
+
+var currentDir = Directory.GetCurrentDirectory();
+string targetDir = currentDir;
+
+
+while (!targetDir.EndsWith("WebAPI") && Directory.GetParent(targetDir) != null)
 {
-    Console.WriteLine("GCS_KEY_JSON loaded with length: " + b64.Length);
+    targetDir = Directory.GetParent(targetDir)!.FullName;
 }
 
-var appRoot = Directory.GetCurrentDirectory();
-var keyPath = Path.Combine(appRoot, "gcs-key.json");
 
-File.WriteAllBytes(keyPath, Convert.FromBase64String(b64));
+if (!targetDir.EndsWith("WebAPI"))
+{
+    Console.WriteLine("❌ Could not locate WebAPI directory");
+    return;
+}
+
+var keyPath = Path.Combine(targetDir, "gcs-key.json");
+File.WriteAllText(keyPath, json);
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 
-Console.WriteLine("Key written to: " + keyPath);
+Console.WriteLine("✅ GCS key saved at: " + keyPath);
 
-
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))

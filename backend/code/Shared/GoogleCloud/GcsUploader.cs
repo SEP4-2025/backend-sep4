@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Http;
 
 namespace GoogleCloud;
 
@@ -12,6 +13,8 @@ public class GcsUploader
     public GcsUploader()
     {
         Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "gcs-key.json");
+        var gcsCredentialJson = Environment.GetEnvironmentVariable("GCS_BACKEND_KEY");
+        GoogleCredential credential = GoogleCredential.FromJson(gcsCredentialJson);
         _storageClient = StorageClient.Create();
     }
 

@@ -94,6 +94,8 @@ steps:
       - "--platform=managed"
       - "--port=8080" 
       - "--allow-unauthenticated"
+      - "--update-secrets=GCLOUD_STORAGE_CREDENTIALS=GCS_BACKEND_KEY:latest"
+      - "'--set-env-vars=GCS_BUCKET_NAME=growmate-plant-pictures"
       - "--project=${PROJECT_ID}"
     waitFor: ["Push WebAPI"]
     id: "Deploy WebAPI"

@@ -26,12 +26,16 @@
       context: .
       dockerfile: Server/WebAPI/Dockerfile
     env_file: .env
+    environment:
+      - GCS_STORAGE_CREDENTIALS = ${GCS_STORAGE_CREDENTIALS_JSON}
     ports:
       - "8080:8080"
     depends_on:
       mqtt:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - '${LOCAL_GCP_SA_KEY_PATH}:/app/secrets/gcp-key.json:ro'
 #    networks:
 #      - growmate-network
       

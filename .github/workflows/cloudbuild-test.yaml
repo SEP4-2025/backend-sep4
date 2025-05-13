@@ -21,3 +21,9 @@ jobs:
       - name: Trigger Cloud Build
         run: |
           gcloud builds submit --config=cloudbuild.yaml --substitutions=COMMIT_SHA=${{ github.sha }}
+
+      - name: Run container with GCS key
+        run: |
+          docker run --rm \
+            -e GCS_BACKEND_KEY='${{ secrets.GCS_BACKEND_KEY }}'
+            
