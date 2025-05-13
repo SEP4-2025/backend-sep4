@@ -3,6 +3,8 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Tools;
 
 namespace LogicImplements;
 
@@ -35,6 +37,7 @@ public class PictureLogic : IPictureInterface
             PlantId = picture.PlantId
         };
         _context.Pictures.Add(newPicture);
+
         await _context.SaveChangesAsync();
         return newPicture;
     }
@@ -55,6 +58,7 @@ public class PictureLogic : IPictureInterface
         if (picture != null)
         {
             _context.Pictures.Remove(picture);
+
             await _context.SaveChangesAsync();
         }
     }

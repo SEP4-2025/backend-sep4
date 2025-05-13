@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Tools;
 
 namespace LogicImplements;
 
@@ -32,6 +33,9 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         waterPump.AutoWateringEnabled = autoWatering;
         await _context.SaveChangesAsync();
+
+        Logger.Log(1, $"Automatic watering changed to {autoWatering}.");
+
         return waterPump;
     }
 
@@ -45,6 +49,8 @@ public class WaterPumpLogic : IWaterPumpInterface
         waterPump.LastWaterAmount = waterAmount;
 
         await _context.SaveChangesAsync();
+
+        Logger.Log(1, $"Manually watered with amount: {waterAmount}.");
 
         return waterPump;
     }

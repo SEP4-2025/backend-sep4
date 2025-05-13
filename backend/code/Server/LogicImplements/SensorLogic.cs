@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Tools;
 
 namespace LogicImplements;
 
@@ -36,6 +37,7 @@ public class SensorLogic : ISensorInterface
         };
 
         _context.Sensors.Add(newSensor);
+
         await _context.SaveChangesAsync();
 
         return newSensor;
