@@ -35,7 +35,12 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
     {
-        return await _context.SensorReadings.Where(sr => sr.TimeStamp == date).ToListAsync();
+        var startDate = date.Date;
+        var endDate = startDate.AddDays(1).AddMilliseconds(-1);
+
+        return await _context
+            .SensorReadings.Where(sr => sr.TimeStamp >= startDate && sr.TimeStamp <= endDate)
+            .ToListAsync();
     }
 
     public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
