@@ -221,7 +221,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
                 break;
             case "Soil Moisture":
                 var waterPump = await waterPumpLogic.GetWaterPumpByIdAsync(sensorReading.SensorId);
-                
+
                 if (
                     sensorReading.Value > sensor.ThresholdValue + 20
                     || sensorReading.Value < sensor.ThresholdValue - 20
