@@ -53,7 +53,7 @@ public class SensorReadingLogic : ISensorReadingInterface
 
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
-        
+
         return newSensorReading;
     }
 
