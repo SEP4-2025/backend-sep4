@@ -3,7 +3,6 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Tools;
 
 namespace LogicImplements;
@@ -54,8 +53,6 @@ public class SensorReadingLogic : ISensorReadingInterface
 
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
-
-        Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
 
         return newSensorReading;
     }
