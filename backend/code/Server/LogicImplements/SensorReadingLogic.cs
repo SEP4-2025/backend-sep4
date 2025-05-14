@@ -50,7 +50,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
 
-        Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
+        // Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
 
         return newSensorReading;
     }
