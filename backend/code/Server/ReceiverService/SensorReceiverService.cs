@@ -184,12 +184,10 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var waterPumpLogic = new WaterPumpLogic(dbContext);
         var sensorLogic = new SensorLogic(dbContext);
 
         var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
-
-        var waterPumpLogic = new WaterPumpLogic(dbContext);
-
 
         switch (sensor.Type)
         {
@@ -213,11 +211,20 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
 
                 break;
             case "Humidity":
-                var waterPump = await waterPumpLogic.GetWaterPumpByIdAsync(sensorReading.SensorId);
-
                 if (
                     sensorReading.Value > sensor.ThresholdValue + 7
                     || sensorReading.Value < sensor.ThresholdValue - 7
+                )
+                {
+                    await CreateNotification(sensorReading);
+                }
+                break;
+            case "Soil Moisture":
+                var waterPump = await waterPumpLogic.GetWaterPumpByIdAsync(sensorReading.SensorId);
+                
+                if (
+                    sensorReading.Value > sensor.ThresholdValue + 20
+                    || sensorReading.Value < sensor.ThresholdValue - 20
                 )
                 {
                     await CreateNotification(sensorReading);
@@ -229,15 +236,6 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
                 else if (waterPump.LastWateredTime < DateTime.UtcNow.AddHours(-24) && waterPump.AutoWateringEnabled)
                 {
                     await TriggerWateringAsync(waterPump.ThresholdValue);
-                }
-                break;
-            case "Soil Moisture":
-                if (
-                    sensorReading.Value > sensor.ThresholdValue + 20
-                    || sensorReading.Value < sensor.ThresholdValue - 20
-                )
-                {
-                    await CreateNotification(sensorReading);
                 }
                 break;
         }
