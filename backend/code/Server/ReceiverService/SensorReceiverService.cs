@@ -130,7 +130,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             }
 
             // Notification logic v2
-            await HandlePostNotifications(sensorReading);
+            // await HandlePostNotifications(sensorReading);
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
