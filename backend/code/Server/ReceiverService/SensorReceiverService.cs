@@ -33,10 +33,10 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
         _serviceProvider = serviceProvider;
         _httpClientFactory = httpClientFactory;
 
-        _server = "34.27.128.90";
-        _port = 1883;
+        // Read MQTT settings from configuration
+        _server = configuration["MqttSettings:Server"] ?? "34.27.128.90";
+        _port = int.Parse(configuration["MqttSettings:Port"] ?? "1883");
 
-        // Only for Proof of concept, will be in .ENV file in future
         // Define topics to subscribe to
         _topics = new List<string>
         {

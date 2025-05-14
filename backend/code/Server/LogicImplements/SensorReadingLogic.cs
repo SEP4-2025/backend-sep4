@@ -3,7 +3,6 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Tools;
 
 namespace LogicImplements;
@@ -54,10 +53,7 @@ public class SensorReadingLogic : ISensorReadingInterface
 
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
-
-        //hardcoded because we do not handle greenhouseId correctly
-        Logger.Log(1, $"New sensor reading added.");
-
+        
         return newSensorReading;
     }
 
