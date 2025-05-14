@@ -25,6 +25,11 @@ namespace ReceiverService
             builder.Services.AddHostedService<SensorReceiverService>();
 
             builder.Services.AddHealthChecks().AddCheck<SensorReceiverService>("mqtt_connection");
+            
+            builder.Configuration
+                .AddJsonFile("receiverSettings.json", optional: false)
+                .AddJsonFile($"receiverSettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
 
             var app = builder.Build();
 
