@@ -15,9 +15,16 @@ RUN dotnet build "WebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "WebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+RUN dotnet build "WebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+# I have no idea what this is doing, but it seems to be necessary
+COPY --from=publish /app/build/WebAPI.dll .
+COPY --from=publish /app/build/WebAPI.runtimeconfig.json .
+COPY --from=publish /app/build/*.deps.json .
+COPY --from=publish /app/build/*.pdb .
+COPY --from=publish /src/Server/WebAPI/appsettings*.json .
+COPY --from=publish /app/build/*.dll .
 ENTRYPOINT ["dotnet", "WebAPI.dll"]
