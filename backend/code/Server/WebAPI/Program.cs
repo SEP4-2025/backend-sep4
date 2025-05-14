@@ -60,7 +60,7 @@ builder.Services.AddHttpClient();
 
 // Add MQTT services
 builder.Services.AddSingleton<SensorReceiverService>();
-builder.Services.AddSingleton<IMqttWateringService, MqttWateringService>();
+builder.Services.AddSingleton<IWateringService, SensorReceiverService>();
 
 builder
     .Services.AddAuthentication(options =>

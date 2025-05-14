@@ -15,13 +15,13 @@ public class WaterPumpController : ControllerBase
 {
     private readonly IWaterPumpInterface _waterPumpLogic;
     private readonly INotificationService _notificationService;
-    private readonly IMqttWateringService _mqttWateringService;
+    private readonly IWateringService _wateringService;
 
-    public WaterPumpController(IWaterPumpInterface waterPumpLogic, INotificationService notificationService, IMqttWateringService mqttWateringService)
+    public WaterPumpController(IWaterPumpInterface waterPumpLogic, INotificationService notificationService, IWateringService wateringService)
     {
         _waterPumpLogic = waterPumpLogic;
-        _notificationService =notificationService;
-        _mqttWateringService = mqttWateringService;
+        _notificationService = notificationService;
+        _wateringService = wateringService;
     }
 
     [HttpGet("{id}")]
@@ -46,7 +46,7 @@ public class WaterPumpController : ControllerBase
     public async Task<ActionResult<int>> GetWaterPumpWaterLevelAsync(int id)
     {
         var waterLevel = await _waterPumpLogic.GetWaterPumpWaterLevelAsync(id);
-        
+
         if (waterLevel == -1)
         {
             return NotFound($"Water pump with id {id} not found.");
@@ -75,11 +75,11 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
-        
+
         if (updatedPump.WaterLevel < 250)
         {
             Logger.Log(1, $"Water level is low: {updatedPump.WaterLevel}.");
-            
+
             var notification = new NotificationDTO
             {
                 Message = $"Water level is low: {updatedPump.WaterLevel}.",
@@ -87,7 +87,7 @@ public class WaterPumpController : ControllerBase
             };
             await _notificationService.SendNotification(notification);
         }
-        
+
         return Ok(updatedPump);
     }
 
@@ -99,11 +99,28 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
-        
-        await _mqttWateringService.TriggerWateringAsync(waterAmount);
-        
+
+        if (pump.WaterLevel < 250)
+        {
+            Logger.Log(1, $"Water level is low: {pump.WaterLevel}.");
+
+            var refillNotification = new NotificationDTO
+            {
+                Message = $"Water level is low: {pump.WaterLevel}.",
+                Type = "Watering",
+                TimeStamp = DateTime.UtcNow
+            };
+            await _notificationService.SendNotification(refillNotification);
+
+            return BadRequest("Water level is too low to water the plants.");
+        }
+
+        //Actual watering
+        await _wateringService.TriggerWateringAsync(waterAmount);
+
+        // Update the water level in the database
         await _waterPumpLogic.TriggerManualWateringAsync(id, waterAmount);
-        
+
         var waterUsedNotification = new NotificationDTO
         {
             Message = $"Plant watered with {waterAmount} ml.",
@@ -112,20 +129,7 @@ public class WaterPumpController : ControllerBase
         };
 
         await _notificationService.SendNotification(waterUsedNotification);
-        
-        if (pump.WaterLevel < 250)
-        {
-            Logger.Log(1, $"Water level is low: {pump.WaterLevel}.");
-            
-            var refillNotification = new NotificationDTO
-            {
-                Message = $"Water level is low: {pump.WaterLevel}.",
-                Type = "Watering",
-                TimeStamp = DateTime.UtcNow
-            };
-            await _notificationService.SendNotification(refillNotification);
-        }
-        
+
         return Ok(pump);
     }
 
@@ -150,7 +154,7 @@ public class WaterPumpController : ControllerBase
         }
         return Ok(updatedPump);
     }
-    
+
     [HttpPatch("{id}/capacity")]
     public async Task<ActionResult<WaterPump>> UpdateCapacityValueAsync(int id, [FromBody] int newCapacityValue)
     {

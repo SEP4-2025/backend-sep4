@@ -1,6 +1,6 @@
 ﻿namespace ReceiverService;
 
-public interface IMqttWateringService
+public interface IWateringService
 {
     Task TriggerWateringAsync(int durationMs);
 }

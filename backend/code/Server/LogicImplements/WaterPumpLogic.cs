@@ -25,7 +25,7 @@ public class WaterPumpLogic : IWaterPumpInterface
     {
         return await _context.WaterPumps.ToListAsync();
     }
-    
+
     public async Task<int> GetWaterPumpWaterLevelAsync(int id)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
@@ -61,7 +61,7 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         //hardcoded because we do not handle greenhouseId correctly
         Logger.Log(1, $"Manually watered with amount: {waterAmount}.");
-        
+
         return waterPump;
     }
 
@@ -71,7 +71,7 @@ public class WaterPumpLogic : IWaterPumpInterface
         if (waterPump == null) return null;
 
         waterPump.WaterLevel += addedWaterAmount;
-        
+
         //Will not work if the water tank capacity is 0 
         if (waterPump.WaterLevel > waterPump.WaterTankCapacity)
         {
