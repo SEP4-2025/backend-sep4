@@ -76,18 +76,6 @@ public class WaterPumpController : ControllerBase
             return NotFound($"Water pump with id {id} not found.");
         }
 
-        if (updatedPump.WaterLevel < 250)
-        {
-            Logger.Log(1, $"Water level is low: {updatedPump.WaterLevel}.");
-
-            var notification = new NotificationDTO
-            {
-                Message = $"Water level is low: {updatedPump.WaterLevel}.",
-                TimeStamp = DateTime.UtcNow
-            };
-            await _notificationService.SendNotification(notification);
-        }
-
         return Ok(updatedPump);
     }
 

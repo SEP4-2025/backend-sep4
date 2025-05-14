@@ -2,5 +2,5 @@
 
 public interface IWateringService
 {
-    Task TriggerWateringAsync(int durationMs);
+    Task TriggerWateringAsync(int waterAmount);
 }
