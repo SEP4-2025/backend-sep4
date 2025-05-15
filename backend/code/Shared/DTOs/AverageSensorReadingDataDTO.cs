@@ -1,6 +1,6 @@
 ﻿namespace DTOs;
 
-public class SensorReadingDataDTO
+public class AverageSensorReadingDataDTO
 {
     public int SensorId { get; set; }
     public string SensorType { get; set; }

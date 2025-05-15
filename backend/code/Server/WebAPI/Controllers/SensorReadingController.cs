@@ -96,7 +96,7 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("average/{greenhouseId}/last24hours")]
-    public async Task<ActionResult<List<SensorReadingDataDTO>>> GetAverageSensorReadings(
+    public async Task<ActionResult<List<AverageSensorReadingDataDTO>>> GetAverageSensorReadings(
         int greenhouseId
     )
     {
@@ -105,7 +105,7 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("average/{greenhouseId}/last7days")]
-    public async Task<ActionResult<List<SensorReadingDataDTO>>> GetAverageReadingFromLast7Days(
+    public async Task<ActionResult<List<AverageSensorReadingDataDTO>>> GetAverageReadingFromLast7Days(
         int greenhouseId
     )
     {
@@ -114,7 +114,7 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("average/{greenhouseId}/last30days")]
-    public async Task<ActionResult<List<SensorReadingDataDTO>>> GetAverageReadingFromLast30Days(
+    public async Task<ActionResult<List<AverageSensorReadingDataDTO>>> GetAverageReadingFromLast30Days(
         int greenhouseId
     )
     {

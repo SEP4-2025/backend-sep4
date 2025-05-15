@@ -1,3 +1,4 @@
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,17 @@ public class LogController : ControllerBase
     public LogController(ILogInterface logInterface)
     {
         _logInterface = logInterface;
+    }
+    
+    [HttpGet("{id}/water-usage")]
+    public async Task<ActionResult<List<DailyWaterUsageDTO>>> GetWaterUsageForLastFiveDays(int id)
+    {
+        var waterUsage = await _logInterface.GetWaterUsageForLastFiveDaysAsync(id);
+        if (waterUsage == null || !waterUsage.Any())
+        {
+            return NotFound($"No water usage data found for greenhouse with id {id}");
+        }
+        return Ok(waterUsage);
     }
 
     [HttpGet]
@@ -38,6 +50,4 @@ public class LogController : ControllerBase
         await _logInterface.DeleteLogAsync(id);
         return NoContent();
     }
-
-
 }

@@ -69,13 +69,16 @@ public class WaterPumpLogic : IWaterPumpInterface
         var waterPump = await GetWaterPumpByIdAsync(id);
         if (waterPump == null) return null;
 
-        waterPump.WaterLevel += addedWaterAmount;
+        var newAmount = waterPump.WaterLevel += addedWaterAmount;
 
         //Will not work if the water tank capacity is 0 
         if (waterPump.WaterLevel > waterPump.WaterTankCapacity)
         {
             waterPump.WaterLevel = waterPump.WaterTankCapacity;
         }
+        
+        //hardcoded because we do not handle greenhouseId correctly
+        Logger.Log(1, $"Water tank refilled to {newAmount}.");
 
         await _context.SaveChangesAsync();
         return waterPump;

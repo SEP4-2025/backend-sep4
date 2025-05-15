@@ -127,7 +127,7 @@ namespace APITests
         [Test]
         public async Task GetAverageSensorReadings_ReturnsOk()
         {
-            var avgList = new List<SensorReadingDataDTO> { new() };
+            var avgList = new List<AverageSensorReadingDataDTO> { new() };
             _mockSensorReading.Setup(x => x.GetAverageSensorReadingsFromLast24Hours(1)).ReturnsAsync(avgList);
 
             var result = await _controller.GetAverageSensorReadings(1);
@@ -138,7 +138,7 @@ namespace APITests
         [Test]
         public async Task GetAverageReadingFromLast7Days_ReturnsOk()
         {
-            var avgList = new List<SensorReadingDataDTO> { new() };
+            var avgList = new List<AverageSensorReadingDataDTO> { new() };
             _mockSensorReading.Setup(x => x.GetAverageReadingFromLast7Days(1)).ReturnsAsync(avgList);
 
             var result = await _controller.GetAverageReadingFromLast7Days(1);
@@ -149,7 +149,7 @@ namespace APITests
         [Test]
         public async Task GetAverageReadingFromLast30Days_ReturnsOk()
         {
-            var avgList = new List<SensorReadingDataDTO> { new() };
+            var avgList = new List<AverageSensorReadingDataDTO> { new() };
             _mockSensorReading.Setup(x => x.GetAverageReadingFromLast30Days(1)).ReturnsAsync(avgList);
 
             var result = await _controller.GetAverageReadingFromLast30Days(1);
