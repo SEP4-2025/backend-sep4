@@ -297,7 +297,7 @@ namespace APITests
             // Assert
             Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
         }
-        
+
         [Test]
         public async Task UpdateWaterTankCapacityAsync_ReturnsOk_WhenPumpExists()
         {

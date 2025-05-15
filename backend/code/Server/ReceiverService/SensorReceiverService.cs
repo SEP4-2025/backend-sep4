@@ -297,16 +297,16 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
             CancellationToken.None
         );
         _logger.LogInformation("Sender is now sending pump data...");
-        
+
         if (!connected)
         {
             _logger.LogError("Failed to connect to MQTT broker");
             return;
         }
-        
+
         // If 250ml = 3000ms, then 1ml = 12ms
         var ms = waterAmount * 12;
-        
+
         var topic = "pump/command";
 
         var message = new MqttApplicationMessageBuilder()

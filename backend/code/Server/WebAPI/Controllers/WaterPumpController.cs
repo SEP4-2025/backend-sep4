@@ -112,8 +112,8 @@ public class WaterPumpController : ControllerBase
         {
             Console.Out.WriteLine(ex.Message);
         }
-        
-        
+
+
 
         // Update the water level in the database, just id needed
         await _waterPumpLogic.TriggerManualWateringAsync(id);
