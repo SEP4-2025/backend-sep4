@@ -33,9 +33,9 @@ public class LogLogic : ILogInterface
     // {
     //     return await _context.Logs.Where(x => x.Id == sensorId).ToListAsync();
     // }
-
+    
     // public async Task<List<Log>> GetLogsByWaterPumpIdAsync(int pumpId)
-    // {
+    // // {
     //     return await _context.Logs.Where(x => x.Id == pumpId).ToListAsync();
     // }
 

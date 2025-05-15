@@ -15,7 +15,7 @@ public class LogController : ControllerBase
     {
         _logInterface = logInterface;
     }
-
+    
     [HttpGet]
     public async Task<ActionResult<List<Log>>> GetLogs()
     {
