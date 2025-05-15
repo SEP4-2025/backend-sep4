@@ -45,17 +45,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 //Create Google Cloud Storage Credentials
-var basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\"));
-var envPath = Path.Combine(basePath, ".env");
+// Attempt to load .env from current directory (Docker case)
+if (File.Exists(".env"))
+{
+    Console.WriteLine("Loading .env from current directory.");
+    Env.Load();
+}
+else
+{
+    // Fallback for local development: ../../.env relative to Server/WebAPI/
+    var fallbackEnvPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\.env"));
+    Console.WriteLine($"Fallback: trying {fallbackEnvPath}");
+    if (File.Exists(fallbackEnvPath))
+    {
+        Env.Load(fallbackEnvPath);
+    }
+    else
+    {
+        Console.WriteLine("No .env file found!");
+    }
+}
 
-
-Console.WriteLine("Current basePath: " + basePath);
-Console.WriteLine("Looking for .env at: " + envPath);
-
-
-Env.Load(envPath);
-
-
+// Validate GCS_KEY_JSON environment variable
 var b64 = Environment.GetEnvironmentVariable("GCS_KEY_JSON");
 if (string.IsNullOrWhiteSpace(b64))
 {
@@ -64,17 +75,16 @@ if (string.IsNullOrWhiteSpace(b64))
 }
 else
 {
-    Console.WriteLine("GCS_KEY_JSON loaded with length: " + b64.Length);
+    Console.WriteLine($"GCS_KEY_JSON loaded with length: {b64.Length}");
 }
 
-var appRoot = Directory.GetCurrentDirectory();
-var keyPath = Path.Combine(appRoot, "gcs-key.json");
+// Write Google Cloud credentials file
+var keyPath = "/tmp/gcs-key.json";
 
 File.WriteAllBytes(keyPath, Convert.FromBase64String(b64));
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 
-Console.WriteLine("Key written to: " + keyPath);
-
+Console.WriteLine($"GCS credentials written to: {keyPath}");
 builder.Services.AddScoped<IGardenerInterface, GardenerLogic>();
 builder.Services.AddScoped<IGreenhouseInterface, GreenhouseLogic>();
 builder.Services.AddScoped<ILogInterface, LogLogic>();
