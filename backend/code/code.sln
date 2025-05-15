@@ -15,8 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Server\Entities\Entities.csproj", "{E2079F00-D292-4DF9-B959-CA69AF57DEB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenderService", "Server\SenderService\SenderService.csproj", "{DD7337D0-0992-4350-AC0C-EA7F9E7EEEAC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReceiverService", "Server\ReceiverService\ReceiverService.csproj", "{29996139-C2DE-4C35-B90F-F17680431BE5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "Shared\DTOs\DTOs.csproj", "{CA6BD64C-74A6-455D-9DDE-8A4265E2B173}"
