@@ -54,15 +54,14 @@ public class SensorController : ControllerBase
     [HttpPatch("update/{id}")]
     public async Task<ActionResult<Sensor>> UpdateSensor(int id, [FromBody] UpdateSensorDTO sensorToUpdate)
     {
+        if (sensorToUpdate.IsEmpty())
+        {
+            return BadRequest("Sensor data is required.");
+        }
         var updatedSensor = await sensor.UpdateSensorAsync(id, sensorToUpdate);
         if (updatedSensor == null)
         {
             return NotFound($"Sensor with ID {id} not found.");
-        }
-
-        if (sensorToUpdate.IsEmpty())
-        {
-            return BadRequest("Sensor data is required.");
         }
 
         return Ok(updatedSensor);
