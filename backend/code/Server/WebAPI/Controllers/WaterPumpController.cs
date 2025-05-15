@@ -104,7 +104,16 @@ public class WaterPumpController : ControllerBase
         }
 
         //Actual watering, needs the water amount that later converts to ms
-        await _wateringService.TriggerWateringAsync(pump.ThresholdValue);
+        try
+        {
+            await _wateringService.TriggerWateringAsync(pump.ThresholdValue);
+        }
+        catch (Exception ex)
+        {
+            Console.Out.WriteLine(ex.Message);
+        }
+        
+        
 
         // Update the water level in the database, just id needed
         await _waterPumpLogic.TriggerManualWateringAsync(id);
@@ -129,7 +138,7 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
-        
+
         if (updatedPump.WaterLevel > updatedPump.WaterTankCapacity)
         {
             return BadRequest("Water level exceeds tank capacity.");
@@ -149,7 +158,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/capacity")]
-    public async Task<ActionResult<WaterPump>> UpdateCapacityValueAsync(int id, [FromBody] int newCapacityValue)
+    public async Task<ActionResult<WaterPump>> UpdateWaterTankCapacityValueAsync(int id, [FromBody] int newCapacityValue)
     {
         var updatedPump = await _waterPumpLogic.UpdateWaterTankCapacityAsync(id, newCapacityValue);
         if (updatedPump == null)

@@ -1,4 +1,4 @@
-steps:
+  steps:
   # Build the WebAPI service
   - name: "gcr.io/cloud-builders/docker"
     args:
