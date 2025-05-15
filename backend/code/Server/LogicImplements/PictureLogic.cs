@@ -1,6 +1,7 @@
 using Database;
 using DTOs;
 using Entities;
+using GCSUploader;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,19 +28,26 @@ public class PictureLogic : IPictureInterface
         return await _context.Pictures.Where(p => p.PlantId == plantId).ToListAsync();
     }
 
-    public async Task<Picture> AddPictureAsync(PictureDTO picture)
+    public async Task<Picture> AddPictureAsync(PictureDTO pictureDto)
     {
-        var newPicture = new Picture()
-        {
-            Url = picture.Url,
-            Note = picture.Note,
-            TimeStamp = DateTime.UtcNow,
-            PlantId = picture.PlantId
-        };
-        _context.Pictures.Add(newPicture);
+        if (pictureDto.IsEmpty())
+            throw new Exception("Picture data is invalid.");
 
+        var uploader = new GCSUploader.GCSUploader();
+        var fileName = Guid.NewGuid().ToString();
+        var url = await uploader.UploadImageAsync(pictureDto.File, fileName);
+
+        var picture = new Picture
+        {
+            Url = url,
+            Note = pictureDto.Note,
+            PlantId = pictureDto.PlantId,
+            TimeStamp = DateTime.UtcNow
+        };
+
+        await _context.Pictures.AddAsync(picture);
         await _context.SaveChangesAsync();
-        return newPicture;
+        return picture;
     }
 
     public async Task<Picture> UpdateNote(int id, string note)

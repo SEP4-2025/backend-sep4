@@ -56,3 +56,6 @@ nunit-*.xml
 # Mac specific
 **/.DS_Store
 .DS_Store
+backend/code/Server/gcs-key.json
+backend/code/Server/WebAPI/gcs-key.json
+backend/code/.env
