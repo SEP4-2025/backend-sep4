@@ -285,20 +285,24 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
 
     public async Task TriggerWateringAsync(int waterAmount)
     {
-        string clientId =
-            $"GrowMateSensorReceiverService-{Guid.NewGuid().ToString().Substring(0, 6)}";
+        //Connect to MQTT broker
+        if (!_mqttClient.IsConnected)
+        {
+            string clientId =
+                $"GrowMateSensorReceiverService-{Guid.NewGuid().ToString().Substring(0, 6)}";
 
-        bool connected = await ReceiverUtil.ConnectMqttClient(
-            _mqttClient,
-            _server,
-            _port,
-            clientId,
-            _logger,
-            CancellationToken.None
-        );
-        _logger.LogInformation("Sender is now sending pump data...");
-
-        if (!connected)
+            await ReceiverUtil.ConnectMqttClient(
+                _mqttClient,
+                _server,
+                _port,
+                clientId,
+                _logger,
+                CancellationToken.None
+            );
+            _logger.LogInformation("Sender is now sending pump data...");
+        }
+        
+        if (!_mqttClient.IsConnected)
         {
             _logger.LogError("Failed to connect to MQTT broker");
             return;
