@@ -21,12 +21,7 @@ namespace APITests
             _mockPictureLogic = new Mock<IPictureInterface>();
             _controller = new PictureController(_mockPictureLogic.Object);
 
-            _testPictureDto = new PictureDTO
-            {
-                PlantId = 1,
-                Url = "http://example.com/pic.jpg",
-                Note = "Test Note"
-            };
+            _testPictureDto = new PictureDTO { PlantId = 1, Note = "Test Note" };
 
             _testPicture = new Picture
             {
@@ -40,7 +35,9 @@ namespace APITests
         [Test]
         public async Task AddPicture_ReturnsCreated_WhenValid()
         {
-            _mockPictureLogic.Setup(x => x.AddPictureAsync(_testPictureDto)).ReturnsAsync(_testPicture);
+            _mockPictureLogic
+                .Setup(x => x.AddPictureAsync(_testPictureDto))
+                .ReturnsAsync(_testPicture);
 
             var result = await _controller.AddPicture(_testPictureDto);
 
@@ -77,18 +74,21 @@ namespace APITests
         [Test]
         public async Task UpdatePictureNote_ReturnsOk_WhenPictureExists()
         {
-            _mockPictureLogic.Setup(x => x.GetPictureByPlantIdAsync(1)).ReturnsAsync(new List<Picture> { _testPicture });
+            _mockPictureLogic
+                .Setup(x => x.GetPictureByPlantIdAsync(1))
+                .ReturnsAsync(new List<Picture> { _testPicture });
 
             var result = await _controller.UpdatePictureNote(1, "Updated Note");
 
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
         }
 
-
         [Test]
         public async Task DeletePicture_ReturnsNoContent_WhenPictureExists()
         {
-            _mockPictureLogic.Setup(x => x.GetPictureByPlantIdAsync(1)).ReturnsAsync(new List<Picture> { _testPicture });
+            _mockPictureLogic
+                .Setup(x => x.GetPictureByPlantIdAsync(1))
+                .ReturnsAsync(new List<Picture> { _testPicture });
             _mockPictureLogic.Setup(x => x.DeletePictureAsync(1)).Returns(Task.CompletedTask);
 
             var result = await _controller.DeletePicture(1);
