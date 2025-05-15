@@ -15,7 +15,7 @@ public class GCSUploader
         string jsonCredentials = Environment.GetEnvironmentVariable("GCS_CREDENTIALS");
         var googleCredential = GoogleCredential.FromJson(jsonCredentials);
         _storageClient = StorageClient.Create(googleCredential);
-        
+
         // Get bucket name from environment variable
         _bucketName = Environment.GetEnvironmentVariable("GCS_BUCKET_NAME") ?? "growmate-plant-pictures";
     }
