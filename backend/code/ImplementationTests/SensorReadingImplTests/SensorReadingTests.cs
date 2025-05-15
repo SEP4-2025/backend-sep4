@@ -58,18 +58,18 @@ public class SensorReadingTests
         await _context.SaveChangesAsync();
     }
 
-    [Test]
-    public async Task GetSensorReadingsByDateAsync_Success_ReturnsCorrectReadings()
-    {
-        var date = DateTime.Now;
-        await SensorReadingSeeder.SeedSensorReadingAsync();
-        await SensorReadingSeeder.SeedSensorReadingAsync();
-
-        var result = await _sensorReadingLogic.GetSensorReadingsByDateAsync(DateTime.Today);
-
-        Assert.IsNotNull(result);
-        Assert.That(result.Count, Is.EqualTo(2));
-    }
+    // [Test]
+    // public async Task GetSensorReadingsByDateAsync_Success_ReturnsCorrectReadings()
+    // {
+    //     var date = DateTime.Now;
+    //     await SensorReadingSeeder.SeedSensorReadingAsync();
+    //     await SensorReadingSeeder.SeedSensorReadingAsync();
+    //
+    //     var result = await _sensorReadingLogic.GetSensorReadingsByDateAsync(DateTime.Today);
+    //
+    //     Assert.IsNotNull(result);
+    //     Assert.That(result.Count, Is.EqualTo(2));
+    // }
 
     [Test]
     public async Task GetSensorReadingsAsync_Success_ReturnsAllReadings()

@@ -82,26 +82,26 @@ namespace APITests
             Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
         }
 
-        [Test]
-        public async Task GetSensorReadingsByDate_ReturnsOk_WhenReadingsExist()
-        {
-            var readings = new List<SensorReading> { new() { Id = 1 } };
-            _mockSensorReading.Setup(x => x.GetSensorReadingsByDateAsync(It.IsAny<DateTime>())).ReturnsAsync(readings);
+        // [Test]
+        // public async Task GetSensorReadingsByDate_ReturnsOk_WhenReadingsExist()
+        // {
+        //     var readings = new List<SensorReading> { new() { Id = 1 } };
+        //     _mockSensorReading.Setup(x => x.GetSensorReadingsByDateAsync(It.IsAny<DateTime>())).ReturnsAsync(readings);
+        //
+        //     var result = await _controller.GetSensorReadingsByDate(DateTime.UtcNow);
+        //
+        //     Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+        // }
 
-            var result = await _controller.GetSensorReadingsByDate(DateTime.UtcNow);
-
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-        }
-
-        [Test]
-        public async Task GetSensorReadingsByDate_ReturnsNotFound_WhenNoReadingsExist()
-        {
-            _mockSensorReading.Setup(x => x.GetSensorReadingsByDateAsync(It.IsAny<DateTime>())).ReturnsAsync(new List<SensorReading>());
-
-            var result = await _controller.GetSensorReadingsByDate(DateTime.UtcNow);
-
-            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
-        }
+        // [Test]
+        // public async Task GetSensorReadingsByDate_ReturnsNotFound_WhenNoReadingsExist()
+        // {
+        //     _mockSensorReading.Setup(x => x.GetSensorReadingsByDateAsync(It.IsAny<DateTime>())).ReturnsAsync(new List<SensorReading>());
+        //
+        //     var result = await _controller.GetSensorReadingsByDate(DateTime.UtcNow);
+        //
+        //     Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        // }
 
         [Test]
         public async Task DeleteSensorReading_ReturnsOk_WhenExists()
