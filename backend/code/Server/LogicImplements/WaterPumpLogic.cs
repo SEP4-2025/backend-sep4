@@ -26,6 +26,14 @@ public class WaterPumpLogic : IWaterPumpInterface
         return await _context.WaterPumps.ToListAsync();
     }
 
+    public async Task<int> GetWaterPumpWaterLevelAsync(int id)
+    {
+        var waterPump = await GetWaterPumpByIdAsync(id);
+        if (waterPump == null) return -1;
+
+        return waterPump.WaterLevel;
+    }
+
     public async Task<WaterPump> ToggleAutomationStatusAsync(int id, bool autoWatering)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
@@ -34,6 +42,7 @@ public class WaterPumpLogic : IWaterPumpInterface
         waterPump.AutoWateringEnabled = autoWatering;
         await _context.SaveChangesAsync();
 
+        //hardcoded because we do not handle greenhouseId correctly
         Logger.Log(1, $"Automatic watering changed to {autoWatering}.");
 
         return waterPump;
@@ -50,6 +59,7 @@ public class WaterPumpLogic : IWaterPumpInterface
 
         await _context.SaveChangesAsync();
 
+        //hardcoded because we do not handle greenhouseId correctly
         Logger.Log(1, $"Manually watered with amount: {waterAmount}.");
 
         return waterPump;
@@ -61,6 +71,8 @@ public class WaterPumpLogic : IWaterPumpInterface
         if (waterPump == null) return null;
 
         waterPump.WaterLevel += addedWaterAmount;
+
+        //Will not work if the water tank capacity is 0 
         if (waterPump.WaterLevel > waterPump.WaterTankCapacity)
         {
             waterPump.WaterLevel = waterPump.WaterTankCapacity;
@@ -76,6 +88,17 @@ public class WaterPumpLogic : IWaterPumpInterface
         if (waterPump == null) return null;
 
         waterPump.ThresholdValue = newThresholdValue;
+        await _context.SaveChangesAsync();
+
+        return waterPump;
+    }
+
+    public async Task<WaterPump> UpdateWaterTankCapacityAsync(int id, int newCapacity)
+    {
+        var waterPump = await GetWaterPumpByIdAsync(id);
+        if (waterPump == null) return null;
+
+        waterPump.WaterTankCapacity = newCapacity;
         await _context.SaveChangesAsync();
 
         return waterPump;

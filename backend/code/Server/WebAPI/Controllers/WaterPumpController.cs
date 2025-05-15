@@ -2,6 +2,9 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using ReceiverService;
+using Tools;
+using WebAPI.Services;
 
 namespace WebAPI.Controllers;
 
@@ -11,10 +14,14 @@ namespace WebAPI.Controllers;
 public class WaterPumpController : ControllerBase
 {
     private readonly IWaterPumpInterface _waterPumpLogic;
+    private readonly INotificationService _notificationService;
+    private readonly IWateringService _wateringService;
 
-    public WaterPumpController(IWaterPumpInterface waterPumpLogic)
+    public WaterPumpController(IWaterPumpInterface waterPumpLogic, INotificationService notificationService, IWateringService wateringService)
     {
         _waterPumpLogic = waterPumpLogic;
+        _notificationService = notificationService;
+        _wateringService = wateringService;
     }
 
     [HttpGet("{id}")]
@@ -33,6 +40,19 @@ public class WaterPumpController : ControllerBase
     {
         var pumps = await _waterPumpLogic.GetAllWaterPumpsAsync();
         return Ok(pumps);
+    }
+
+    [HttpGet("{id}/water-level")]
+    public async Task<ActionResult<int>> GetWaterPumpWaterLevelAsync(int id)
+    {
+        var waterLevel = await _waterPumpLogic.GetWaterPumpWaterLevelAsync(id);
+
+        if (waterLevel == -1)
+        {
+            return NotFound($"Water pump with id {id} not found.");
+        }
+
+        return Ok(waterLevel);
     }
 
     [HttpPost]
@@ -55,6 +75,7 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
+
         return Ok(updatedPump);
     }
 
@@ -66,7 +87,37 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
+
+        if (pump.WaterLevel < 250)
+        {
+            Logger.Log(1, $"Water level is low: {pump.WaterLevel}.");
+
+            var refillNotification = new NotificationDTO
+            {
+                Message = $"Water level is low: {pump.WaterLevel}.",
+                Type = "Watering",
+                TimeStamp = DateTime.UtcNow
+            };
+            await _notificationService.SendNotification(refillNotification);
+
+            return BadRequest("Water level is too low to water the plants.");
+        }
+
+        //Actual watering
+        await _wateringService.TriggerWateringAsync(waterAmount);
+
+        // Update the water level in the database
         await _waterPumpLogic.TriggerManualWateringAsync(id, waterAmount);
+
+        var waterUsedNotification = new NotificationDTO
+        {
+            Message = $"Plant watered with {waterAmount} ml.",
+            Type = "Watering",
+            TimeStamp = DateTime.UtcNow
+        };
+
+        await _notificationService.SendNotification(waterUsedNotification);
+
         return Ok(pump);
     }
 
@@ -85,6 +136,17 @@ public class WaterPumpController : ControllerBase
     public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(int id, [FromBody] int newThresholdValue)
     {
         var updatedPump = await _waterPumpLogic.UpdateThresholdValueAsync(id, newThresholdValue);
+        if (updatedPump == null)
+        {
+            return NotFound($"Water pump with id {id} not found.");
+        }
+        return Ok(updatedPump);
+    }
+
+    [HttpPatch("{id}/capacity")]
+    public async Task<ActionResult<WaterPump>> UpdateCapacityValueAsync(int id, [FromBody] int newCapacityValue)
+    {
+        var updatedPump = await _waterPumpLogic.UpdateWaterTankCapacityAsync(id, newCapacityValue);
         if (updatedPump == null)
         {
             return NotFound($"Water pump with id {id} not found.");

@@ -12,10 +12,5 @@
   "AllowedHosts": "*",
 
   "WebApiEndpoint": "http://localhost:8080/notification/trigger",
-  "CloudWebApiEndpoint": "https://webapi-service-68779328892.europe-north2.run.app/notification/trigger",
-  
-  "MqttSettings": {
-    "Server": "34.27.128.90",
-    "Port": 1883
-  }
+  "CloudWebApiEndpoint": "https://webapi-service-68779328892.europe-north2.run.app/notification/trigger"
 }

@@ -3,6 +3,7 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Tools;
 
 namespace LogicImplements;
@@ -34,12 +35,7 @@ public class SensorReadingLogic : ISensorReadingInterface
 
     public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
     {
-        var startDate = date.Date;
-        var endDate = startDate.AddDays(1).AddMilliseconds(-1);
-
-        return await _context
-            .SensorReadings.Where(sr => sr.TimeStamp >= startDate && sr.TimeStamp <= endDate)
-            .ToListAsync();
+        return await _context.SensorReadings.Where(sr => sr.TimeStamp == date).ToListAsync();
     }
 
     public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
@@ -53,6 +49,8 @@ public class SensorReadingLogic : ISensorReadingInterface
 
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
+
+        // Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
 
         return newSensorReading;
     }

@@ -26,6 +26,12 @@ namespace ReceiverService
 
             builder.Services.AddHealthChecks().AddCheck<SensorReceiverService>("mqtt_connection");
 
+            //Needed for dockerfile builds as the appsettings.json files have same paths
+            builder.Configuration
+                .AddJsonFile("receiverSettings.json", optional: false)
+                .AddJsonFile($"receiverSettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
             var app = builder.Build();
 
             app.MapHealthChecks("/health");

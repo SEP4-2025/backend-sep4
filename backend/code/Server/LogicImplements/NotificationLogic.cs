@@ -31,24 +31,19 @@ public class NotificationLogic : INotificationInterface
 
         return notification;
     }
-
-    public async Task<Notification> AddNotification(NotificationDTO notificationDto)
+    
+    public async Task<Notification> AddNotification(NotificationDTO notification)
     {
-        // Map DTO to entity
-        var notification = new Notification
+        var newNotification = new Notification
         {
-            Type = notificationDto.Type,
-            Message = notificationDto.Message,
-            TimeStamp = notificationDto.TimeStamp,
-            IsRead = notificationDto.IsRead,
-            SensorId = notificationDto.SensorId,
-            WaterPumpId = notificationDto.WaterPumpId,
+            Type = notification.Type,
+            Message = notification.Message,
+            TimeStamp = DateTime.UtcNow
         };
 
-        // Add to database
-        _context.Notifications.Add(notification);
+        _context.Notifications.Add(newNotification);
         await _context.SaveChangesAsync();
 
-        return notification;
+        return newNotification;
     }
 }

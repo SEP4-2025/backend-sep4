@@ -1,3 +1,5 @@
+namespace WebAPI.Services;
+
 public interface INotificationService
 {
     Task SendNotification(NotificationDTO notification);
