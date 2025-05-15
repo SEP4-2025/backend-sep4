@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 
+namespace WebAPI.Services;
+
 public class NotificationHub : Hub
 {
     public async Task SendNotification(NotificationDTO notification)

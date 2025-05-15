@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 
+namespace WebAPI.Services;
+
 public class NotificationService : INotificationService
 {
     private readonly IHubContext<NotificationHub> _hubContext;

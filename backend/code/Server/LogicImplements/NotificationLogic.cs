@@ -31,4 +31,20 @@ public class NotificationLogic : INotificationInterface
 
         return notification;
     }
+
+    public async Task<Notification> AddNotification(NotificationDTO notification)
+    {
+        var newNotification = new Notification
+        {
+            Type = notification.Type,
+            Message = notification.Message,
+            TimeStamp = DateTime.UtcNow
+        };
+
+        _context.Notifications.Add(newNotification);
+        await _context.SaveChangesAsync();
+
+        return newNotification;
+    }
+
 }

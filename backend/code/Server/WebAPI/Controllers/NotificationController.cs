@@ -1,6 +1,7 @@
 using LogicInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Services;
 
 //Will turn on authorization later, after initial testing on cloud
 // [Authorize]
@@ -28,6 +29,9 @@ public class NotificationController : ControllerBase
         [FromBody] NotificationDTO notificationPayload
     )
     {
+        //notification will be added to db even if it does not go through  
+        await _notificationLogic.AddNotification(notificationPayload);
+
         try
         {
             var notificationPrefs = await _notificationPrefLogic.GetNotificationPrefs();
