@@ -72,7 +72,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         return await _context.SensorReadings.ToListAsync();
     }
 
-    public async Task<List<SensorReadingDataDTO>> GetAverageSensorReadingsFromLast24Hours(
+    public async Task<List<AverageSensorReadingDataDTO>> GetAverageSensorReadingsFromLast24Hours(
         int greenhouseId
     )
     {
@@ -95,7 +95,7 @@ public class SensorReadingLogic : ISensorReadingInterface
                 },
                 joined => joined.SensorReading.Value
             )
-            .Select(g => new SensorReadingDataDTO
+            .Select(g => new AverageSensorReadingDataDTO
             {
                 SensorId = g.Key.Id,
                 SensorType = g.Key.Type,
@@ -107,7 +107,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         return result;
     }
 
-    public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast7Days(int greenhouseId)
+    public async Task<List<AverageSensorReadingDataDTO>> GetAverageReadingFromLast7Days(int greenhouseId)
     {
         var timeLimit = DateTime.UtcNow.AddDays(-7);
 
@@ -128,7 +128,7 @@ public class SensorReadingLogic : ISensorReadingInterface
                 },
                 joined => joined.SensorReading.Value
             )
-            .Select(g => new SensorReadingDataDTO
+            .Select(g => new AverageSensorReadingDataDTO
             {
                 SensorId = g.Key.Id,
                 SensorType = g.Key.Type,
@@ -140,7 +140,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         return result;
     }
 
-    public async Task<List<SensorReadingDataDTO>> GetAverageReadingFromLast30Days(int greenhouseId)
+    public async Task<List<AverageSensorReadingDataDTO>> GetAverageReadingFromLast30Days(int greenhouseId)
     {
         var timeLimit = DateTime.UtcNow.AddDays(-30);
 
@@ -161,7 +161,7 @@ public class SensorReadingLogic : ISensorReadingInterface
                 },
                 joined => joined.SensorReading.Value
             )
-            .Select(g => new SensorReadingDataDTO
+            .Select(g => new AverageSensorReadingDataDTO
             {
                 SensorId = g.Key.Id,
                 SensorType = g.Key.Type,
