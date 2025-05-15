@@ -76,7 +76,7 @@ public class WaterPumpLogic : IWaterPumpInterface
         {
             waterPump.WaterLevel = waterPump.WaterTankCapacity;
         }
-        
+
         //hardcoded because we do not handle greenhouseId correctly
         Logger.Log(1, $"Water tank refilled to {newAmount}.");
 

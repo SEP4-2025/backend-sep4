@@ -14,8 +14,8 @@
 	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">C:\Users\samko\AppData\Local\JetBrains\Rider2024.3\resharper-host\temp\Rider\vAny\CoverageData\_code.1710742293\Snapshot\snapshot.utdcvr</s:String>
 	
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=09e6d8ce_002D3100_002D4ac2_002Da414_002D271fe17574c7/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GardenerTest #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="C:\Users\samko\RiderProjects\backend-sep4\backend\code\ImplementationTests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;ImplementationTests&amp;gt;" /&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=09e6d8ce_002D3100_002D4ac2_002Da414_002D271fe17574c7/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GardenerTest #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="C:\Users\samko\RiderProjects\backend-sep4\backend\code\ImplementationTests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;ImplementationTests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0d32c7a9_002Df036_002D421f_002D955f_002Df5aadf979211/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Solution /&gt;

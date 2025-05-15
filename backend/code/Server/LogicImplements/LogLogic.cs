@@ -33,7 +33,7 @@ public class LogLogic : ILogInterface
     public async Task<List<DailyWaterUsageDTO>> GetWaterUsageForLastFiveDaysAsync(int greenhouseId)
     {
         var endDate = DateTime.UtcNow;
-        var startDate = endDate.AddDays(-5); 
+        var startDate = endDate.AddDays(-5);
 
         // Fetch logs for the greenhouse within the date range
         var logs = await _context.Logs
@@ -113,7 +113,7 @@ public class LogLogic : ILogInterface
     // }
 
     // public async Task<List<Log>> GetLogsByWaterPumpIdAsync(int pumpId)
-    // {
+    // // {
     //     return await _context.Logs.Where(x => x.Id == pumpId).ToListAsync();
     // }
 
