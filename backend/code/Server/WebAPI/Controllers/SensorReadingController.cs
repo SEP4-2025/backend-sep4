@@ -50,19 +50,19 @@ public class SensorReadingController : ControllerBase
         return Ok(readings);
     }
 
-        [HttpGet("date/{date}")]
-        public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(DateTime date)
-        {
-            var startOfDay = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
-            var endOfDay = startOfDay.AddDays(1);
+    [HttpGet("date/{date}")]
+    public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(DateTime date)
+    {
+        var startOfDay = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+        var endOfDay = startOfDay.AddDays(1);
 
-            var readings = await sensorReading.GetSensorReadingsByDateAsync(startOfDay, endOfDay);
+        var readings = await sensorReading.GetSensorReadingsByDateAsync(startOfDay, endOfDay);
 
-            if (readings == null || readings.Count == 0)
-                return NotFound($"No readings found on {startOfDay.ToShortDateString()}.");
+        if (readings == null || readings.Count == 0)
+            return NotFound($"No readings found on {startOfDay.ToShortDateString()}.");
 
-            return Ok(readings);
-        }
+        return Ok(readings);
+    }
 
     [HttpPost]
     public async Task<ActionResult<SensorReading>> AddSensorReading(
