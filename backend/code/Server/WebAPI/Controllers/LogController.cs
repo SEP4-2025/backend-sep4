@@ -16,7 +16,7 @@ public class LogController : ControllerBase
     {
         _logInterface = logInterface;
     }
-    
+
     [HttpGet("{id}/water-usage")]
     public async Task<ActionResult<List<DailyWaterUsageDTO>>> GetWaterUsageForLastFiveDays(int id)
     {
@@ -27,7 +27,7 @@ public class LogController : ControllerBase
         }
         return Ok(waterUsage);
     }
-    
+
     [HttpGet]
     public async Task<ActionResult<List<Log>>> GetLogs()
     {
