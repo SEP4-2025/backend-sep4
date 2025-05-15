@@ -97,7 +97,7 @@ public class WaterPumpTests
     public async Task TriggerManualWateringAsync_InsufficientWater_ReturnsNull()
     {
         var testWaterPump = await WaterPumpSeeder.SeedWaterPumpAsync();
-
+        testWaterPump.WaterLevel = 0;
         var result = await _waterPumpLogic.TriggerManualWateringAsync(testWaterPump.Id);
 
         Assert.IsNull(result);
