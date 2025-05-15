@@ -1,7 +1,6 @@
 using System.Text;
 using Database;
 using Entities;
-using DotNetEnv;
 using LogicImplements;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -43,25 +42,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Validate GCS_KEY_JSON environment variable
-var b64 = Environment.GetEnvironmentVariable("GCS_BACKEND_KEY");
-if (string.IsNullOrWhiteSpace(b64))
-{
-    Console.WriteLine("GCS_BACKEND_KEY missing or empty");
-    return;
-}
-else
-{
-    Console.WriteLine($"GCS_BACKEND_KEY loaded with length: {b64.Length}");
-}
-
-// Write Google Cloud credentials file
-var keyPath = "/tmp/gcs-key.json";
-
-File.WriteAllBytes(keyPath, Convert.FromBase64String(b64));
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
-
-Console.WriteLine($"GCS credentials written to: {keyPath}");
 builder.Services.AddScoped<IGardenerInterface, GardenerLogic>();
 builder.Services.AddScoped<IGreenhouseInterface, GreenhouseLogic>();
 builder.Services.AddScoped<ILogInterface, LogLogic>();
