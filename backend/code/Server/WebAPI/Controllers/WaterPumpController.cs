@@ -129,7 +129,7 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
-        
+
         if (updatedPump.WaterLevel > updatedPump.WaterTankCapacity)
         {
             return BadRequest("Water level exceeds tank capacity.");
