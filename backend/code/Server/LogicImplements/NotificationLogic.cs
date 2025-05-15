@@ -31,7 +31,6 @@ public class NotificationLogic : INotificationInterface
 
         return notification;
     }
-    
     public async Task<Notification> AddNotification(NotificationDTO notification)
     {
         var newNotification = new Notification
