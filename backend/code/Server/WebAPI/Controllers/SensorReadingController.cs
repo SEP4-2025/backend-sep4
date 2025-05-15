@@ -53,12 +53,14 @@ public class SensorReadingController : ControllerBase
     [HttpGet("date/{date}")]
     public async Task<ActionResult<List<SensorReading>>> GetSensorReadingsByDate(DateTime date)
     {
-        var utcDate = DateTime.SpecifyKind(date, DateTimeKind.Utc);
-        var readings = await sensorReading.GetSensorReadingsByDateAsync(utcDate);
+        var startOfDay = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+        var endOfDay = startOfDay.AddDays(1);
+
+        var readings = await sensorReading.GetSensorReadingsByDateAsync(startOfDay, endOfDay);
+
         if (readings == null || readings.Count == 0)
-        {
-            return NotFound($"No readings found on {utcDate.ToShortDateString()}.");
-        }
+            return NotFound($"No readings found on {startOfDay.ToShortDateString()}.");
+
         return Ok(readings);
     }
 

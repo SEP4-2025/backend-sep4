@@ -51,6 +51,8 @@ public class SensorLogic : ISensorInterface
             existingSensor.Type = addSensor.Type;
         if (addSensor.MetricUnit is not null)
             existingSensor.MetricUnit = addSensor.MetricUnit;
+        if (addSensor.ThresholdValue.HasValue)
+            existingSensor.ThresholdValue = addSensor.ThresholdValue.Value;
 
         await _context.SaveChangesAsync();
 
@@ -63,6 +65,16 @@ public class SensorLogic : ISensorInterface
         if (sensorToDelete != null)
         {
             _context.Sensors.Remove(sensorToDelete);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task UpdateSensorThresholdAsync(int id, int threshold)
+    {
+        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+        if (sensor != null)
+        {
+            sensor.ThresholdValue = threshold;
             await _context.SaveChangesAsync();
         }
     }

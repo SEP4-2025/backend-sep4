@@ -33,9 +33,11 @@ public class SensorReadingLogic : ISensorReadingInterface
         return await _context.SensorReadings.Where(s => s.SensorId == sensorId).ToListAsync();
     }
 
-    public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime date)
+    public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime start, DateTime end)
     {
-        return await _context.SensorReadings.Where(sr => sr.TimeStamp == date).ToListAsync();
+        return await _context.SensorReadings
+            .Where(r => r.TimeStamp >= start && r.TimeStamp < end)
+            .ToListAsync();
     }
 
     public async Task<SensorReading> AddSensorReadingAsync(SensorReadingDTO sensorReading)
@@ -50,7 +52,7 @@ public class SensorReadingLogic : ISensorReadingInterface
         _context.SensorReadings.Add(newSensorReading);
         await _context.SaveChangesAsync();
 
-        // Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
+        Logger.Log(1, $"New sensor reading with id: {newSensorReading.Id} added.");
 
         return newSensorReading;
     }

@@ -10,4 +10,5 @@ public interface ISensorInterface
     Task<Sensor> AddSensorAsync(AddSensorDTO addSensor);
     Task<Sensor> UpdateSensorAsync(int id, UpdateSensorDTO addSensor);
     Task DeleteSensorAsync(int id);
+    Task UpdateSensorThresholdAsync(int id, int threshold);
 }

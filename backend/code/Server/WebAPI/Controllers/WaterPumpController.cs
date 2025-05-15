@@ -80,7 +80,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/manual-watering")]
-    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync(int id, [FromQuery] int waterAmount)
+    public async Task<ActionResult<WaterPump>> TriggerManualWateringAsync(int id)
     {
         var pump = await _waterPumpLogic.GetWaterPumpByIdAsync(id);
         if (pump == null)
@@ -103,15 +103,24 @@ public class WaterPumpController : ControllerBase
             return BadRequest("Water level is too low to water the plants.");
         }
 
-        //Actual watering
-        await _wateringService.TriggerWateringAsync(waterAmount);
+        //Actual watering, needs the water amount that later converts to ms
+        try
+        {
+            await _wateringService.TriggerWateringAsync(pump.ThresholdValue);
+        }
+        catch (Exception ex)
+        {
+            Console.Out.WriteLine(ex.Message);
+        }
 
-        // Update the water level in the database
-        await _waterPumpLogic.TriggerManualWateringAsync(id, waterAmount);
+
+
+        // Update the water level in the database, just id needed
+        await _waterPumpLogic.TriggerManualWateringAsync(id);
 
         var waterUsedNotification = new NotificationDTO
         {
-            Message = $"Plant watered with {waterAmount} ml.",
+            Message = $"Plant watered with {pump.ThresholdValue} ml.",
             Type = "Watering",
             TimeStamp = DateTime.UtcNow
         };
@@ -129,6 +138,11 @@ public class WaterPumpController : ControllerBase
         {
             return NotFound($"Water pump with id {id} not found.");
         }
+
+        if (updatedPump.WaterLevel > updatedPump.WaterTankCapacity)
+        {
+            return BadRequest("Water level exceeds tank capacity.");
+        }
         return Ok(updatedPump);
     }
 
@@ -144,7 +158,7 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/capacity")]
-    public async Task<ActionResult<WaterPump>> UpdateCapacityValueAsync(int id, [FromBody] int newCapacityValue)
+    public async Task<ActionResult<WaterPump>> UpdateWaterTankCapacityValueAsync(int id, [FromBody] int newCapacityValue)
     {
         var updatedPump = await _waterPumpLogic.UpdateWaterTankCapacityAsync(id, newCapacityValue);
         if (updatedPump == null)

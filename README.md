@@ -78,13 +78,14 @@ The GrowMate backend provides the following RESTful API endpoints:
 
 ### Sensor
 
-| Method | Endpoint       | Description         |
-| ------ | -------------- | ------------------- |
-| GET    | `/sensor`      | Get all sensors     |
-| GET    | `/sensor/{id}` | Get sensor by ID    |
-| POST   | `/sensor`      | Create a new sensor |
-| PATCH  | `/sensor`      | Update a sensor     |
-| DELETE | `/sensor/{id}` | Delete a sensor     |
+| Method | Endpoint                  | Description                    |
+| ------ | ------------------------- | ------------------------------ |
+| GET    | `/sensor`                 | Get all sensors                |
+| GET    | `/sensor/{id}`            | Get sensor by ID               |
+| POST   | `/sensor`                 | Create a new sensor            |
+| PATCH  | `/sensor/update/{id}`     | Update a sensor                |
+| DELETE | `/sensor/{id}`            | Delete a sensor                |
+| PATCH  | `/sensor/{id}/threshold`  | Update sensor threshold value  |
 
 ### Sensor Reading
 
@@ -99,16 +100,18 @@ The GrowMate backend provides the following RESTful API endpoints:
 
 ### Water Pump
 
-| Method | Endpoint                          | Description                 |
-| ------ |-----------------------------------| --------------------------- |
-| GET    | `/waterpump`                      | Get all water pumps         |
-| GET    | `/waterpump/{id}`                 | Get water pump by ID        |
-| POST   | `/waterpump`                      | Create a new water pump     |
-| PATCH  | `/waterpump/{id}/toggle-automation`| Update auto watering status |
-| PATCH  | `/waterpump/{id}/manual-watering` | Trigger manual watering     |
-| PATCH  | `/waterpump/{id}/add-water`       | Update current water level  |
-| PATCH  | `/waterpump/{id}/threshold`       | Update threshold value      |
-| DELETE | `/waterpump/{id}`                 | Delete a water pump         |
+| Method | Endpoint                                | Description                         |
+| ------ | --------------------------------------- | ----------------------------------- |
+| GET    | `/waterpump`                            | Get all water pumps                 |
+| GET    | `/waterpump/{id}`                       | Get water pump by ID                |
+| GET    | `/waterpump/{id}/water-level`           | Get water pump's water level        |
+| POST   | `/waterpump`                            | Create a new water pump             |
+| PATCH  | `/waterpump/{id}/toggle-automation`     | Toggle automation status            |
+| PATCH  | `/waterpump/{id}/manual-watering`       | Trigger manual watering             |
+| PATCH  | `/waterpump/{id}/add-water`             | Update current water level          |
+| PATCH  | `/waterpump/{id}/threshold`             | Update threshold value              |
+| PATCH  | `/waterpump/{id}/capacity`              | Update water tank capacity          |
+| DELETE | `/waterpump/{id}`                       | Delete a water pump                 |
 
 ### Prediction
 

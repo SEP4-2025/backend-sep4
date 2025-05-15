@@ -1,10 +1,15 @@
-﻿using DTOs;
+﻿using Database;
+using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using ReceiverService;
+using Tools;
 using WebAPI.Controllers;
 using WebAPI.Services;
 
@@ -27,7 +32,22 @@ namespace APITests
             _mockNotificationService = new Mock<INotificationService>();
             _mockMqttWateringService = new Mock<IWateringService>();
 
-            _controller = new WaterPumpController(_mockWaterPumpLogic.Object, _mockNotificationService.Object, _mockMqttWateringService.Object);
+            // Initialize the logger
+            var services = new ServiceCollection();
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase("TestDb").EnableSensitiveDataLogging()
+            );
+
+            services.AddScoped<DbContext, AppDbContext>();
+
+            var provider = services.BuildServiceProvider();
+            var _context = provider.GetRequiredService<AppDbContext>();
+
+            Logger.Initialize(_context);
+
+            _controller = new WaterPumpController(_mockWaterPumpLogic.Object, _mockNotificationService.Object,
+                _mockMqttWateringService.Object);
             _testPump = new WaterPump
             {
                 Id = 1,
@@ -143,10 +163,10 @@ namespace APITests
         {
             // Arrange
             _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
-            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1, 100)).ReturnsAsync(_testPump);
+            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1)).ReturnsAsync(_testPump);
 
             // Act
-            var result = await _controller.TriggerManualWateringAsync(1, 100);
+            var result = await _controller.TriggerManualWateringAsync(1);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
@@ -161,7 +181,7 @@ namespace APITests
             _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
 
             // Act
-            var result = await _controller.TriggerManualWateringAsync(1, 100);
+            var result = await _controller.TriggerManualWateringAsync(1);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
@@ -248,6 +268,49 @@ namespace APITests
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task GetWaterPumpWaterLevelAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.GetWaterPumpWaterLevelAsync(1);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump.WaterLevel));
+        }
+
+        [Test]
+        public async Task GetWaterPumpWaterLevelAsync_ReturnsNotFound_WhenPumpDoesNotExist()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
+
+            // Act
+            var result = await _controller.GetWaterPumpWaterLevelAsync(1);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task UpdateWaterTankCapacityAsync_ReturnsOk_WhenPumpExists()
+        {
+            // Arrange
+            _mockWaterPumpLogic.Setup(x => x.UpdateWaterTankCapacityAsync(1, 1000)).ReturnsAsync(_testPump);
+
+            // Act
+            var result = await _controller.UpdateWaterTankCapacityValueAsync(1, 1000);
+
+            // Assert
+            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult.Value, Is.EqualTo(_testPump));
         }
     }
 }

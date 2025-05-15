@@ -149,6 +149,10 @@ if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
     DbContext.SaveChanges();
 }
 
+//Add Logger
+Logger.Initialize(DbContext);
+
+
 // Configure the HTTP request pipeline. We might need to adjust for it or get other solution for running local(dev) / cloud(prod)
 if (app.Environment.IsDevelopment())
 { //Development mode

@@ -157,7 +157,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
             }
 
             // Notification logic v2
-            // await HandlePostNotifications(sensorReading);
+            await HandlePostNotifications(sensorReading);
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
@@ -285,16 +285,33 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
 
     public async Task TriggerWateringAsync(int waterAmount)
     {
-        // If 250ml = 3000ms, then 1ml = 12ms
-        var ms = waterAmount * 12;
-
-        if (_mqttClient.IsConnected != true)
+        //Connect to MQTT broker
+        if (!_mqttClient.IsConnected)
         {
-            _logger.LogWarning("MQTT client is not connected. Cannot trigger watering.");
+            string clientId =
+                $"GrowMateSensorReceiverService-{Guid.NewGuid().ToString().Substring(0, 6)}";
+
+            await ReceiverUtil.ConnectMqttClient(
+                _mqttClient,
+                _server,
+                _port,
+                clientId,
+                _logger,
+                CancellationToken.None
+            );
+            _logger.LogInformation("Sender is now sending pump data...");
+        }
+
+        if (!_mqttClient.IsConnected)
+        {
+            _logger.LogError("Failed to connect to MQTT broker");
             return;
         }
 
-        var topic = $"pump/command";
+        // If 250ml = 3000ms, then 1ml = 12ms
+        var ms = waterAmount * 12;
+
+        var topic = "pump/command";
 
         var message = new MqttApplicationMessageBuilder()
             .WithTopic(topic)

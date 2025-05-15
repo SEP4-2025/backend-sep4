@@ -83,14 +83,13 @@ public class WaterPumpTests
     public async Task TriggerManualWateringAsync_Success_UpdatesWaterLevelAndWateringInfo()
     {
         var testWaterPump = await WaterPumpSeeder.SeedWaterPumpAsync();
-        int waterAmount = 200;
-        int expectedWaterLevel = testWaterPump.WaterLevel - waterAmount;
+        int expectedWaterLevel = testWaterPump.WaterLevel - testWaterPump.ThresholdValue;
 
-        var result = await _waterPumpLogic.TriggerManualWateringAsync(testWaterPump.Id, waterAmount);
+        var result = await _waterPumpLogic.TriggerManualWateringAsync(testWaterPump.Id);
 
         Assert.IsNotNull(result);
         Assert.That(result.WaterLevel, Is.EqualTo(expectedWaterLevel));
-        Assert.That(result.LastWaterAmount, Is.EqualTo(waterAmount));
+        Assert.That(result.LastWaterAmount, Is.EqualTo(testWaterPump.ThresholdValue));
         Assert.That(result.LastWateredTime.Date, Is.EqualTo(DateTime.UtcNow.Date));
     }
 
@@ -98,9 +97,8 @@ public class WaterPumpTests
     public async Task TriggerManualWateringAsync_InsufficientWater_ReturnsNull()
     {
         var testWaterPump = await WaterPumpSeeder.SeedWaterPumpAsync();
-        int waterAmount = testWaterPump.WaterLevel + 100; // More than available
-
-        var result = await _waterPumpLogic.TriggerManualWateringAsync(testWaterPump.Id, waterAmount);
+        testWaterPump.WaterLevel = 0;
+        var result = await _waterPumpLogic.TriggerManualWateringAsync(testWaterPump.Id);
 
         Assert.IsNull(result);
     }
