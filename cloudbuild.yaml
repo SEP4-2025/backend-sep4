@@ -80,8 +80,8 @@ steps:
       - "--project=${PROJECT_ID}"
     waitFor: ["Push mqtt broker"]
     id: "Deploy mqtt"
-
-
+  
+  
   # Deploy WebAPI container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
@@ -92,9 +92,11 @@ steps:
       - "--image=gcr.io/${PROJECT_ID}/webapi:${COMMIT_SHA}"
       - "--region=europe-north2"
       - "--platform=managed"
-      - "--port=8080" 
+      - "--port=8080"
       - "--allow-unauthenticated"
       - "--project=${PROJECT_ID}"
+      - "--set-env-vars=GCS_BUCKET_NAME=growmate-backend"
+      - "--set-secrets=GCS_CREDENTIALS=GCS_BACKEND_KEY:latest"
     waitFor: ["Push WebAPI"]
     id: "Deploy WebAPI"
 
