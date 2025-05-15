@@ -32,7 +32,7 @@ public class LogLogic : ILogInterface
 
     public async Task<List<DailyWaterUsageDTO>> GetWaterUsageForLastFiveDaysAsync(int greenhouseId)
     {
-        var endDate = DateTime.UtcNow.Date.AddDays(+1);
+        var endDate = DateTime.UtcNow;
         var startDate = endDate.AddDays(-5); 
 
         // Fetch logs for the greenhouse within the date range
