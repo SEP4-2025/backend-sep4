@@ -48,19 +48,18 @@ public class WaterPumpLogic : IWaterPumpInterface
         return waterPump;
     }
 
-    public async Task<WaterPump> TriggerManualWateringAsync(int id, int waterAmount)
+    public async Task<WaterPump> TriggerManualWateringAsync(int id)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump.WaterLevel < waterAmount) return null;
 
-        waterPump.WaterLevel -= waterAmount;
+        waterPump.WaterLevel -= waterPump.ThresholdValue;
         waterPump.LastWateredTime = DateTime.UtcNow;
-        waterPump.LastWaterAmount = waterAmount;
+        waterPump.LastWaterAmount = waterPump.ThresholdValue;
 
         await _context.SaveChangesAsync();
 
         //hardcoded because we do not handle greenhouseId correctly
-        Logger.Log(1, $"Manually watered with amount: {waterAmount}.");
+        Logger.Log(1, $"Plant watered with amount: {waterPump.ThresholdValue}.");
 
         return waterPump;
     }

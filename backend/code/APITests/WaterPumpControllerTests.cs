@@ -143,10 +143,10 @@ namespace APITests
         {
             // Arrange
             _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
-            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1, 100)).ReturnsAsync(_testPump);
+            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1)).ReturnsAsync(_testPump);
 
             // Act
-            var result = await _controller.TriggerManualWateringAsync(1, 100);
+            var result = await _controller.TriggerManualWateringAsync(1);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
@@ -161,7 +161,7 @@ namespace APITests
             _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
 
             // Act
-            var result = await _controller.TriggerManualWateringAsync(1, 100);
+            var result = await _controller.TriggerManualWateringAsync(1);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
