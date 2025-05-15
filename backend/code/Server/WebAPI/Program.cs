@@ -14,9 +14,6 @@ using WebAPI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -46,38 +43,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-//Create Google Cloud Storage Credentials
-// Attempt to load .env from current directory (Docker case)
-if (File.Exists(".env"))
-{
-    Console.WriteLine("Loading .env from current directory.");
-    Env.Load();
-}
-else
-{
-    // Fallback for local development: ../../.env relative to Server/WebAPI/
-    var fallbackEnvPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\.env"));
-    Console.WriteLine($"Fallback: trying {fallbackEnvPath}");
-    if (File.Exists(fallbackEnvPath))
-    {
-        Env.Load(fallbackEnvPath);
-    }
-    else
-    {
-        Console.WriteLine("No .env file found!");
-    }
-}
-
 // Validate GCS_KEY_JSON environment variable
-var b64 = Environment.GetEnvironmentVariable("GCS_KEY_JSON");
+var b64 = Environment.GetEnvironmentVariable("GCS_BACKEND_KEY");
 if (string.IsNullOrWhiteSpace(b64))
 {
-    Console.WriteLine("GCS_KEY_JSON missing or empty");
+    Console.WriteLine("GCS_BACKEND_KEY missing or empty");
     return;
 }
 else
 {
-    Console.WriteLine($"GCS_KEY_JSON loaded with length: {b64.Length}");
+    Console.WriteLine($"GCS_BACKEND_KEY loaded with length: {b64.Length}");
 }
 
 // Write Google Cloud credentials file
