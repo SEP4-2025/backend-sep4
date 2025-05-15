@@ -39,7 +39,7 @@ public static class ReceiverUtil
             return Task.CompletedTask;
         };
 
-        mqttClient.ApplicationMessageReceivedAsync += e =>
+        mqttClient.ApplicationMessageReceivedAsync += async e =>
         {
             logger.LogInformation("### RECEIVED MESSAGE ###");
 
@@ -55,7 +55,6 @@ public static class ReceiverUtil
                 if (!TopicToSensorIdMap.TryGetValue(topic, out int sensorId))
                 {
                     logger.LogWarning("Unknown topic: {Topic}, cannot map to sensor ID", topic);
-                    return Task.CompletedTask;
                 }
 
                 if (int.TryParse(message, out var value))
@@ -74,7 +73,7 @@ public static class ReceiverUtil
                         newSensorReading.TimeStamp
                     );
 
-                    handleSensorReading(newSensorReading).Wait();
+                    await handleSensorReading(newSensorReading);
                 }
                 else
                 {
@@ -88,8 +87,6 @@ public static class ReceiverUtil
             {
                 logger.LogWarning(ex, "Error parsing message: {Message}", message);
             }
-
-            return Task.CompletedTask;
         };
     }
 
