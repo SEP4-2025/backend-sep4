@@ -3,7 +3,7 @@ substitutions:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/YOUR_PROJECT_ID/secrets/GCS_BACKEND_KEY/versions/latest
+    - versionName: projects/warm-rock-458712-a1/secrets/GCS_BACKEND_KEY/versions/latest
       env: GCS_CREDENTIALS
 
 steps:
