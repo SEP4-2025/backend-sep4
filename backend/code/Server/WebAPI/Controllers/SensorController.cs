@@ -80,4 +80,16 @@ public class SensorController : ControllerBase
         return Ok("Sensor deleted successfully.");
     }
 
+    [HttpPatch("{id}/threshold")]
+    public async Task<ActionResult> UpdateSensorThreshold(int id, [FromBody] int threshold)
+    {
+        var existing = await sensor.GetSensorByIdAsync(id);
+        if (existing == null)
+        {
+            return NotFound($"Sensor with ID {id} not found.");
+        }
+
+        await sensor.UpdateSensorThresholdAsync(id, threshold);
+        return Ok("Sensor threshold updated successfully.");
+    }
 }

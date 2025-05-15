@@ -68,4 +68,14 @@ public class SensorLogic : ISensorInterface
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task UpdateSensorThresholdAsync(int id, int threshold)
+    {
+        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+        if (sensor != null)
+        {
+            sensor.ThresholdValue = threshold;
+            await _context.SaveChangesAsync();
+        }
+    }
 }

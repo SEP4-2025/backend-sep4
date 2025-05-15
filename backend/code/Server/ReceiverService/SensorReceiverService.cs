@@ -301,7 +301,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
             );
             _logger.LogInformation("Sender is now sending pump data...");
         }
-        
+
         if (!_mqttClient.IsConnected)
         {
             _logger.LogError("Failed to connect to MQTT broker");

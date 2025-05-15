@@ -186,6 +186,7 @@ namespace APITests
             _mockSensorLogic.Verify(x => x.DeleteSensorAsync(It.IsAny<int>()), Times.Never);
         }
 
+
         // Helper test classes to avoid Moq limitations with non-virtual methods
         private class EmptyAddSensorDTO : AddSensorDTO
         {
