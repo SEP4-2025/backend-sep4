@@ -33,10 +33,10 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
         _serviceProvider = serviceProvider;
         _httpClientFactory = httpClientFactory;
 
-        // Read MQTT settings from configuration
-        _server = configuration["MqttSettings:Server"] ?? "34.27.128.90";
-        _port = int.Parse(configuration["MqttSettings:Port"] ?? "1883");
+        _server = "34.27.128.90";
+        _port = 1883;
 
+        // Only for Proof of concept, will be in .ENV file in future
         // Define topics to subscribe to
         _topics = new List<string>
         {
@@ -114,10 +114,23 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
 
             var sensorReadingLogic = new SensorReadingLogic(dbContext);
 
-            await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
+            try
+            {
+                _logger.LogInformation("Adding sensor reading to database...");
+                await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
+                _logger.LogInformation(
+                    "Sensor reading added to database: {SensorReading}",
+                    JsonSerializer.Serialize(sensorReading)
+                );
+            }
+            catch
+            {
+                _logger.LogError("Failed to add sensor reading to database");
+                return;
+            }
 
             // Notification logic v2
-            await HandlePostNotifications(sensorReading);
+            // await HandlePostNotifications(sensorReading);
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
