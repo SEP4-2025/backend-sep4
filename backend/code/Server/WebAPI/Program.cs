@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ReceiverService;
 using Tools;
+using WebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +55,13 @@ builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationPrefInterface, NotificationPrefLogic>();
 builder.Services.AddScoped<INotificationInterface, NotificationLogic>();
 
+// Add HttpClient support
+builder.Services.AddHttpClient();
+
+// Add MQTT services
+builder.Services.AddSingleton<SensorReceiverService>();
+builder.Services.AddSingleton<IWateringService, SensorReceiverService>();
+
 builder
     .Services.AddAuthentication(options =>
     {
@@ -80,10 +89,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure default gardner in the database if doesnt exist yet
+// Configure default gardner in the database if does not exist yet
 using var scope = app.Services.CreateScope();
 var DbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-Logger.Initialize(DbContext);
 
 if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
 {
@@ -97,6 +105,10 @@ if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
     DbContext.Gardeners.Add(gardener);
     DbContext.SaveChanges();
 }
+
+//Add Logger
+Logger.Initialize(DbContext);
+
 
 // Configure the HTTP request pipeline. We might need to adjust for it or get other solution for running local(dev) / cloud(prod)
 if (app.Environment.IsDevelopment())

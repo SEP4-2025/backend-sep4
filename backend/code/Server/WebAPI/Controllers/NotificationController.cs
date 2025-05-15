@@ -1,6 +1,9 @@
+using DTOs;
+using Entities;
 using LogicInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Services;
 
 //Will turn on authorization later, after initial testing on cloud
 // [Authorize]
@@ -28,22 +31,46 @@ public class NotificationController : ControllerBase
         [FromBody] NotificationDTO notificationPayload
     )
     {
+        //notification will be added to db even if it does not go through  
+        await _notificationLogic.AddNotification(notificationPayload);
+
         try
         {
+            // Always store the notification regardless of preferences
+            var notification = await _notificationLogic.AddNotification(notificationPayload);
+
+            // Log the notification receipt
+            Console.WriteLine(
+                $"Notification received: Type={notificationPayload.Type}, Message={notificationPayload.Message}"
+            );
+
             var notificationPrefs = await _notificationPrefLogic.GetNotificationPrefs();
             var gardenerPrefs = notificationPrefs
                 .Where(p => p.Type == notificationPayload.Type && p.IsEnabled == true)
                 .ToList();
+
             if (gardenerPrefs.Count == 0)
             {
-                return NotFound("Notification disabled");
+                // Still return OK but note that no one will be notified
+                return Ok(
+                    new
+                    {
+                        status = "Notification saved but no enabled preferences found for this type",
+                        notificationId = notification.Id,
+                    }
+                );
             }
             else
             {
                 await _notificationService.SendNotification(notificationPayload);
+                return Ok(
+                    new
+                    {
+                        status = "Notification triggered successfully",
+                        notificationId = notification.Id,
+                    }
+                );
             }
-
-            return Ok(new { status = "Notification triggered successfully" });
         }
         catch (Exception ex)
         {

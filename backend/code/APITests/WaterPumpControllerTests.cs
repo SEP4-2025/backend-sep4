@@ -4,7 +4,9 @@ using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
+using ReceiverService;
 using WebAPI.Controllers;
+using WebAPI.Services;
 
 namespace APITests
 {
@@ -12,6 +14,8 @@ namespace APITests
     public class WaterPumpControllerTests
     {
         private Mock<IWaterPumpInterface> _mockWaterPumpLogic;
+        private Mock<INotificationService> _mockNotificationService;
+        private Mock<IWateringService> _mockMqttWateringService;
         private WaterPumpController _controller;
         private WaterPump _testPump;
         private WaterPumpDTO _testPumpDto;
@@ -20,7 +24,10 @@ namespace APITests
         public void Setup()
         {
             _mockWaterPumpLogic = new Mock<IWaterPumpInterface>();
-            _controller = new WaterPumpController(_mockWaterPumpLogic.Object);
+            _mockNotificationService = new Mock<INotificationService>();
+            _mockMqttWateringService = new Mock<IWateringService>();
+
+            _controller = new WaterPumpController(_mockWaterPumpLogic.Object, _mockNotificationService.Object, _mockMqttWateringService.Object);
             _testPump = new WaterPump
             {
                 Id = 1,
@@ -136,10 +143,10 @@ namespace APITests
         {
             // Arrange
             _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
-            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1, 100)).ReturnsAsync(_testPump);
+            _mockWaterPumpLogic.Setup(x => x.TriggerManualWateringAsync(1)).ReturnsAsync(_testPump);
 
             // Act
-            var result = await _controller.TriggerManualWateringAsync(1, 100);
+            var result = await _controller.TriggerManualWateringAsync(1);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
@@ -154,7 +161,7 @@ namespace APITests
             _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
 
             // Act
-            var result = await _controller.TriggerManualWateringAsync(1, 100);
+            var result = await _controller.TriggerManualWateringAsync(1);
 
             // Assert
             Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());

@@ -8,7 +8,7 @@ using MQTTnet;
 
 namespace ReceiverService;
 
-public class SensorReceiverService : BackgroundService, IHealthCheck
+public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringService
 {
     private readonly IMqttClient _mqttClient;
     private readonly MqttClientFactory _mqttFactory = new();
@@ -65,6 +65,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
             isConnected => _isHealthy = isConnected
         );
 
+        int reconnectAttempts = 0;
+        const int maxReconnectDelay = 60000; // 1 minute max delay
+
         try
         {
             await ConnectAndSubscribe(stoppingToken);
@@ -76,11 +79,35 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
                     if (!_mqttClient.IsConnected)
                     {
                         _isHealthy = false;
-                        _logger.LogWarning("Connection lost. Attempting to reconnect...");
-                        await ConnectAndSubscribe(stoppingToken);
-                    }
 
-                    await Task.Delay(5000, stoppingToken);
+                        // Calculate backoff delay with exponential backoff
+                        int delayMs = Math.Min(
+                            (int)(1000 * Math.Pow(2, reconnectAttempts)),
+                            maxReconnectDelay
+                        );
+                        reconnectAttempts++;
+
+                        _logger.LogWarning(
+                            "Connection lost. Attempting to reconnect in {DelaySeconds} seconds (attempt {Attempt})...",
+                            delayMs / 1000,
+                            reconnectAttempts
+                        );
+
+                        await Task.Delay(delayMs, stoppingToken);
+                        await ConnectAndSubscribe(stoppingToken);
+
+                        if (_mqttClient.IsConnected)
+                        {
+                            // Reset reconnect counter on successful connection
+                            reconnectAttempts = 0;
+                        }
+                    }
+                    else
+                    {
+                        // If connected, reset reconnect counter and wait
+                        reconnectAttempts = 0;
+                        await Task.Delay(5000, stoppingToken);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -100,7 +127,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
         }
         finally
         {
-            await Task.Delay(5000);
+            await ReceiverUtil.DisconnectMqttClient(_mqttClient, _logger, CancellationToken.None);
         }
     }
 
@@ -142,7 +169,9 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
     private async Task ConnectAndSubscribe(CancellationToken stoppingToken)
     {
-        string clientId = $"SensorReceiver_{Guid.NewGuid().ToString("N")}";
+        // Use a stable client ID to prevent constant reconnections
+        string clientId =
+            $"GrowMateSensorReceiverService-{Guid.NewGuid().ToString().Substring(0, 6)}";
 
         bool connected = await ReceiverUtil.ConnectMqttClient(
             _mqttClient,
@@ -197,6 +226,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var waterPumpLogic = new WaterPumpLogic(dbContext);
         var sensorLogic = new SensorLogic(dbContext);
 
         var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
@@ -209,7 +239,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
                     || sensorReading.Value < sensor.ThresholdValue - 150
                 )
                 {
-                    await createNotification(sensorReading);
+                    await CreateNotification(sensorReading);
                 }
                 break;
             case "Temperature":
@@ -218,7 +248,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
                     || sensorReading.Value < sensor.ThresholdValue - 4
                 )
                 {
-                    await createNotification(sensorReading);
+                    await CreateNotification(sensorReading);
                 }
 
                 break;
@@ -228,22 +258,54 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
                     || sensorReading.Value < sensor.ThresholdValue - 7
                 )
                 {
-                    await createNotification(sensorReading);
+                    await CreateNotification(sensorReading);
                 }
                 break;
             case "Soil Moisture":
+                var waterPump = await waterPumpLogic.GetWaterPumpByIdAsync(sensorReading.SensorId);
+
                 if (
                     sensorReading.Value > sensor.ThresholdValue + 20
                     || sensorReading.Value < sensor.ThresholdValue - 20
                 )
                 {
-                    await createNotification(sensorReading);
+                    await CreateNotification(sensorReading);
+                }
+                else if (sensorReading.Value < 40 && waterPump.AutoWateringEnabled)
+                {
+                    await TriggerWateringAsync(waterPump.ThresholdValue);
+                }
+                else if (waterPump.LastWateredTime < DateTime.UtcNow.AddHours(-24) && waterPump.AutoWateringEnabled)
+                {
+                    await TriggerWateringAsync(waterPump.ThresholdValue);
                 }
                 break;
         }
     }
 
-    public async Task createNotification(SensorReadingDTO sensorReading)
+    public async Task TriggerWateringAsync(int waterAmount)
+    {
+        // If 250ml = 3000ms, then 1ml = 12ms
+        var ms = waterAmount * 12;
+
+        if (_mqttClient.IsConnected != true)
+        {
+            _logger.LogWarning("MQTT client is not connected. Cannot trigger watering.");
+            return;
+        }
+
+        var topic = $"pump/command";
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(topic)
+            .WithPayload(ms.ToString())
+            .Build();
+
+        await _mqttClient.PublishAsync(message);
+        _logger.LogInformation("Published watering command to topic {Topic}: {Payload}ml ({Duration}ms)", topic, waterAmount, ms);
+    }
+
+    public async Task CreateNotification(SensorReadingDTO sensorReading)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();

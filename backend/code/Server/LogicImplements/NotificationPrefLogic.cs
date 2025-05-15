@@ -20,6 +20,24 @@ public class NotificationPrefLogic : INotificationPrefInterface
         return await _context.NotificationPreferences.ToListAsync();
     }
 
+    public async Task<List<NotificationPreferences>> GetNotificationPrefsByGardenerId(
+        int gardenerId
+    )
+    {
+        var preferences = await _context
+            .NotificationPreferences.Where(p => p.GardenerId == gardenerId)
+            .ToListAsync();
+
+        if (preferences == null || preferences.Count == 0)
+        {
+            throw new KeyNotFoundException(
+                $"No notification preferences found for gardener {gardenerId}."
+            );
+        }
+
+        return preferences;
+    }
+
     public async Task UpdateNotificationPref(int gardenerId, string type)
     {
         var preference = await _context
