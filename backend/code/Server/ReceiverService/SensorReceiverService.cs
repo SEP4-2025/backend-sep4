@@ -140,10 +140,23 @@ public class SensorReceiverService : BackgroundService, IHealthCheck
 
             var sensorReadingLogic = new SensorReadingLogic(dbContext);
 
-            await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
+            try
+            {
+                _logger.LogInformation("Adding sensor reading to database...");
+                await sensorReadingLogic.AddSensorReadingAsync(sensorReading);
+                _logger.LogInformation(
+                    "Sensor reading added to database: {SensorReading}",
+                    JsonSerializer.Serialize(sensorReading)
+                );
+            }
+            catch
+            {
+                _logger.LogError("Failed to add sensor reading to database");
+                return;
+            }
 
             // Notification logic v2
-            await HandlePostNotifications(sensorReading);
+            // await HandlePostNotifications(sensorReading);
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
