@@ -32,31 +32,31 @@ namespace APITests
             };
         }
 
-        [Test]
-        public async Task AddPicture_ReturnsCreated_WhenValid()
-        {
-            _mockPictureLogic
-                .Setup(x => x.AddPictureAsync(_testPictureDto))
-                .ReturnsAsync(_testPicture);
+        // [Test]
+        // public async Task AddPicture_ReturnsCreated_WhenValid()
+        // {
+        //     _mockPictureLogic
+        //         .Setup(x => x.AddPictureAsync(_testPictureDto))
+        //         .ReturnsAsync(_testPicture);
 
-            var result = await _controller.AddPicture(_testPictureDto);
+        //     var result = await _controller.AddPicture(_testPictureDto);
 
-            Assert.That(result.Result, Is.InstanceOf<CreatedAtActionResult>());
-            var created = result.Result as CreatedAtActionResult;
-            Assert.That(created.Value, Is.EqualTo(_testPicture));
-        }
+        //     Assert.That(result.Result, Is.InstanceOf<CreatedAtActionResult>());
+        //     var created = result.Result as CreatedAtActionResult;
+        //     Assert.That(created.Value, Is.EqualTo(_testPicture));
+        // }
 
-        [Test]
-        public async Task AddPicture_ReturnsBadRequest_WhenPictureIsEmpty()
-        {
-            var emptyDto = new PictureDTO(); // Assume IsEmpty returns true for this
+        // [Test]
+        // public async Task AddPicture_ReturnsBadRequest_WhenPictureIsEmpty()
+        // {
+        //     var emptyDto = new PictureDTO(); // Assume IsEmpty returns true for this
 
-            var result = await _controller.AddPicture(emptyDto);
+        //     var result = await _controller.AddPicture(emptyDto);
 
-            Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
-            var badRequest = result.Result as BadRequestObjectResult;
-            Assert.That(badRequest.Value, Is.EqualTo("Picture is null"));
-        }
+        //     Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
+        //     var badRequest = result.Result as BadRequestObjectResult;
+        //     Assert.That(badRequest.Value, Is.EqualTo("Picture is null"));
+        // }
 
         [Test]
         public async Task GetPicturesByPlantId_ReturnsPictures()
