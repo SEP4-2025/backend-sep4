@@ -8,16 +8,37 @@ namespace LogicImplements;
 
 public class LogLogic : ILogInterface
 {
-    public readonly AppDbContext _context;
+    private readonly AppDbContext _context;
 
     public LogLogic(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Log?> GetLogByIdAsync(int id)
+    public async Task<Log> AddLogAsync(Log log)
     {
-        return await _context.Logs.FirstOrDefaultAsync(x => x.Id == id);
+        var newLog = new Log()
+        {
+            Timestamp = log.Timestamp,
+            Message = log.Message,
+            GreenhouseId = log.GreenhouseId
+        };
+        await _context.Logs.AddAsync(newLog);
+        await _context.SaveChangesAsync();
+
+        return newLog;
+    }
+
+    public async Task<Log> GetLogByIdAsync(int id)
+    {
+        var log = await _context.Logs.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (log == null)
+        {
+            throw new Exception("Log not found.");
+        }
+
+        return log;
     }
 
     public async Task<List<Log>> GetLogsByDateAsync(DateTime date)
@@ -32,25 +53,23 @@ public class LogLogic : ILogInterface
 
     public async Task<List<DailyWaterUsageDTO>> GetWaterUsageForLastFiveDaysAsync(int greenhouseId)
     {
+        //This method gets water usage for the last 5 days,
+        //it is done through logs due to the fact that we do not have a water usage table,
+        //and we do not want to add a new table just for this
         var endDate = DateTime.UtcNow;
         var startDate = endDate.AddDays(-5);
 
         // Fetch logs for the greenhouse within the date range
-        var logs = await _context.Logs
-            .Where(x => x.GreenhouseId == greenhouseId &&
-                        x.Timestamp >= startDate &&
-                        x.Timestamp < endDate)
+        var logs = await _context
+            .Logs.Where(x =>
+                x.GreenhouseId == greenhouseId && x.Timestamp >= startDate && x.Timestamp < endDate
+            )
             .OrderBy(x => x.Timestamp)
             .ToListAsync();
 
         // Group logs by date
-        var dailyData = logs
-            .GroupBy(log => log.Timestamp.Date)
-            .Select(group => new
-            {
-                Date = group.Key,
-                Logs = group.ToList()
-            })
+        var dailyData = logs.GroupBy(log => log.Timestamp.Date)
+            .Select(group => new { Date = group.Key, Logs = group.ToList() })
             .ToList();
 
         var results = new List<DailyWaterUsageDTO>();
@@ -59,9 +78,7 @@ public class LogLogic : ILogInterface
         foreach (var day in dailyData)
         {
             // Extract watering logs
-            var wateringLogs = day.Logs
-                .Where(l => l.Message.Contains("watered with"))
-                .ToList();
+            var wateringLogs = day.Logs.Where(l => l.Message.Contains("watered with")).ToList();
 
             // Calculate total water usage for the day
             int dailyWaterUsage = 0;
@@ -77,9 +94,11 @@ public class LogLogic : ILogInterface
 
             // Get the latest water level reported for the day
             int waterLevel = 0;
-            var waterLevelLogs = day.Logs
-                .Where(l => l.Message.Contains("Water tank refilled to") ||
-                            l.Message.Contains("Water level is"))
+            var waterLevelLogs = day
+                .Logs.Where(l =>
+                    l.Message.Contains("Water tank refilled to")
+                    || l.Message.Contains("Water level is")
+                )
                 .OrderByDescending(l => l.Timestamp)
                 .FirstOrDefault();
 
@@ -97,41 +116,17 @@ public class LogLogic : ILogInterface
                 }
             }
 
-            results.Add(new DailyWaterUsageDTO
-            {
-                Date = day.Date,
-                DailyWaterUsage = dailyWaterUsage,
-                WaterLevel = waterLevel
-            });
+            results.Add(
+                new DailyWaterUsageDTO
+                {
+                    Date = day.Date,
+                    DailyWaterUsage = dailyWaterUsage,
+                    WaterLevel = waterLevel
+                }
+            );
         }
         return results;
     }
-
-    // public async Task<List<Log>> GetLogsBySensorIdAsync(int sensorId)
-    // {
-    //     return await _context.Logs.Where(x => x.Id == sensorId).ToListAsync();
-    // }
-
-    // public async Task<List<Log>> GetLogsByWaterPumpIdAsync(int pumpId)
-    // // {
-    //     return await _context.Logs.Where(x => x.Id == pumpId).ToListAsync();
-    // }
-
-    // public async Task<Log> AddLogAsync(Log log)
-    // {
-    //     var newLog = new Log()
-    //     {
-    //         Timestamp = log.Timestamp,
-    //         Message = log.Message,
-    //         SensorReadingId = log.SensorReadingId,
-    //         WaterPumpId = log.WaterPumpId,
-    //         GreenhouseId = log.GreenhouseId
-    //     };
-    //     await _context.Logs.AddAsync(newLog);
-    //     await _context.SaveChangesAsync();
-    //     
-    //     return newLog;
-    // }
 
     public async Task DeleteLogAsync(int id)
     {

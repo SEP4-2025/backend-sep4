@@ -3,13 +3,12 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
-using Tools;
 
 namespace LogicImplements;
 
 public class GreenhouseLogic : IGreenhouseInterface
 {
-    public readonly AppDbContext _context;
+    private readonly AppDbContext _context;
 
     public GreenhouseLogic(AppDbContext context)
     {
@@ -21,19 +20,42 @@ public class GreenhouseLogic : IGreenhouseInterface
         return await _context.Greenhouses.ToListAsync();
     }
 
-    public async Task<Greenhouse?> GetGreenhouseById(int id)
+    public async Task<Greenhouse> GetGreenhouseById(int id)
     {
-        return await _context.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
+        var greenhouse = await _context.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
+
+        if (greenhouse == null)
+        {
+            throw new KeyNotFoundException($"Greenhouse with id {id} not found.");
+        }
+
+        return greenhouse;
     }
 
-    public async Task<Greenhouse?> GetGreenhouseByName(string name)
+    public async Task<Greenhouse> GetGreenhouseByName(string name)
     {
-        return await _context.Greenhouses.FirstOrDefaultAsync(g => g.Name == name);
+        var gardener = await _context.Greenhouses.FirstOrDefaultAsync(g => g.Name == name);
+
+        if (gardener == null)
+        {
+            throw new KeyNotFoundException($"Greenhouse with name {name} not found.");
+        }
+
+        return gardener;
     }
 
-    public async Task<Greenhouse?> GetGreenhouseByGardenerId(int gardenerId)
+    public async Task<Greenhouse> GetGreenhouseByGardenerId(int gardenerId)
     {
-        return await _context.Greenhouses.FirstOrDefaultAsync(g => g.GardenerId == gardenerId);
+        var greenhouse = await _context.Greenhouses.FirstOrDefaultAsync(g =>
+            g.GardenerId == gardenerId
+        );
+
+        if (greenhouse == null)
+        {
+            throw new KeyNotFoundException($"Greenhouse with gardener id {gardenerId} not found.");
+        }
+
+        return greenhouse;
     }
 
     public async Task<Greenhouse> AddGreenhouse(GreenhouseDTO greenhouse)
@@ -48,14 +70,18 @@ public class GreenhouseLogic : IGreenhouseInterface
         await _context.SaveChangesAsync();
 
         return newGreenhouse;
-
     }
 
     public async Task<Greenhouse> UpdateGreenhouseName(int id, string name)
     {
         var greenhouse = await _context.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
-        greenhouse.Name = name;
 
+        if (greenhouse == null)
+        {
+            throw new KeyNotFoundException($"Greenhouse with id {id} not found.");
+        }
+
+        greenhouse.Name = name;
         await _context.SaveChangesAsync();
 
         return greenhouse;
@@ -65,16 +91,23 @@ public class GreenhouseLogic : IGreenhouseInterface
     {
         var existingGreenhouse = await _context.Greenhouses.FindAsync(greenhouse.Id);
 
+        if (existingGreenhouse == null)
+        {
+            throw new KeyNotFoundException($"Greenhouse with id {greenhouse.Id} not found.");
+        }
+
         existingGreenhouse.Name = greenhouse.Name;
         existingGreenhouse.GardenerId = greenhouse.GardenerId;
 
         await _context.SaveChangesAsync();
+
         return existingGreenhouse;
     }
 
     public async Task DeleteGreenhouse(int id)
     {
         var greenhouseToDelete = await _context.Greenhouses.FirstOrDefaultAsync(s => s.Id == id);
+
         if (greenhouseToDelete != null)
         {
             _context.Greenhouses.Remove(greenhouseToDelete);

@@ -7,7 +7,6 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class GreenhouseController : ControllerBase
 {
     private readonly IGreenhouseInterface _greenhouse;
@@ -63,7 +62,9 @@ public class GreenhouseController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Greenhouse>> AddGreenhouseAsync([FromBody] GreenhouseDTO greenhouse)
+    public async Task<ActionResult<Greenhouse>> AddGreenhouseAsync(
+        [FromBody] GreenhouseDTO greenhouse
+    )
     {
         if (greenhouse.isEmpty())
         {
@@ -82,7 +83,10 @@ public class GreenhouseController : ControllerBase
     }
 
     [HttpPut("update/{id}")]
-    public async Task<ActionResult<Greenhouse>> UpdateGreenhouseNameAsync(int id, [FromBody] string name)
+    public async Task<ActionResult<Greenhouse>> UpdateGreenhouseNameAsync(
+        int id,
+        [FromBody] string name
+    )
     {
         var greenhouse = await _greenhouse.GetGreenhouseById(id);
         if (greenhouse == null)
@@ -117,7 +121,9 @@ public class GreenhouseController : ControllerBase
         {
             if (e.InnerException?.Message.Contains("Plant_greenhouseid_fkey") == true)
             {
-                return BadRequest("Cannot delete Greenhouse because it is associated with a Plant.");
+                return BadRequest(
+                    "Cannot delete Greenhouse because it is associated with a Plant."
+                );
             }
             if (e.InnerException?.Message.Contains("Sensor_greenhouseid_fkey") == true)
             {

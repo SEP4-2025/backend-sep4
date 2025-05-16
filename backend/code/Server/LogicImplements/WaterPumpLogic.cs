@@ -9,16 +9,23 @@ namespace LogicImplements;
 
 public class WaterPumpLogic : IWaterPumpInterface
 {
-    public AppDbContext _context;
+    private readonly AppDbContext _context;
 
     public WaterPumpLogic(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<WaterPump?> GetWaterPumpByIdAsync(int id)
+    public async Task<WaterPump> GetWaterPumpByIdAsync(int id)
     {
-        return await _context.WaterPumps.FirstOrDefaultAsync(w => w.Id == id);
+        var waterPump = await _context.WaterPumps.FirstOrDefaultAsync(w => w.Id == id);
+
+        if (waterPump == null)
+        {
+            throw new KeyNotFoundException($"Water pump with ID {id} not found.");
+        }
+
+        return waterPump;
     }
 
     public async Task<List<WaterPump>> GetAllWaterPumpsAsync()
@@ -29,7 +36,6 @@ public class WaterPumpLogic : IWaterPumpInterface
     public async Task<int> GetWaterPumpWaterLevelAsync(int id)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump == null) return -1;
 
         return waterPump.WaterLevel;
     }
@@ -37,7 +43,6 @@ public class WaterPumpLogic : IWaterPumpInterface
     public async Task<WaterPump> ToggleAutomationStatusAsync(int id, bool autoWatering)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump == null) return null;
 
         waterPump.AutoWateringEnabled = autoWatering;
         await _context.SaveChangesAsync();
@@ -67,11 +72,10 @@ public class WaterPumpLogic : IWaterPumpInterface
     public async Task<WaterPump> UpdateCurrentWaterLevelAsync(int id, int addedWaterAmount)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump == null) return null;
 
         var newAmount = waterPump.WaterLevel += addedWaterAmount;
 
-        //Will not work if the water tank capacity is 0 
+        //Will not work if the water tank capacity is 0
         if (waterPump.WaterLevel > waterPump.WaterTankCapacity)
         {
             waterPump.WaterLevel = waterPump.WaterTankCapacity;
@@ -87,7 +91,6 @@ public class WaterPumpLogic : IWaterPumpInterface
     public async Task<WaterPump> UpdateThresholdValueAsync(int id, int newThresholdValue)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump == null) return null;
 
         waterPump.ThresholdValue = newThresholdValue;
         await _context.SaveChangesAsync();
@@ -98,7 +101,6 @@ public class WaterPumpLogic : IWaterPumpInterface
     public async Task<WaterPump> UpdateWaterTankCapacityAsync(int id, int newCapacity)
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
-        if (waterPump == null) return null;
 
         waterPump.WaterTankCapacity = newCapacity;
         await _context.SaveChangesAsync();
@@ -106,17 +108,17 @@ public class WaterPumpLogic : IWaterPumpInterface
         return waterPump;
     }
 
-    public async Task<WaterPump> AddWaterPumpAsync(WaterPumpDTO waterPumpDTO)
+    public async Task<WaterPump> AddWaterPumpAsync(WaterPumpDTO waterPumpDto)
     {
         var waterPump = new WaterPump
         {
-            Id = waterPumpDTO.Id,
-            LastWateredTime = waterPumpDTO.LastWatered,
-            LastWaterAmount = waterPumpDTO.LastWaterAmount,
-            AutoWateringEnabled = waterPumpDTO.AutoWatering,
-            WaterTankCapacity = waterPumpDTO.WaterTankCapacity,
-            WaterLevel = waterPumpDTO.CurrentWaterLevel,
-            ThresholdValue = waterPumpDTO.ThresholdValue
+            Id = waterPumpDto.Id,
+            LastWateredTime = waterPumpDto.LastWatered,
+            LastWaterAmount = waterPumpDto.LastWaterAmount,
+            AutoWateringEnabled = waterPumpDto.AutoWatering,
+            WaterTankCapacity = waterPumpDto.WaterTankCapacity,
+            WaterLevel = waterPumpDto.CurrentWaterLevel,
+            ThresholdValue = waterPumpDto.ThresholdValue
         };
 
         await _context.WaterPumps.AddAsync(waterPump);

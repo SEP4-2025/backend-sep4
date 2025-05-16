@@ -13,7 +13,7 @@ namespace LogicInterfaces
         Task<WaterPump> UpdateCurrentWaterLevelAsync(int id, int addedWaterAmount);
         Task<WaterPump> UpdateThresholdValueAsync(int id, int newThresholdValue);
         Task<WaterPump> UpdateWaterTankCapacityAsync(int id, int newCapacity);
-        Task<WaterPump> AddWaterPumpAsync(WaterPumpDTO waterPumpDTO);
+        Task<WaterPump> AddWaterPumpAsync(WaterPumpDTO waterPumpDto);
         Task DeleteWaterPumpAsync(int id);
     }
 }

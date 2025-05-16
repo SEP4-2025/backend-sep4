@@ -3,7 +3,6 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Tools;
 
 namespace LogicImplements;
@@ -17,9 +16,16 @@ public class SensorReadingLogic : ISensorReadingInterface
         _context = context;
     }
 
-    public async Task<SensorReading?> GetSensorReadingByIdAsync(int id)
+    public async Task<SensorReading> GetSensorReadingByIdAsync(int id)
     {
-        return await _context.SensorReadings.FirstOrDefaultAsync(sr => sr.Id == id);
+        var sensorReading = await _context.SensorReadings.FirstOrDefaultAsync(sr => sr.Id == id);
+
+        if (sensorReading == null)
+        {
+            throw new Exception($"Sensor reading with id {id} not found.");
+        }
+
+        return sensorReading;
     }
 
     public async Task<List<SensorReading>> GetSensorReadingsBySensorIdAsync(int sensorId)
@@ -33,10 +39,13 @@ public class SensorReadingLogic : ISensorReadingInterface
         return await _context.SensorReadings.Where(s => s.SensorId == sensorId).ToListAsync();
     }
 
-    public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(DateTime start, DateTime end)
+    public async Task<List<SensorReading>> GetSensorReadingsByDateAsync(
+        DateTime start,
+        DateTime end
+    )
     {
-        return await _context.SensorReadings
-            .Where(r => r.TimeStamp >= start && r.TimeStamp < end)
+        return await _context
+            .SensorReadings.Where(r => r.TimeStamp >= start && r.TimeStamp < end)
             .ToListAsync();
     }
 
@@ -107,7 +116,9 @@ public class SensorReadingLogic : ISensorReadingInterface
         return result;
     }
 
-    public async Task<List<AverageSensorReadingDataDTO>> GetAverageReadingFromLast7Days(int greenhouseId)
+    public async Task<List<AverageSensorReadingDataDTO>> GetAverageReadingFromLast7Days(
+        int greenhouseId
+    )
     {
         var timeLimit = DateTime.UtcNow.AddDays(-7);
 
@@ -140,7 +151,9 @@ public class SensorReadingLogic : ISensorReadingInterface
         return result;
     }
 
-    public async Task<List<AverageSensorReadingDataDTO>> GetAverageReadingFromLast30Days(int greenhouseId)
+    public async Task<List<AverageSensorReadingDataDTO>> GetAverageReadingFromLast30Days(
+        int greenhouseId
+    )
     {
         var timeLimit = DateTime.UtcNow.AddDays(-30);
 

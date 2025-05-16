@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+namespace WebAPI.Controllers;
+
 [ApiController]
 [Route("[controller]")]
 public class AuthController : ControllerBase
@@ -50,6 +52,7 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(Gardener gardener)
     {
+        
         var securityKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
         );

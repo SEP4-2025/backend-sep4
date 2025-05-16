@@ -9,23 +9,28 @@ namespace LogicImplements;
 
 public class PredictionLogic : IPredictionInterface
 {
-    public AppDbContext _context;
+    private readonly AppDbContext _context;
 
     public PredictionLogic(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Prediction?> GetPredictionByIdAsync(int id)
+    public async Task<Prediction> GetPredictionByIdAsync(int id)
     {
-        return await _context.Predictions.FirstOrDefaultAsync(p => p.Id == id);
+        var prediction = await _context.Predictions.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (prediction == null)
+        {
+            throw new Exception($"Prediction with id {id} not found.");
+        }
+
+        return prediction;
     }
 
     public async Task<List<Prediction>> GetPredictionsByDateAsync(DateTime date)
     {
-        return await _context.Predictions
-            .Where(p => p.Date.Date == date.Date)
-            .ToListAsync();
+        return await _context.Predictions.Where(p => p.Date.Date == date.Date).ToListAsync();
     }
 
     public async Task<List<Prediction>> GetAllPredictions()
@@ -57,6 +62,7 @@ public class PredictionLogic : IPredictionInterface
     public async Task DeletePredictionAsync(int id)
     {
         var prediction = await _context.Predictions.FirstOrDefaultAsync(p => p.Id == id);
+
         if (prediction != null)
         {
             _context.Predictions.Remove(prediction);

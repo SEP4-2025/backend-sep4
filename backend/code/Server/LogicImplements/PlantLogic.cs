@@ -10,7 +10,7 @@ namespace LogicImplements;
 
 public class PlantLogic : IPlantInterface
 {
-    public AppDbContext _context;
+    private readonly AppDbContext _context;
 
     public PlantLogic(AppDbContext context)
     {
@@ -21,9 +21,17 @@ public class PlantLogic : IPlantInterface
     {
         return await _context.Plants.ToListAsync();
     }
-    public async Task<Plant?> GetPlantByIdAsync(int id)
+
+    public async Task<Plant> GetPlantByIdAsync(int id)
     {
-        return await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
+        var plant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (plant == null)
+        {
+            throw new Exception("Plant not found.");
+        }
+
+        return plant;
     }
 
     public async Task<Plant> AddPlantAsync(PlantDTO plant)
@@ -55,6 +63,7 @@ public class PlantLogic : IPlantInterface
     public async Task DeletePlantAsync(int id)
     {
         var plant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
+
         if (plant != null)
         {
             _context.Plants.Remove(plant);

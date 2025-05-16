@@ -7,7 +7,6 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class SensorController : ControllerBase
 {
     private readonly ISensorInterface sensor;
@@ -52,7 +51,10 @@ public class SensorController : ControllerBase
     }
 
     [HttpPatch("update/{id}")]
-    public async Task<ActionResult<Sensor>> UpdateSensor(int id, [FromBody] UpdateSensorDTO sensorToUpdate)
+    public async Task<ActionResult<Sensor>> UpdateSensor(
+        int id,
+        [FromBody] UpdateSensorDTO sensorToUpdate
+    )
     {
         if (sensorToUpdate.IsEmpty())
         {

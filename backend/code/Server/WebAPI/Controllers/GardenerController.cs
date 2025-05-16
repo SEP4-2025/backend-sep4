@@ -6,10 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
-
 [ApiController]
 [Route("[controller]")]
-
 public class GardenerController : ControllerBase
 {
     private readonly IGardenerInterface _gardener;
@@ -55,11 +53,18 @@ public class GardenerController : ControllerBase
             return BadRequest("You can only create one gardener.");
         }
         var addedGardener = await _gardener.AddGardenerAsync(addGardener);
-        return CreatedAtAction(nameof(GetGardenerById), new { id = addedGardener.Id }, addedGardener);
+        return CreatedAtAction(
+            nameof(GetGardenerById),
+            new { id = addedGardener.Id },
+            addedGardener
+        );
     }
 
     [HttpPatch("update/{id}")]
-    public async Task<ActionResult<Gardener>> UpdateGardener(int id, [FromBody] GardenerDTO gardener)
+    public async Task<ActionResult<Gardener>> UpdateGardener(
+        int id,
+        [FromBody] GardenerDTO gardener
+    )
     {
         if (gardener.ValueMissing())
         {
@@ -91,11 +96,12 @@ public class GardenerController : ControllerBase
         {
             if (ex.InnerException?.Message.Contains("Greenhouse_gardenerid_fkey") == true)
             {
-                return BadRequest("Cannot delete Gardener because it is associated with a Greenhouse.");
+                return BadRequest(
+                    "Cannot delete Gardener because it is associated with a Greenhouse."
+                );
             }
             throw;
         }
         return Ok("Gardener deleted successfully.");
     }
-
 }

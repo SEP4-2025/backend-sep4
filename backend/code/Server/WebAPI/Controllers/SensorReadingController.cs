@@ -105,18 +105,18 @@ public class SensorReadingController : ControllerBase
     }
 
     [HttpGet("average/{greenhouseId}/last7days")]
-    public async Task<ActionResult<List<AverageSensorReadingDataDTO>>> GetAverageReadingFromLast7Days(
-        int greenhouseId
-    )
+    public async Task<
+        ActionResult<List<AverageSensorReadingDataDTO>>
+    > GetAverageReadingFromLast7Days(int greenhouseId)
     {
         var average = await sensorReading.GetAverageReadingFromLast7Days(greenhouseId);
         return Ok(average);
     }
 
     [HttpGet("average/{greenhouseId}/last30days")]
-    public async Task<ActionResult<List<AverageSensorReadingDataDTO>>> GetAverageReadingFromLast30Days(
-        int greenhouseId
-    )
+    public async Task<
+        ActionResult<List<AverageSensorReadingDataDTO>>
+    > GetAverageReadingFromLast30Days(int greenhouseId)
     {
         var average = await sensorReading.GetAverageReadingFromLast30Days(greenhouseId);
         return Ok(average);
