@@ -11,8 +11,8 @@ using ReceiverService;
 using Tools;
 using WebAPI.Services;
 
-
 var builder = WebApplication.CreateBuilder(args);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
         policyBuilder =>
         {
             policyBuilder
-                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io/frontend-sep4")
+                .SetIsOriginAllowed(_ => true) // Allow any origin
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -109,8 +109,10 @@ if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
 //Add Logger
 Logger.Initialize(DbContext);
 
-
 // Configure the HTTP request pipeline. We might need to adjust for it or get other solution for running local(dev) / cloud(prod)
+// Apply CORS before other middleware
+app.UseCors("AllowAllOrigins");
+
 if (app.Environment.IsDevelopment())
 { //Development mode
     app.UseSwagger();
@@ -119,17 +121,18 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "GrowMate API v1 (dev env)");
         c.RoutePrefix = string.Empty;
     });
-
-    app.UseCors("AllowAllOrigins");
 }
 else
 {
     // Production mode
     app.UseHttpsRedirection();
-    app.UseCors("AllowAllOrigins");
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GrowMate API v1");
+        c.RoutePrefix = string.Empty;
+    });
 }
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseAuthentication();
 app.UseAuthorization();
