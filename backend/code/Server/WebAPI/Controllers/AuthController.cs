@@ -52,7 +52,6 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(Gardener gardener)
     {
-        
         var securityKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
         );
@@ -109,5 +108,29 @@ public class AuthController : ControllerBase
         await _dbContext.SaveChangesAsync();
 
         return Ok("Password changed successfully.");
+    }
+
+    [HttpPost("confirm-password")]
+    public async Task<IActionResult> ConfirmPassword(
+        [FromBody] ConfirmPasswordDTO confirmPasswordRequest
+    )
+    {
+        var gardener = await _dbContext.Gardeners.FirstOrDefaultAsync(g => g.Id == 2);
+        if (gardener == null)
+        {
+            return NotFound("Gardener not found.");
+        }
+
+        var isPasswordValid = _passwordHasher.VerifyHashedPassword(
+            gardener,
+            gardener.Password,
+            confirmPasswordRequest.Password
+        );
+        if (isPasswordValid == PasswordVerificationResult.Failed)
+        {
+            return Unauthorized("Invalid password.");
+        }
+
+        return Ok("Password confirmed successfully.");
     }
 }
