@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class NotificationPrefController : ControllerBase

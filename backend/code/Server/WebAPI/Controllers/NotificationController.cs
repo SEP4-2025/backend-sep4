@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Services;
 
-[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class NotificationController : ControllerBase
