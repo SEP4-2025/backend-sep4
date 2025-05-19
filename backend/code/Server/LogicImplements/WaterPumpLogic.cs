@@ -57,6 +57,11 @@ public class WaterPumpLogic : IWaterPumpInterface
     {
         var waterPump = await GetWaterPumpByIdAsync(id);
 
+        if (waterPump.WaterLevel < waterPump.ThresholdValue)
+        {
+            throw new InvalidOperationException("Insufficient water to perform manual watering.");
+        }
+
         waterPump.WaterLevel -= waterPump.ThresholdValue;
         waterPump.LastWateredTime = DateTime.UtcNow;
         waterPump.LastWaterAmount = waterPump.ThresholdValue;

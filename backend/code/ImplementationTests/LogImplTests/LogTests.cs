@@ -29,6 +29,15 @@ public class LogTests
     }
 
     [Test]
+    public void GetLogByIdAsync_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _logLogic.GetLogByIdAsync(9999)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Log not found."));
+    }
+
+    [Test]
     public async Task GetLogsByDateAsync_Success_ReturnsCorrectLogs()
     {
         var today = DateTime.Today;
@@ -62,6 +71,31 @@ public class LogTests
         var logs = await _logLogic.GetAllLogs();
 
         Assert.IsEmpty(logs);
+    }
+
+    [Test]
+    public async Task GetWaterUsageForLastFiveDaysAsync_ReturnsEmpty_WhenNoLogs()
+    {
+        var result = await _logLogic.GetWaterUsageForLastFiveDaysAsync(1);
+
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task GetWaterUsageForLastFiveDaysAsync_ReturnsCorrectUsage()
+    {
+        var log = await LogSeeder.SeedLogWithMessageAsync("Plant watered with amount: 150.");
+        var log2 = await LogSeeder.SeedLogWithMessageAsync("Water tank refilled to 200.");
+
+        log.GreenhouseId = 1;
+        log2.GreenhouseId = 1;
+        await _context.SaveChangesAsync();
+
+        var result = await _logLogic.GetWaterUsageForLastFiveDaysAsync(1);
+
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.GreaterThanOrEqualTo(1));
     }
 
     [TearDown]

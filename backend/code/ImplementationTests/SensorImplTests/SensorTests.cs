@@ -19,6 +19,25 @@ public class SensorTests
     }
 
     [Test]
+    public async Task AddSensorAsync_Success_AddsSensorCorrectly()
+    {
+        var sensorDto = new AddSensorDTO
+        {
+            Type = "Humidity",
+            MetricUnit = "Percentage",
+            GreenHouseId = 3,
+        };
+
+        var result = await _sensorLogic.AddSensorAsync(sensorDto);
+
+        Assert.IsNotNull(result);
+        Assert.That(result.Id, Is.GreaterThan(0));
+        Assert.That(result.Type, Is.EqualTo(sensorDto.Type));
+        Assert.That(result.MetricUnit, Is.EqualTo(sensorDto.MetricUnit));
+        Assert.That(result.GreenhouseId, Is.EqualTo(sensorDto.GreenHouseId));
+    }
+
+    [Test]
     public async Task GetSensorByIdAsync_Success_ReturnsCorrectSensor()
     {
         var testSensor = await SensorSeeder.SeedSensorAsync();
@@ -44,22 +63,13 @@ public class SensorTests
     }
 
     [Test]
-    public async Task AddSensorAsync_Success_AddsSensorCorrectly()
+    public Task GetSensorByIdAsync_Throws_WhenNotFound()
     {
-        var sensorDto = new AddSensorDTO
-        {
-            Type = "Humidity",
-            MetricUnit = "Percentage",
-            GreenHouseId = 3,
-        };
-
-        var result = await _sensorLogic.AddSensorAsync(sensorDto);
-
-        Assert.IsNotNull(result);
-        Assert.That(result.Id, Is.GreaterThan(0));
-        Assert.That(result.Type, Is.EqualTo(sensorDto.Type));
-        Assert.That(result.MetricUnit, Is.EqualTo(sensorDto.MetricUnit));
-        Assert.That(result.GreenhouseId, Is.EqualTo(sensorDto.GreenHouseId));
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _sensorLogic.GetSensorByIdAsync(-1)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Sensor with ID -1 not found."));
+        return Task.CompletedTask;
     }
 
     [Test]
@@ -77,38 +87,44 @@ public class SensorTests
     }
 
     [Test]
-    public async Task DeleteSensorAsync_Success_DeletesSensor()
+    public Task UpdateSensorAsync_Throws_WhenNotFound()
+    {
+        var updateDto = new UpdateSensorDTO { Type = "Light", MetricUnit = "Lux" };
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _sensorLogic.UpdateSensorAsync(-1, updateDto)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Sensor with ID -1 not found."));
+        return Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task DeleteSensorAsync_RemovesSensor()
     {
         var testSensor = await SensorSeeder.SeedSensorAsync();
 
         await _sensorLogic.DeleteSensorAsync(testSensor.Id);
 
-        var result = await _sensorLogic.GetSensorByIdAsync(testSensor.Id);
-        Assert.IsNull(result);
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _sensorLogic.GetSensorByIdAsync(testSensor.Id)
+        );
+        Assert.That(exception.Message, Is.EqualTo($"Sensor with ID {testSensor.Id} not found."));
     }
 
     [Test]
-    public async Task UpdateSensorAsync_NonExistentId_ThrowsException()
+    public async Task UpdateSensorThresholdAsync_Success_UpdatesThreshold()
     {
-        var nonExistentSensor = new Sensor
-        {
-            Id = 9999,
-            Type = "Soil Moisture",
-            MetricUnit = "Percentage",
-            GreenhouseId = 1,
-        };
+        var testSensor = await SensorSeeder.SeedSensorAsync();
+        int newThreshold = 42;
+        await _sensorLogic.UpdateSensorThresholdAsync(testSensor.Id, newThreshold);
+        var updated = await _sensorLogic.GetSensorByIdAsync(testSensor.Id);
+        Assert.That(updated.ThresholdValue, Is.EqualTo(newThreshold));
+    }
 
-        Assert.ThrowsAsync<NullReferenceException>(
-            async () =>
-                await _sensorLogic.UpdateSensorAsync(
-                    nonExistentSensor.Id,
-                    new UpdateSensorDTO
-                    {
-                        Type = nonExistentSensor.Type,
-                        MetricUnit = nonExistentSensor.MetricUnit,
-                    }
-                )
-        );
+    [Test]
+    public async Task UpdateSensorThresholdAsync_DoesNothing_WhenSensorNotFound()
+    {
+        await _sensorLogic.UpdateSensorThresholdAsync(-1, 100);
+        Assert.Pass();
     }
 
     [TearDown]

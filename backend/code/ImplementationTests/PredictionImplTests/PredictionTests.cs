@@ -35,6 +35,15 @@ public class PredictionTests
     }
 
     [Test]
+    public void GetPredictionByIdAsync_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _predictionLogic.GetPredictionByIdAsync(-1)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Prediction with id -1 not found."));
+    }
+
+    [Test]
     public async Task GetPredictionsByDateAsync_Success_ReturnsCorrectPredictions()
     {
         var date = DateTime.Now.Date;
@@ -77,10 +86,11 @@ public class PredictionTests
 
         var allPredictions = await _predictionLogic.GetAllPredictions();
         var addedPrediction = allPredictions.FirstOrDefault(p =>
-            p.OptimalTemperature == prediction.OptimalTemperature &&
-            p.OptimalHumidity == prediction.OptimalHumidity &&
-            p.GreenhouseId == prediction.GreenhouseId &&
-            p.SensorReadingId == prediction.SensorReadingId);
+            p.OptimalTemperature == prediction.OptimalTemperature
+            && p.OptimalHumidity == prediction.OptimalHumidity
+            && p.GreenhouseId == prediction.GreenhouseId
+            && p.SensorReadingId == prediction.SensorReadingId
+        );
 
         Assert.IsNotNull(addedPrediction);
         Assert.That(addedPrediction.OptimalTemperature, Is.EqualTo(prediction.OptimalTemperature));
@@ -98,8 +108,13 @@ public class PredictionTests
 
         await _predictionLogic.DeletePredictionAsync(testPrediction.Id);
 
-        var result = await _predictionLogic.GetPredictionByIdAsync(testPrediction.Id);
-        Assert.IsNull(result);
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _predictionLogic.GetPredictionByIdAsync(testPrediction.Id)
+        );
+        Assert.That(
+            exception.Message,
+            Is.EqualTo($"Prediction with id {testPrediction.Id} not found.")
+        );
     }
 
     [TearDown]

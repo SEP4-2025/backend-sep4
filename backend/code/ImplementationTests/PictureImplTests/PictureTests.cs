@@ -19,6 +19,16 @@ public class PictureTests
     }
 
     [Test]
+    public void AddPictureAsync_Throws_WhenDtoIsNull()
+    {
+        PictureDTO? nullDto = null;
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _pictureLogic.AddPictureAsync(nullDto!)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Picture data is invalid."));
+    }
+
+    [Test]
     public async Task GetPictureById_Success_ReturnsCorrectPicture()
     {
         var testPicture = await PictureSeeder.SeedPictureAsync();
@@ -28,6 +38,15 @@ public class PictureTests
         Assert.IsNotNull(result);
         Assert.That(result.Url, Is.EqualTo(testPicture.Url));
         Assert.That(result.Note, Is.EqualTo(testPicture.Note));
+    }
+
+    [Test]
+    public void GetPictureById_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _pictureLogic.GetPictureById(9999)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Picture not found."));
     }
 
     [Test]
@@ -43,25 +62,6 @@ public class PictureTests
         Assert.That(result.Count, Is.EqualTo(2));
         Assert.That(result.All(p => p.PlantId == plantId), Is.True);
     }
-
-    // [Test]
-    // public async Task AddPictureAsync_Success_AddsPictureCorrectly()
-    // {
-    //     var picture = new PictureDTO
-    //     {
-    //         Url = "http://new-image.com/test.jpg",
-    //         Note = "New test picture",
-    //         PlantId = 3
-    //     };
-    //
-    //     var result = await _pictureLogic.AddPictureAsync(picture);
-    //
-    //     Assert.IsNotNull(result);
-    //     Assert.That(result.Id, Is.GreaterThan(0));
-    //     Assert.That(result.Url, Is.EqualTo(picture.Url));
-    //     Assert.That(result.Note, Is.EqualTo(picture.Note));
-    //     Assert.That(result.PlantId, Is.EqualTo(picture.PlantId));
-    // }
 
     [Test]
     public async Task UpdateNote_Success_UpdatesNoteCorrectly()
@@ -82,8 +82,19 @@ public class PictureTests
 
         await _pictureLogic.DeletePictureAsync(testPicture.Id);
 
-        var result = await _pictureLogic.GetPictureById(testPicture.Id);
-        Assert.IsNull(result);
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _pictureLogic.GetPictureById(testPicture.Id)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Picture not found."));
+    }
+
+    [Test]
+    public void UpdateNote_Throws_WhenNotFound()
+    {
+        var ex = Assert.ThrowsAsync<Exception>(
+            async () => await _pictureLogic.UpdateNote(9999, "note")
+        );
+        Assert.That(ex.Message, Is.EqualTo("Sensor with ID 9999 not found."));
     }
 
     [TearDown]

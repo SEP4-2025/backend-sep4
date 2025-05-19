@@ -19,6 +19,16 @@ public class SensorReadingTests
     }
 
     [Test]
+    public Task GetSensorReadingByIdAsync_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _sensorReadingLogic.GetSensorReadingByIdAsync(-1)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Sensor reading with id -1 not found."));
+        return Task.CompletedTask;
+    }
+
+    [Test]
     public async Task GetSensorReadingByIdAsync_Success_ReturnsCorrectReading()
     {
         var testReading = await SensorReadingSeeder.SeedSensorReadingAsync();
@@ -58,19 +68,6 @@ public class SensorReadingTests
         await _context.SaveChangesAsync();
     }
 
-    // [Test]
-    // public async Task GetSensorReadingsByDateAsync_Success_ReturnsCorrectReadings()
-    // {
-    //     var date = DateTime.Now;
-    //     await SensorReadingSeeder.SeedSensorReadingAsync();
-    //     await SensorReadingSeeder.SeedSensorReadingAsync();
-    //
-    //     var result = await _sensorReadingLogic.GetSensorReadingsByDateAsync(DateTime.Today);
-    //
-    //     Assert.IsNotNull(result);
-    //     Assert.That(result.Count, Is.EqualTo(2));
-    // }
-
     [Test]
     public async Task GetSensorReadingsAsync_Success_ReturnsAllReadings()
     {
@@ -102,14 +99,94 @@ public class SensorReadingTests
     }
 
     [Test]
-    public async Task DeleteSensorReadingAsync_Success_DeletesReading()
+    public async Task DeleteSensorReadingAsync_RemovesReading()
     {
         var testReading = await SensorReadingSeeder.SeedSensorReadingAsync();
 
         await _sensorReadingLogic.DeleteSensorReadingAsync(testReading.Id);
 
-        var result = await _sensorReadingLogic.GetSensorReadingByIdAsync(testReading.Id);
-        Assert.IsNull(result);
+        var exception = Assert.ThrowsAsync<Exception>(
+            async () => await _sensorReadingLogic.GetSensorReadingByIdAsync(testReading.Id)
+        );
+        Assert.That(
+            exception.Message,
+            Is.EqualTo($"Sensor reading with id {testReading.Id} not found.")
+        );
+    }
+
+    [Test]
+    public async Task GetAverageSensorReadingsFromLast24Hours_ReturnsEmpty_WhenNoReadings()
+    {
+        var result = await _sensorReadingLogic.GetAverageSensorReadingsFromLast24Hours(1);
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task GetAverageSensorReadingsFromLast24Hours_ReturnsCorrectAverage()
+    {
+        var sensor = new Sensor
+        {
+            Type = "Temperature",
+            MetricUnit = "Celsius",
+            GreenhouseId = 1
+        };
+        await _context.Sensors.AddAsync(sensor);
+        await _context.SaveChangesAsync();
+        await SensorReadingSeeder.SeedSensorReadingAsync(sensor.Id);
+        var result = await _sensorReadingLogic.GetAverageSensorReadingsFromLast24Hours(1);
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.GreaterThanOrEqualTo(1));
+    }
+
+    [Test]
+    public async Task GetAverageReadingFromLast7Days_ReturnsEmpty_WhenNoReadings()
+    {
+        var result = await _sensorReadingLogic.GetAverageReadingFromLast7Days(1);
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task GetAverageReadingFromLast7Days_ReturnsCorrectAverage()
+    {
+        var sensor = new Sensor
+        {
+            Type = "Humidity",
+            MetricUnit = "%",
+            GreenhouseId = 1
+        };
+        await _context.Sensors.AddAsync(sensor);
+        await _context.SaveChangesAsync();
+        await SensorReadingSeeder.SeedSensorReadingAsync(sensor.Id);
+        var result = await _sensorReadingLogic.GetAverageReadingFromLast7Days(1);
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.GreaterThanOrEqualTo(1));
+    }
+
+    [Test]
+    public async Task GetAverageReadingFromLast30Days_ReturnsEmpty_WhenNoReadings()
+    {
+        var result = await _sensorReadingLogic.GetAverageReadingFromLast30Days(1);
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task GetAverageReadingFromLast30Days_ReturnsCorrectAverage()
+    {
+        var sensor = new Sensor
+        {
+            Type = "Light",
+            MetricUnit = "Lux",
+            GreenhouseId = 1
+        };
+        await _context.Sensors.AddAsync(sensor);
+        await _context.SaveChangesAsync();
+        await SensorReadingSeeder.SeedSensorReadingAsync(sensor.Id);
+        var result = await _sensorReadingLogic.GetAverageReadingFromLast30Days(1);
+        Assert.IsNotNull(result);
+        Assert.That(result.Count, Is.GreaterThanOrEqualTo(1));
     }
 
     [TearDown]

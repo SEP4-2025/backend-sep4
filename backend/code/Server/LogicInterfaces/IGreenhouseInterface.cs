@@ -11,5 +11,6 @@ public interface IGreenhouseInterface
     Task<Greenhouse> GetGreenhouseByGardenerId(int gardenerId);
     Task<Greenhouse> AddGreenhouse(GreenhouseDTO greenhouse);
     Task<Greenhouse> UpdateGreenhouseName(int id, string name);
+    Task<Greenhouse> UpdateGreenhouse(Greenhouse greenhouse);
     Task DeleteGreenhouse(int id);
 }

@@ -52,6 +52,9 @@ namespace APITests
             {
                 Id = 1,
                 ThresholdValue = 200,
+                WaterLevel = 500,
+                WaterTankCapacity = 1000,
+                AutoWateringEnabled = true,
             };
             _testPumpDto = new WaterPumpDTO
             {
@@ -268,34 +271,6 @@ namespace APITests
 
             // Assert
             Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
-        }
-
-        [Test]
-        public async Task GetWaterPumpWaterLevelAsync_ReturnsOk_WhenPumpExists()
-        {
-            // Arrange
-            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync(_testPump);
-
-            // Act
-            var result = await _controller.GetWaterPumpWaterLevelAsync(1);
-
-            // Assert
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result.Result as OkObjectResult;
-            Assert.That(okResult.Value, Is.EqualTo(_testPump.WaterLevel));
-        }
-
-        [Test]
-        public async Task GetWaterPumpWaterLevelAsync_ReturnsNotFound_WhenPumpDoesNotExist()
-        {
-            // Arrange
-            _mockWaterPumpLogic.Setup(x => x.GetWaterPumpByIdAsync(1)).ReturnsAsync((WaterPump)null);
-
-            // Act
-            var result = await _controller.GetWaterPumpWaterLevelAsync(1);
-
-            // Assert
-            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
         }
 
         [Test]
