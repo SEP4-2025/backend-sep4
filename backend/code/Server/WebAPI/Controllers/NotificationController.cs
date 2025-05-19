@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Services;
 
-//Will turn on authorization later, after initial testing on cloud
-// [Authorize]
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class NotificationController : ControllerBase

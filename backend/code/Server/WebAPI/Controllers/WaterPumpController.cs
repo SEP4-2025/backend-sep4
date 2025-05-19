@@ -1,6 +1,7 @@
 using DTOs;
 using Entities;
 using LogicInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ReceiverService;
 using Tools;
@@ -8,6 +9,7 @@ using WebAPI.Services;
 
 namespace WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class WaterPumpController : ControllerBase

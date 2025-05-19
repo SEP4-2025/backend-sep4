@@ -2,10 +2,12 @@ using DTOs;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class SensorReadingController : ControllerBase
