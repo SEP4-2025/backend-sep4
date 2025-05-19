@@ -12,11 +12,14 @@ namespace APITests
     {
         private Mock<IPredictionInterface> _mockPredictionLogic;
         private PredictionController _controller;
-        private readonly Prediction _testPrediction = new() { Id = 1, Date = DateTime.Today, SensorReadingId = 1 };
-        private readonly PredictionDTO _testPredictionDto = new()
-        {
-            SensorReadingId = 1
-        };
+        private readonly Prediction _testPrediction =
+            new()
+            {
+                Id = 1,
+                Date = DateTime.Today,
+                SensorReadingId = 1
+            };
+        private readonly PredictionDTO _testPredictionDto = new() { SensorReadingId = 1 };
 
         [SetUp]
         public void Setup()
@@ -28,7 +31,9 @@ namespace APITests
         [Test]
         public async Task GetPredictionById_ReturnsOk_WhenPredictionExists()
         {
-            _mockPredictionLogic.Setup(x => x.GetPredictionByIdAsync(1)).ReturnsAsync(_testPrediction);
+            _mockPredictionLogic
+                .Setup(x => x.GetPredictionByIdAsync(1))
+                .ReturnsAsync(_testPrediction);
 
             var result = await _controller.GetPredictionById(1);
 
@@ -41,7 +46,9 @@ namespace APITests
         [Test]
         public async Task GetPredictionById_ReturnsNotFound_WhenPredictionDoesNotExist()
         {
-            _mockPredictionLogic.Setup(x => x.GetPredictionByIdAsync(99)).ReturnsAsync((Prediction)null);
+            _mockPredictionLogic
+                .Setup(x => x.GetPredictionByIdAsync(99))
+                .ReturnsAsync((Prediction)null);
 
             var result = await _controller.GetPredictionById(99);
 
@@ -56,7 +63,9 @@ namespace APITests
         {
             var date = DateTime.Today;
             var predictions = new List<Prediction> { _testPrediction };
-            _mockPredictionLogic.Setup(x => x.GetPredictionsByDateAsync(date)).ReturnsAsync(predictions);
+            _mockPredictionLogic
+                .Setup(x => x.GetPredictionsByDateAsync(date))
+                .ReturnsAsync(predictions);
 
             var result = await _controller.GetPredictionsByDate(date);
 
@@ -83,7 +92,9 @@ namespace APITests
         [Test]
         public async Task AddPrediction_ReturnsOk_WhenPredictionIsValid()
         {
-            _mockPredictionLogic.Setup(x => x.AddPredictionAsync(_testPredictionDto)).Returns(Task.CompletedTask);
+            _mockPredictionLogic
+                .Setup(x => x.AddPredictionAsync(_testPredictionDto))
+                .Returns(Task.CompletedTask);
 
             var result = await _controller.AddPrediction(_testPredictionDto);
 
@@ -107,7 +118,9 @@ namespace APITests
         [Test]
         public async Task DeletePrediction_ReturnsOk_WhenPredictionExists()
         {
-            _mockPredictionLogic.Setup(x => x.GetPredictionByIdAsync(1)).ReturnsAsync(_testPrediction);
+            _mockPredictionLogic
+                .Setup(x => x.GetPredictionByIdAsync(1))
+                .ReturnsAsync(_testPrediction);
             _mockPredictionLogic.Setup(x => x.DeletePredictionAsync(1)).Returns(Task.CompletedTask);
 
             var result = await _controller.DeletePrediction(1);
@@ -121,7 +134,9 @@ namespace APITests
         [Test]
         public async Task DeletePrediction_ReturnsNotFound_WhenPredictionDoesNotExist()
         {
-            _mockPredictionLogic.Setup(x => x.GetPredictionByIdAsync(99)).ReturnsAsync((Prediction)null);
+            _mockPredictionLogic
+                .Setup(x => x.GetPredictionByIdAsync(99))
+                .ReturnsAsync((Prediction)null);
 
             var result = await _controller.DeletePrediction(99);
 
