@@ -14,12 +14,12 @@ public static class PredictionSeeder
 
         var prediction = new Prediction
         {
-            Temperature     = 25,
-            AirHumidity     = 60,
-            Light           = 75,
-            SoilHumidity    = 80,
-            Date            = date ?? DateTime.UtcNow,
-            GreenhouseId    = greenhouseId,
+            Temperature = 25,
+            AirHumidity = 60,
+            Light = 75,
+            SoilHumidity = 80,
+            Date = date ?? DateTime.UtcNow,
+            GreenhouseId = greenhouseId,
             SensorReadingId = sensorReadingId
         };
 

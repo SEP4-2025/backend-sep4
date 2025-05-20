@@ -15,13 +15,13 @@ namespace APITests
     public class PredictionControllerRepredictTests
     {
         private Mock<IPredictionInterface> _logicMock;
-        private PredictionController      _controller;
+        private PredictionController _controller;
 
         [SetUp]
         public void SetUp()
         {
             // 1) mock the business logic
-            _logicMock   = new Mock<IPredictionInterface>();
+            _logicMock = new Mock<IPredictionInterface>();
             // 2) stub a logger
             var logger = Mock.Of<ILogger<PredictionController>>();
             // 3) instantiate controller under test
@@ -34,16 +34,16 @@ namespace APITests
             // arrange
             var dto = new PredictionResponseDTO
             {
-                Prediction      = 42.0,
+                Prediction = 42.0,
                 PredictionProba = null,
-                InputReceived   = new PredictionRequestDTO
+                InputReceived = new PredictionRequestDTO
                 {
-                    Temperature     = 10,
-                    Light           = 20,
-                    AirHumidity     = 30,
-                    SoilHumidity    = 40,
-                    Date            = DateTime.UtcNow,
-                    GreenhouseId    = 1,
+                    Temperature = 10,
+                    Light = 20,
+                    AirHumidity = 30,
+                    SoilHumidity = 40,
+                    Date = DateTime.UtcNow,
+                    GreenhouseId = 1,
                     SensorReadingId = 99
                 }
             };
