@@ -76,10 +76,10 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("Prediction");
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.OptimalTemperature).HasColumnName("optimaltemp");
-            entity.Property(e => e.OptimalLight).HasColumnName("optimallight");
-            entity.Property(e => e.OptimalHumidity).HasColumnName("optimalhumidity");
-            entity.Property(e => e.OptimalWaterLevel).HasColumnName("optimalwaterlevel");
+            entity.Property(e => e.Temperature).HasColumnName("temperature");
+            entity.Property(e => e.Light).HasColumnName("light");
+            entity.Property(e => e.AirHumidity).HasColumnName("airhumidity");
+            entity.Property(e => e.SoilHumidity).HasColumnName("soilhumidity");
             entity.Property(e => e.Date).HasColumnName("date");
             entity.Property(e => e.GreenhouseId).HasColumnName("greenhouseid");
             entity.Property(e => e.SensorReadingId).HasColumnName("sensorreadingid");

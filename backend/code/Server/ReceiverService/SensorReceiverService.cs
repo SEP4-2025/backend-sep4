@@ -1,7 +1,9 @@
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Database;
 using DTOs;
+using Entities;
 using LogicImplements;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MQTTnet;
@@ -21,6 +23,15 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
     private readonly IServiceProvider _serviceProvider;
     private bool _isHealthy = false;
 
+    private class SensorState
+    {
+        public double Temperature { get; set; }
+        public double Light { get; set; }
+        public double AirHumidity { get; set; }
+        public double SoilHumidity { get; set; }
+    }
+    private readonly ConcurrentDictionary<int, SensorState> _latestState
+        = new ConcurrentDictionary<int, SensorState>();
     public SensorReceiverService(
         ILogger<SensorReceiverService> logger,
         IServiceProvider serviceProvider,
@@ -158,6 +169,8 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
 
             // Notification logic v2
             await HandlePostNotifications(sensorReading);
+            // Update state and save prediction
+            await UpdateStateAndSavePredictionAsync(sensorReading);
 
             _logger.LogInformation("Successfully added sensor reading to database");
         }
@@ -358,4 +371,86 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
             _logger.LogError(ex, "Failed to send notification");
         }
     }
+    private async Task UpdateStateAndSavePredictionAsync(SensorReadingDTO sensorReading)
+    {
+        // create a scope so we can resolve SensorLogic + DbContext
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sensorLogic = scope.ServiceProvider.GetRequiredService<SensorLogic>();
+        var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
+
+        // get or create the state object for this greenhouse
+        var state = _latestState.GetOrAdd(
+            sensor.GreenhouseId,
+            _ => new SensorState()
+        );
+
+        bool changed = false;
+
+        // update only the matching field, mark if it actually changed
+        switch (sensor.Type)
+        {
+            case "Temperature":
+                if (state.Temperature != sensorReading.Value)
+                {
+                    state.Temperature = sensorReading.Value;
+                    changed = true;
+                }
+                break;
+
+            case "Humidity":
+                if (state.AirHumidity != sensorReading.Value)
+                {
+                    state.AirHumidity = sensorReading.Value;
+                    changed = true;
+                }
+                break;
+
+            case "Light":
+                if (state.Light != sensorReading.Value)
+                {
+                    state.Light = sensorReading.Value;
+                    changed = true;
+                }
+                break;
+
+            case "Soil Moisture":
+                if (state.SoilHumidity != sensorReading.Value)
+                {
+                    state.SoilHumidity = sensorReading.Value;
+                    changed = true;
+                }
+                break;
+        }
+
+        if (!changed)
+        {
+            // nothing to do if the value didn't move
+            return;
+        }
+
+        // build a new Prediction entity from the **entire current state**
+        var prediction = new Prediction
+        {
+            Temperature = (int)state.Temperature,
+            AirHumidity = (int)state.AirHumidity,
+            Light = (int)state.Light,
+            SoilHumidity = (int)state.SoilHumidity,
+            Date = sensorReading.TimeStamp,
+            GreenhouseId = sensor.GreenhouseId,
+            SensorReadingId = 4
+        };
+
+        try
+        {
+            await dbContext.Predictions.AddAsync(prediction);
+            await dbContext.SaveChangesAsync();
+            _logger.LogInformation("Persisted updated Prediction: {@prediction}", prediction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save updated Prediction");
+        }
+    }
+
 }

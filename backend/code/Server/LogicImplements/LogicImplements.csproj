@@ -16,6 +16,9 @@
 
     <ItemGroup>
       <PackageReference Include="Google.Cloud.Storage.V1" Version="4.13.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0-preview.4.25258.110" />
     </ItemGroup>
+
+   
 
 </Project>

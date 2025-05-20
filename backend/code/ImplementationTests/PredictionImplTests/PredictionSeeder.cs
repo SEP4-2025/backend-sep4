@@ -10,10 +10,10 @@ public static class PredictionSeeder
 
         var prediction = new Prediction
         {
-            OptimalTemperature = 25,
-            OptimalHumidity = 60,
-            OptimalLight = 75,
-            OptimalWaterLevel = 80,
+            Temperature = 25,
+            AirHumidity = 60,
+            Light = 75,
+            SoilHumidity = 80,
             Date = DateTime.Now,
             GreenhouseId = greenhouseId,
             SensorReadingId = sensorReadingId

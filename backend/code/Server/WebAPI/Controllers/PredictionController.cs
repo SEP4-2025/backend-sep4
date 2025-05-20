@@ -10,13 +10,16 @@ namespace WebAPI.Controllers;
 public class PredictionController : ControllerBase
 {
     private readonly IPredictionInterface _predictionInterface;
+    private readonly ILogger<PredictionController> _logger;
 
-    public PredictionController(IPredictionInterface predictionInterface)
+    public PredictionController(IPredictionInterface predictionInterface, ILogger<PredictionController> logger)
     {
         _predictionInterface = predictionInterface;
+        _logger = logger;
     }
 
-    [HttpGet("{id}")]
+
+    /*[HttpGet("{id}")]
     public async Task<ActionResult<Prediction>> GetPredictionById(int id)
     {
         var prediction = await _predictionInterface.GetPredictionByIdAsync(id);
@@ -67,5 +70,33 @@ public class PredictionController : ControllerBase
 
         await _predictionInterface.DeletePredictionAsync(id);
         return Ok($"Prediction with id {id} deleted");
+    }*/
+
+    /// <summary>
+    /// GET api/prediction/repredict/latest
+    /// Retrieves the latest saved prediction, re-sends it to the Python ML endpoint,
+    /// and returns the updated prediction.
+    /// </summary>
+    [HttpGet("repredict/latest")]
+    public async Task<ActionResult<PredictionResponseDTO>> RepredictLatest()
+    {
+        try
+        {
+            var result = await _predictionInterface.RepredictLatestAsync();
+            return Ok(result);
+        }
+        catch (InvalidOperationException inv)
+        {
+            return NotFound(inv.Message);
+        }
+        catch (HttpRequestException httpEx)
+        {
+            return StatusCode(502, httpEx.Message);
+        }
+        catch (Exception ex)
+        {
+            // return full exception message so you can vedea exact de unde vine
+            return StatusCode(500, ex.ToString());
+        }
     }
 }

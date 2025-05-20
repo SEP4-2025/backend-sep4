@@ -3,10 +3,10 @@
 public class Prediction
 {
     public int Id { get; set; }
-    public int OptimalTemperature { get; set; }
-    public int OptimalLight { get; set; }
-    public int OptimalHumidity { get; set; }
-    public int OptimalWaterLevel { get; set; }
+    public int Temperature { get; set; }
+    public int Light { get; set; }
+    public int AirHumidity { get; set; }
+    public int SoilHumidity { get; set; }
     public DateTime Date { get; set; }
 
     public int GreenhouseId { get; set; }
