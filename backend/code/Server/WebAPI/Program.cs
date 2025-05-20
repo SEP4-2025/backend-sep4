@@ -60,12 +60,11 @@ builder.Services.AddCors(options =>
         policyBuilder =>
         {
             policyBuilder
-                .SetIsOriginAllowed(_ => true) // Allow any origin
+                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io/frontend-sep4")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
-        }
-    );
+        });
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
