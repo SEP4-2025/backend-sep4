@@ -23,7 +23,12 @@ public class PredictionController : ControllerBase
     public async Task<ActionResult<Prediction>> GetPredictionById(int id)
     {
         var prediction = await _predictionInterface.GetPredictionByIdAsync(id);
-        if (prediction == null) return NotFound($"No prediction found with id {id}");
+
+        if (prediction == null)
+        {
+            return NotFound($"No prediction found with id {id}");
+        }
+
         return Ok(prediction);
     }
 
@@ -44,7 +49,11 @@ public class PredictionController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> AddPrediction([FromBody] PredictionDTO prediction)
     {
-        if (prediction == null) return BadRequest("Prediction cannot be null");
+        if (prediction == null)
+        {
+            return BadRequest("Prediction cannot be null");
+        }
+
         await _predictionInterface.AddPredictionAsync(prediction);
         return Ok(prediction);
     }
@@ -53,7 +62,11 @@ public class PredictionController : ControllerBase
     public async Task<IActionResult> DeletePrediction(int id)
     {
         var existing = await _predictionInterface.GetPredictionByIdAsync(id);
-        if (existing == null) return NotFound($"No prediction found with id {id}");
+       
+        if (existing == null)
+        {
+            return NotFound($"No prediction found with id {id}");
+        }
 
         await _predictionInterface.DeletePredictionAsync(id);
         return Ok($"Prediction with id {id} deleted");

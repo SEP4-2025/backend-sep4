@@ -3,7 +3,6 @@ using DTOs;
 using Entities;
 using LogicInterfaces;
 using Microsoft.EntityFrameworkCore;
-using Tools;
 
 namespace LogicImplements;
 
@@ -21,9 +20,16 @@ public class SensorLogic : ISensorInterface
         return await _context.Sensors.ToListAsync();
     }
 
-    public async Task<Sensor?> GetSensorByIdAsync(int id)
+    public async Task<Sensor> GetSensorByIdAsync(int id)
     {
-        return await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+        var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+
+        if (sensor == null)
+        {
+            throw new KeyNotFoundException($"Sensor with ID {id} not found.");
+        }
+
+        return sensor;
     }
 
     public async Task<Sensor> AddSensorAsync(AddSensorDTO addSensor)
@@ -47,12 +53,25 @@ public class SensorLogic : ISensorInterface
     {
         var existingSensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
 
+        if (existingSensor == null)
+        {
+            throw new KeyNotFoundException($"Sensor with ID {id} not found.");
+        }
+
         if (addSensor.Type is not null)
+        {
             existingSensor.Type = addSensor.Type;
+        }
+
         if (addSensor.MetricUnit is not null)
+        {
             existingSensor.MetricUnit = addSensor.MetricUnit;
+        }
+
         if (addSensor.ThresholdValue.HasValue)
+        {
             existingSensor.ThresholdValue = addSensor.ThresholdValue.Value;
+        }
 
         await _context.SaveChangesAsync();
 
@@ -62,6 +81,7 @@ public class SensorLogic : ISensorInterface
     public async Task DeleteSensorAsync(int id)
     {
         var sensorToDelete = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+
         if (sensorToDelete != null)
         {
             _context.Sensors.Remove(sensorToDelete);
@@ -72,6 +92,7 @@ public class SensorLogic : ISensorInterface
     public async Task UpdateSensorThresholdAsync(int id, int threshold)
     {
         var sensor = await _context.Sensors.FirstOrDefaultAsync(s => s.Id == id);
+
         if (sensor != null)
         {
             sensor.ThresholdValue = threshold;

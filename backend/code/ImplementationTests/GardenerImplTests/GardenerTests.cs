@@ -19,7 +19,7 @@ public class GardenerTests
     }
 
     [Test]
-    public async Task FetchGardenersAsync_Success_ReturnsAllGardenersCorrectly()
+    public async Task GetGardenersAsync_Success_ReturnsAllGardenersCorrectly()
     {
         await GardenerSeeder.SeedGardenerAsync();
 
@@ -30,7 +30,7 @@ public class GardenerTests
     }
 
     [Test]
-    public async Task FetchGardenersByIdAsync_Success_ReturnsCorrectGardener()
+    public async Task GetGardenersByIdAsync_Success_ReturnsCorrectGardener()
     {
         var testGardener = await GardenerSeeder.SeedGardenerAsync();
 
@@ -41,13 +41,18 @@ public class GardenerTests
     }
 
     [Test]
+    public void GetGardenerByIdAsync_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _gardenerLogic.GetGardenerByIdAsync(9999)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Gardener with id 9999 not found."));
+    }
+
+    [Test]
     public async Task AddGardenerAsync_Success_AddsUserCorrectly()
     {
-        var gardenerDto = new GardenerDTO
-        {
-            Username = "newGardener",
-            Password = "newPassword"
-        };
+        var gardenerDto = new GardenerDTO { Username = "newGardener", Password = "newPassword" };
 
         var testGardener = await _gardenerLogic.AddGardenerAsync(gardenerDto);
         var addedGardener = await _gardenerLogic.GetGardenerByIdAsync(testGardener.Id);
@@ -60,11 +65,7 @@ public class GardenerTests
     public async Task UpdateGardenerAsync_Success_UpdatesUsernameCorrectly()
     {
         var oldGardener = await GardenerSeeder.SeedGardenerAsync();
-        var newGardener = new GardenerDTO
-        {
-            Username = "newGardener",
-            Password = "123456"
-        };
+        var newGardener = new GardenerDTO { Username = "newGardener", Password = "123456" };
 
         await _gardenerLogic.UpdateGardenerAsync(oldGardener.Id, newGardener);
 
@@ -72,6 +73,17 @@ public class GardenerTests
 
         Assert.IsNotNull(updatedGardener);
         Assert.That(updatedGardener.Username, Is.EqualTo(newGardener.Username));
+    }
+
+    [Test]
+    public void UpdateGardenerAsync_Throws_WhenNotFound()
+    {
+        var updateGardener = new GardenerDTO { Username = "doesnotexist" };
+
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _gardenerLogic.UpdateGardenerAsync(9999, updateGardener)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Gardener with id 9999 not found."));
     }
 
     [Test]

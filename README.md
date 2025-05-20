@@ -13,123 +13,151 @@ The backend is structured as a collection of microservices:
 
 ## API Endpoints
 
-The GrowMate backend provides the following RESTful API endpoints:
+### AuthController
 
-### Authentication
+| Method | Route                  | Description                  |
+| ------ | ---------------------- | ---------------------------- |
+| POST   | /Auth/login            | Login with username/password |
+| PATCH  | /Auth/change-password  | Change user password         |
+| POST   | /Auth/confirm-password | Confirm password             |
 
-| Method | Endpoint                | Description                      |
-| ------ | ----------------------- | -------------------------------- |
-| POST   | `/auth/login`           | Login with username and password |
-| PATCH  | `/auth/change-password` | Change user password             |
+---
 
-### Notification
+### GardenerController
 
-| Method | Endpoint                | Description                   |
-| ------ | ----------------------- | ----------------------------- |
-| POST   | `/notification/trigger` | Send notification to frontend |
-| GET    | `/notification/all`     | Get all notifications         |
-| GET    | `/notification/byType`  | Get notification by type      |
+| Method | Route                 | Description           |
+| ------ | --------------------- | --------------------- |
+| GET    | /Gardener             | Get all gardeners     |
+| GET    | /Gardener/{id}        | Get gardener by ID    |
+| POST   | /Gardener             | Create a new gardener |
+| PATCH  | /Gardener/update/{id} | Update a gardener     |
+| DELETE | /Gardener/{id}        | Delete a gardener     |
 
-### Notification Preferences
+---
 
-| Method | Endpoint                   | Description                      |
-| ------ | -------------------------- | -------------------------------- |
-| GET    | `/notificationpref`        | Get all notification preferences |
-| PATCH  | `/notificationpref/toggle` | Toggle notification preference   |
+### GreenhouseController
 
-### Gardener
+| Method | Route                             | Description                   |
+| ------ | --------------------------------- | ----------------------------- |
+| GET    | /Greenhouse                       | Get all greenhouses           |
+| GET    | /Greenhouse/{id}                  | Get greenhouse by ID          |
+| GET    | /Greenhouse/gardener/{gardenerId} | Get greenhouse by gardener ID |
+| GET    | /Greenhouse/name/{name}           | Get greenhouse by name        |
+| POST   | /Greenhouse                       | Create a new greenhouse       |
+| PUT    | /Greenhouse/update/{id}           | Update greenhouse name        |
+| DELETE | /Greenhouse/{id}                  | Delete a greenhouse           |
 
-| Method | Endpoint         | Description           |
-| ------ | ---------------- | --------------------- |
-| GET    | `/gardener`      | Get all gardeners     |
-| GET    | `/gardener/{id}` | Get gardener by ID    |
-| POST   | `/gardener`      | Create a new gardener |
-| PATCH  | `/gardener`      | Update a gardener     |
-| DELETE | `/gardener/{id}` | Delete a gardener     |
+---
 
-### Greenhouse
+### LogController
 
-| Method | Endpoint                            | Description                   |
-| ------ | ----------------------------------- | ----------------------------- |
-| GET    | `/greenhouse/{id}`                  | Get greenhouse by ID          |
-| GET    | `/greenhouse/gardener/{gardenerId}` | Get greenhouse by gardener ID |
-| GET    | `/greenhouse/name/{name}`           | Get greenhouse by name        |
-| POST   | `/greenhouse`                       | Create a new greenhouse       |
-| PUT    | `/greenhouse`                       | Update greenhouse name        |
-| DELETE | `/greenhouse/{id}`                  | Delete a greenhouse           |
+| Method | Route                 | Description                                    |
+| ------ | --------------------- | ---------------------------------------------- |
+| GET    | /Log                  | Get all logs                                   |
+| GET    | /Log/date/{date}      | Get logs by date                               |
+| GET    | /Log/{id}/water-usage | Get water usage for last 5 days for greenhouse |
+| DELETE | /Log/{id}             | Delete a log                                   |
 
-### Plant
+---
 
-| Method | Endpoint           | Description        |
-| ------ | ------------------ | ------------------ |
-| GET    | `/plant/{plantId}` | Get plant by ID    |
-| POST   | `/plant`           | Create a new plant |
-| PUT    | `/plant`           | Update plant name  |
-| DELETE | `/plant/{id}`      | Delete a plant     |
+### NotificationController
 
-### Picture
+| Method | Route                            | Description                 |
+| ------ | -------------------------------- | --------------------------- |
+| POST   | /Notification/trigger            | Trigger/send a notification |
+| GET    | /Notification/all                | Get all notifications       |
+| GET    | /Notification/byType?type={type} | Get notification by type    |
 
-| Method | Endpoint             | Description              |
-| ------ | -------------------- | ------------------------ |
-| GET    | `/picture/{plantId}` | Get pictures by plant ID |
-| POST   | `/picture`           | Add a new picture        |
-| PUT    | `/picture`           | Update picture note      |
-| DELETE | `/picture/{id}`      | Delete a picture         |
+---
 
-### Sensor
+### NotificationPrefController
 
-| Method | Endpoint                  | Description                    |
-| ------ | ------------------------- | ------------------------------ |
-| GET    | `/sensor`                 | Get all sensors                |
-| GET    | `/sensor/{id}`            | Get sensor by ID               |
-| POST   | `/sensor`                 | Create a new sensor            |
-| PATCH  | `/sensor/update/{id}`     | Update a sensor                |
-| DELETE | `/sensor/{id}`            | Delete a sensor                |
-| PATCH  | `/sensor/{id}/threshold`  | Update sensor threshold value  |
+| Method | Route                          | Description                          |
+| ------ | ------------------------------ | ------------------------------------ |
+| GET    | /NotificationPref              | Get all notification preferences     |
+| PATCH  | /NotificationPref/toggle       | Toggle notification preference       |
+| GET    | /NotificationPref/{gardenerId} | Get notification prefs by gardenerId |
 
-### Sensor Reading
+---
 
-| Method | Endpoint                           | Description               |
-| ------ | ---------------------------------- | ------------------------- |
-| GET    | `/sensorreading`                   | Get all sensor readings   |
-| GET    | `/sensorreading/{id}`              | Get sensor reading by ID  |
-| GET    | `/sensorreading/sensor/{sensorId}` | Get readings by sensor ID |
-| GET    | `/sensorreading/date/{date}`       | Get readings by date      |
-| POST   | `/sensorreading`                   | Add a new sensor reading  |
-| DELETE | `/sensorreading/{id}`              | Delete a sensor reading   |
+### PictureController
 
-### Water Pump
+| Method | Route                  | Description                      |
+| ------ | ---------------------- | -------------------------------- |
+| POST   | /Picture/UploadPicture | Upload a new picture (multipart) |
+| GET    | /Picture/{plantId}     | Get pictures by plant ID         |
+| PUT    | /Picture               | Update picture note              |
+| DELETE | /Picture/{Id}          | Delete a picture                 |
 
-| Method | Endpoint                                | Description                         |
-| ------ | --------------------------------------- | ----------------------------------- |
-| GET    | `/waterpump`                            | Get all water pumps                 |
-| GET    | `/waterpump/{id}`                       | Get water pump by ID                |
-| GET    | `/waterpump/{id}/water-level`           | Get water pump's water level        |
-| POST   | `/waterpump`                            | Create a new water pump             |
-| PATCH  | `/waterpump/{id}/toggle-automation`     | Toggle automation status            |
-| PATCH  | `/waterpump/{id}/manual-watering`       | Trigger manual watering             |
-| PATCH  | `/waterpump/{id}/add-water`             | Update current water level          |
-| PATCH  | `/waterpump/{id}/threshold`             | Update threshold value              |
-| PATCH  | `/waterpump/{id}/capacity`              | Update water tank capacity          |
-| DELETE | `/waterpump/{id}`                       | Delete a water pump                 |
+---
 
-### Prediction
+### PlantController
 
-| Method | Endpoint                  | Description             |
-| ------ | ------------------------- | ----------------------- |
-| GET    | `/prediction`             | Get all predictions     |
-| GET    | `/prediction/{id}`        | Get prediction by ID    |
-| GET    | `/prediction/date/{date}` | Get predictions by date |
-| POST   | `/prediction`             | Add a new prediction    |
-| DELETE | `/prediction/{id}`        | Delete a prediction     |
+| Method | Route            | Description        |
+| ------ | ---------------- | ------------------ |
+| GET    | /Plant           | Get all plants     |
+| GET    | /Plant/{plantId} | Get plant by ID    |
+| POST   | /Plant           | Create a new plant |
+| PUT    | /Plant/{id}      | Update plant name  |
+| DELETE | /Plant/{id}      | Delete a plant     |
 
-### Log
+---
 
-| Method | Endpoint           | Description      |
-| ------ | ------------------ | ---------------- |
-| GET    | `/log`             | Get all logs     |
-| GET    | `/log/date/{date}` | Get logs by date |
-| DELETE | `/log/{id}`        | Delete a log     |
+### PredictionController
+
+| Method | Route                   | Description             |
+| ------ | ----------------------- | ----------------------- |
+| GET    | /Prediction             | Get all predictions     |
+| GET    | /Prediction/{id}        | Get prediction by ID    |
+| GET    | /Prediction/date/{date} | Get predictions by date |
+| POST   | /Prediction             | Add a new prediction    |
+| DELETE | /Prediction/{id}        | Delete a prediction     |
+
+---
+
+### SensorController
+
+| Method | Route                  | Description                   |
+| ------ | ---------------------- | ----------------------------- |
+| GET    | /Sensor                | Get all sensors               |
+| GET    | /Sensor/{id}           | Get sensor by ID              |
+| POST   | /Sensor                | Create a new sensor           |
+| PATCH  | /Sensor/update/{id}    | Update a sensor               |
+| DELETE | /Sensor/{id}           | Delete a sensor               |
+| PATCH  | /Sensor/{id}/threshold | Update sensor threshold value |
+
+---
+
+### SensorReadingController
+
+| Method | Route                                             | Description               |
+| ------ | ------------------------------------------------- | ------------------------- |
+| GET    | /SensorReading                                    | Get all sensor readings   |
+| GET    | /SensorReading/{id}                               | Get sensor reading by ID  |
+| GET    | /SensorReading/sensor/{sensorId}                  | Get readings by sensor ID |
+| GET    | /SensorReading/date/{date}                        | Get readings by date      |
+| POST   | /SensorReading                                    | Add a new sensor reading  |
+| DELETE | /SensorReading/{id}                               | Delete a sensor reading   |
+| GET    | /SensorReading/average/{greenhouseId}/last24hours | Get avg readings last 24h |
+| GET    | /SensorReading/average/{greenhouseId}/last7days   | Get avg readings last 7d  |
+| GET    | /SensorReading/average/{greenhouseId}/last30days  | Get avg readings last 30d |
+
+---
+
+### WaterPumpController
+
+| Method | Route                             | Description                  |
+| ------ | --------------------------------- | ---------------------------- |
+| GET    | /WaterPump                        | Get all water pumps          |
+| GET    | /WaterPump/{id}                   | Get water pump by ID         |
+| GET    | /WaterPump/{id}/water-level       | Get water pump's water level |
+| POST   | /WaterPump                        | Create a new water pump      |
+| PATCH  | /WaterPump/{id}/toggle-automation | Toggle automation status     |
+| PATCH  | /WaterPump/{id}/manual-watering   | Trigger manual watering      |
+| PATCH  | /WaterPump/{id}/add-water         | Update current water level   |
+| PATCH  | /WaterPump/{id}/threshold         | Update threshold value       |
+| PATCH  | /WaterPump/{id}/capacity          | Update water tank capacity   |
+| DELETE | /WaterPump/{id}                   | Delete a water pump          |
 
 ## Project Structure
 
@@ -141,8 +169,7 @@ The solution is organized into several projects:
 - **LogicInterfaces**: Defines interfaces for business logic operations
 - **LogicImplements**: Implements the business logic interfaces
 - **WebAPI**: REST API for client applications with controllers and endpoints
-- **ReceiverService**: MQTT client service for receiving sensor data
-- **SenderService**: MQTT client service for sending commands to devices
+- **ReceiverService**: MQTT client service for receiving sensor data and sending pump commands
 
 ### Shared
 

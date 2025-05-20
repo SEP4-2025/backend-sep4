@@ -1,6 +1,7 @@
 using DTOs;
 using Entities;
 using LogicInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

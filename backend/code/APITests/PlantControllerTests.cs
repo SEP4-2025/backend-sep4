@@ -21,11 +21,7 @@ namespace APITests
             _mockPlantLogic = new Mock<IPlantInterface>();
             _controller = new PlantController(_mockPlantLogic.Object);
 
-            _testPlantDto = new PlantDTO
-            {
-                Name = "Test Plant",
-                GreenhouseId = 1
-            };
+            _testPlantDto = new PlantDTO { Name = "Test Plant", GreenhouseId = 1 };
 
             _testPlant = new Plant
             {
@@ -133,7 +129,9 @@ namespace APITests
         public async Task UpdatePlantName_ReturnsOk_WhenPlantExists()
         {
             _mockPlantLogic.Setup(x => x.GetPlantByIdAsync(1)).ReturnsAsync(_testPlant);
-            _mockPlantLogic.Setup(x => x.UpdatePlantNameAsync(1, "Updated Plant")).ReturnsAsync(_testPlant);
+            _mockPlantLogic
+                .Setup(x => x.UpdatePlantNameAsync(1, "Updated Plant"))
+                .ReturnsAsync(_testPlant);
 
             var result = await _controller.UpdatePlantName(1, "Updated Plant");
 

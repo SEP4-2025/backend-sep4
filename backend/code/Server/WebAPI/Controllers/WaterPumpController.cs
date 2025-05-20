@@ -1,6 +1,7 @@
 using DTOs;
 using Entities;
 using LogicInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ReceiverService;
 using Tools;
@@ -8,16 +9,20 @@ using WebAPI.Services;
 
 namespace WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
-
 public class WaterPumpController : ControllerBase
 {
     private readonly IWaterPumpInterface _waterPumpLogic;
     private readonly INotificationService _notificationService;
     private readonly IWateringService _wateringService;
 
-    public WaterPumpController(IWaterPumpInterface waterPumpLogic, INotificationService notificationService, IWateringService wateringService)
+    public WaterPumpController(
+        IWaterPumpInterface waterPumpLogic,
+        INotificationService notificationService,
+        IWateringService wateringService
+    )
     {
         _waterPumpLogic = waterPumpLogic;
         _notificationService = notificationService;
@@ -56,7 +61,9 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<WaterPump>> AddWaterPumpAsync([FromBody] WaterPumpDTO waterPumpDTO)
+    public async Task<ActionResult<WaterPump>> AddWaterPumpAsync(
+        [FromBody] WaterPumpDTO waterPumpDTO
+    )
     {
         if (waterPumpDTO == null)
         {
@@ -68,7 +75,10 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/toggle-automation")]
-    public async Task<ActionResult<WaterPump>> ToggleAutomationStatusAsync(int id, [FromBody] bool autoWatering)
+    public async Task<ActionResult<WaterPump>> ToggleAutomationStatusAsync(
+        int id,
+        [FromBody] bool autoWatering
+    )
     {
         var updatedPump = await _waterPumpLogic.ToggleAutomationStatusAsync(id, autoWatering);
         if (updatedPump == null)
@@ -128,7 +138,10 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/add-water")]
-    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync(int id, [FromBody] int addedWaterAmount)
+    public async Task<ActionResult<WaterPump>> UpdateCurrentWaterLevelAsync(
+        int id,
+        [FromBody] int addedWaterAmount
+    )
     {
         var updatedPump = await _waterPumpLogic.UpdateCurrentWaterLevelAsync(id, addedWaterAmount);
         if (updatedPump == null)
@@ -144,7 +157,10 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/threshold")]
-    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(int id, [FromBody] int newThresholdValue)
+    public async Task<ActionResult<WaterPump>> UpdateThresholdValueAsync(
+        int id,
+        [FromBody] int newThresholdValue
+    )
     {
         var updatedPump = await _waterPumpLogic.UpdateThresholdValueAsync(id, newThresholdValue);
         if (updatedPump == null)
@@ -155,7 +171,10 @@ public class WaterPumpController : ControllerBase
     }
 
     [HttpPatch("{id}/capacity")]
-    public async Task<ActionResult<WaterPump>> UpdateWaterTankCapacityValueAsync(int id, [FromBody] int newCapacityValue)
+    public async Task<ActionResult<WaterPump>> UpdateWaterTankCapacityValueAsync(
+        int id,
+        [FromBody] int newCapacityValue
+    )
     {
         var updatedPump = await _waterPumpLogic.UpdateWaterTankCapacityAsync(id, newCapacityValue);
         if (updatedPump == null)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using ReceiverService;
 using Tools;
 using WebAPI.Services;
@@ -19,7 +20,36 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Define JWT Bearer auth scheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token.\n\nExample: Bearer eyJhbGciOi..."
+    });
+
+    // Apply security requirement globally
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 builder.Services.AddSignalR();
 
 // Add CORS policy
@@ -30,7 +60,7 @@ builder.Services.AddCors(options =>
         policyBuilder =>
         {
             policyBuilder
-                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io/frontend-sep4")
+                .SetIsOriginAllowed(_ => true) // Allow any origin
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -109,27 +139,28 @@ if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
 //Add Logger
 Logger.Initialize(DbContext);
 
-
 // Configure the HTTP request pipeline. We might need to adjust for it or get other solution for running local(dev) / cloud(prod)
+// Apply CORS before other middleware
+app.UseCors("AllowAllOrigins");
+
 if (app.Environment.IsDevelopment())
 { //Development mode
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "GrowMate API v1 (dev env)");
-        c.RoutePrefix = string.Empty;
     });
-
-    app.UseCors("AllowAllOrigins");
 }
 else
 {
     // Production mode
     app.UseHttpsRedirection();
-    app.UseCors("AllowAllOrigins");
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GrowMate API v1");
+    });
 }
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseAuthentication();
 app.UseAuthorization();

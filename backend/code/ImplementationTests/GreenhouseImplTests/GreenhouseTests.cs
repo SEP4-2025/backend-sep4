@@ -54,14 +54,37 @@ public class GreenhouseTests
     }
 
     [Test]
+    public void GetGreenhouseById_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _greenhouseLogic.GetGreenhouseById(9999)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Greenhouse with id 9999 not found."));
+    }
+
+    [Test]
+    public void GetGreenhouseByName_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _greenhouseLogic.GetGreenhouseByName("doesnotexist")
+        );
+        Assert.That(exception.Message, Is.EqualTo("Greenhouse with name doesnotexist not found."));
+    }
+
+    [Test]
+    public void GetGreenhouseByGardenerId_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _greenhouseLogic.GetGreenhouseByGardenerId(9999)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Greenhouse with gardener id 9999 not found."));
+    }
+
+    [Test]
     public async Task AddGreenhouseAsync_Success_AddsGreenhouseCorrectly()
     {
         var gardener = await GardenerSeeder.SeedGardenerAsync();
-        var greenhouseDto = new GreenhouseDTO
-        {
-            Name = "New Greenhouse",
-            GardenerId = gardener.Id
-        };
+        var greenhouseDto = new GreenhouseDTO { Name = "New Greenhouse", GardenerId = gardener.Id };
 
         var result = await _greenhouseLogic.AddGreenhouse(greenhouseDto);
 
@@ -82,33 +105,42 @@ public class GreenhouseTests
         Assert.That(result.Name, Is.EqualTo(newName));
     }
 
-    // Method not implemented in the controller
-    // [Test]
-    // public async Task UpdateGreenhouseAsync_Success_UpdatesCorrectly()
-    // {
-    //     // First create a gardener and greenhouse
-    //     var oldGardener = await GardenerSeeder.SeedGardenerAsync();
-    //     var oldGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync(oldGardener.Id);
-    //
-    //     // Create a new gardener for updating the greenhouse
-    //     var newGardener = await GardenerSeeder.SeedGardenerAsync();
-    //
-    //     // Create updated greenhouse
-    //     var updatedGreenhouse = new Greenhouse
-    //     {
-    //         Id = oldGreenhouse.Id,
-    //         Name = "Updated Greenhouse Name",
-    //         GardenerId = newGardener.Id
-    //     };
-    //
-    //     var result = await _greenhouseLogic.(updatedGreenhouse);
-    //
-    //     // Verify update was successful
-    //     Assert.IsNotNull(result);
-    //     Assert.That(result.Name, Is.EqualTo(updatedGreenhouse.Name));
-    //     Assert.That(result.GardenerId, Is.EqualTo(newGardener.Id));
-    //     Assert.AreNotEqual(oldGreenhouse.Name, result.Name);
-    // }
+    [Test]
+    public void UpdateGreenhouseName_Throws_WhenNotFound()
+    {
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _greenhouseLogic.UpdateGreenhouseName(9999, "newName")
+        );
+        Assert.That(exception.Message, Is.EqualTo("Greenhouse with id 9999 not found."));
+    }
+
+    [Test]
+    public async Task UpdateGreenhouse_Success_UpdatesGreenhouseCorrectly()
+    {
+        var gardener = await GardenerSeeder.SeedGardenerAsync();
+        var testGreenhouse = await GreenhouseSeeder.SeedGreenhouseAsync(gardener.Id);
+        testGreenhouse.Name = "Updated Name";
+        testGreenhouse.GardenerId = gardener.Id;
+        var result = await _greenhouseLogic.UpdateGreenhouse(testGreenhouse);
+        Assert.IsNotNull(result);
+        Assert.That(result.Name, Is.EqualTo("Updated Name"));
+        Assert.That(result.GardenerId, Is.EqualTo(gardener.Id));
+    }
+
+    [Test]
+    public void UpdateGreenhouse_Throws_WhenNotFound()
+    {
+        var greenhouse = new Greenhouse
+        {
+            Id = -1,
+            Name = "DoesNotExist",
+            GardenerId = 1
+        };
+        var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _greenhouseLogic.UpdateGreenhouse(greenhouse)
+        );
+        Assert.That(exception.Message, Is.EqualTo("Greenhouse with id -1 not found."));
+    }
 
     [Test]
     public async Task DeleteGreenhouseAsync_Success_DeletesGreenhouse()
@@ -117,9 +149,10 @@ public class GreenhouseTests
 
         await _greenhouseLogic.DeleteGreenhouse(testGreenhouse.Id);
 
-        var deleteGreenhose = await _greenhouseLogic.GetGreenhouseById(testGreenhouse.Id);
-
-        Assert.That(deleteGreenhose, Is.Null);
+        var ex = Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _greenhouseLogic.GetGreenhouseById(testGreenhouse.Id)
+        );
+        Assert.That(ex.Message, Is.EqualTo($"Greenhouse with id {testGreenhouse.Id} not found."));
     }
 
     [TearDown]
