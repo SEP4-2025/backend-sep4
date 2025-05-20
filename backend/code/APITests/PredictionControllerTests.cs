@@ -1,149 +1,119 @@
-﻿using DTOs;
-using Entities;
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using DTOs;  // PredictionResponseDTO
 using LogicInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
+using NUnit.Framework;
 using WebAPI.Controllers;
 
 namespace APITests
 {
     [TestFixture]
-    public class PredictionControllerTests
+    public class PredictionControllerRepredictTests
     {
-        private Mock<IPredictionInterface> _mockPredictionLogic;
-        private PredictionController _controller;
-        private readonly Prediction _testPrediction =
-            new()
-            {
-                Id = 1,
-                Date = DateTime.Today,
-                SensorReadingId = 1
-            };
-        private readonly PredictionDTO _testPredictionDto = new() { SensorReadingId = 1 };
+        private Mock<IPredictionInterface> _logicMock;
+        private PredictionController      _controller;
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            _mockPredictionLogic = new Mock<IPredictionInterface>();
-            _controller = new PredictionController(_mockPredictionLogic.Object);
+            // 1) mock the business logic
+            _logicMock   = new Mock<IPredictionInterface>();
+            // 2) stub a logger
+            var logger = Mock.Of<ILogger<PredictionController>>();
+            // 3) instantiate controller under test
+            _controller = new PredictionController(_logicMock.Object, logger);
         }
 
         [Test]
-        public async Task GetPredictionById_ReturnsOk_WhenPredictionExists()
+        public async Task RepredictLatest_ReturnsOk_WhenLogicSucceeds()
         {
-            _mockPredictionLogic
-                .Setup(x => x.GetPredictionByIdAsync(1))
-                .ReturnsAsync(_testPrediction);
+            // arrange
+            var dto = new PredictionResponseDTO
+            {
+                Prediction      = 42.0,
+                PredictionProba = null,
+                InputReceived   = new PredictionRequestDTO
+                {
+                    Temperature     = 10,
+                    Light           = 20,
+                    AirHumidity     = 30,
+                    SoilHumidity    = 40,
+                    Date            = DateTime.UtcNow,
+                    GreenhouseId    = 1,
+                    SensorReadingId = 99
+                }
+            };
+            _logicMock
+                .Setup(x => x.RepredictLatestAsync())
+                .ReturnsAsync(dto);
 
-            var result = await _controller.GetPredictionById(1);
+            // act
+            var actionResult = await _controller.RepredictLatest();
 
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result.Result as OkObjectResult;
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo(_testPrediction));
+            // assert
+            Assert.That(actionResult.Result, Is.InstanceOf<OkObjectResult>());
+            var ok = (OkObjectResult)actionResult.Result;
+            Assert.That(ok.StatusCode, Is.EqualTo(200));
+            Assert.That(ok.Value, Is.SameAs(dto));
         }
 
         [Test]
-        public async Task GetPredictionById_ReturnsNotFound_WhenPredictionDoesNotExist()
+        public async Task RepredictLatest_ReturnsNotFound_WhenLogicThrowsInvalidOperation()
         {
-            _mockPredictionLogic
-                .Setup(x => x.GetPredictionByIdAsync(99))
-                .ReturnsAsync((Prediction)null);
+            // arrange
+            _logicMock
+                .Setup(x => x.RepredictLatestAsync())
+                .ThrowsAsync(new InvalidOperationException("no data"));
 
-            var result = await _controller.GetPredictionById(99);
+            // act
+            var actionResult = await _controller.RepredictLatest();
 
-            Assert.That(result.Result, Is.InstanceOf<NotFoundObjectResult>());
-            var notFoundResult = result.Result as NotFoundObjectResult;
-            Assert.That(notFoundResult.StatusCode, Is.EqualTo(404));
-            Assert.That(notFoundResult.Value, Is.EqualTo("No prediction found with id 99"));
+            // assert
+            Assert.That(actionResult.Result, Is.InstanceOf<NotFoundObjectResult>());
+            var nf = (NotFoundObjectResult)actionResult.Result;
+            Assert.That(nf.StatusCode, Is.EqualTo(404));
+            Assert.That(nf.Value, Is.EqualTo("no data"));
         }
 
         [Test]
-        public async Task GetPredictionsByDate_ReturnsOkWithPredictions_WhenPredictionsExist()
+        public async Task RepredictLatest_ReturnsBadGateway_WhenLogicThrowsHttpRequest()
         {
-            var date = DateTime.Today;
-            var predictions = new List<Prediction> { _testPrediction };
-            _mockPredictionLogic
-                .Setup(x => x.GetPredictionsByDateAsync(date))
-                .ReturnsAsync(predictions);
+            // arrange
+            _logicMock
+                .Setup(x => x.RepredictLatestAsync())
+                .ThrowsAsync(new HttpRequestException("connect fail"));
 
-            var result = await _controller.GetPredictionsByDate(date);
+            // act
+            var actionResult = await _controller.RepredictLatest();
 
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result.Result as OkObjectResult;
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo(predictions));
+            // assert
+            Assert.That(actionResult.Result, Is.InstanceOf<ObjectResult>());
+            var br = (ObjectResult)actionResult.Result;
+            Assert.That(br.StatusCode, Is.EqualTo(502));
+            Assert.That(br.Value, Is.EqualTo("connect fail"));
         }
 
         [Test]
-        public async Task GetAllPredictions_ReturnsOkWithPredictions()
+        public async Task RepredictLatest_ReturnsServerError_WhenLogicThrowsUnexpected()
         {
-            var predictions = new List<Prediction> { _testPrediction };
-            _mockPredictionLogic.Setup(x => x.GetAllPredictions()).ReturnsAsync(predictions);
+            // arrange
+            _logicMock
+                .Setup(x => x.RepredictLatestAsync())
+                .ThrowsAsync(new Exception("boom"));
 
-            var result = await _controller.GetAllPredictions();
+            // act
+            var actionResult = await _controller.RepredictLatest();
 
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result.Result as OkObjectResult;
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo(predictions));
-        }
-
-        [Test]
-        public async Task AddPrediction_ReturnsOk_WhenPredictionIsValid()
-        {
-            _mockPredictionLogic
-                .Setup(x => x.AddPredictionAsync(_testPredictionDto))
-                .Returns(Task.CompletedTask);
-
-            var result = await _controller.AddPrediction(_testPredictionDto);
-
-            Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result as OkObjectResult;
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo(_testPredictionDto));
-        }
-
-        [Test]
-        public async Task AddPrediction_ReturnsBadRequest_WhenPredictionIsNull()
-        {
-            var result = await _controller.AddPrediction(null);
-
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-            var badRequestResult = result as BadRequestObjectResult;
-            Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
-            Assert.That(badRequestResult.Value, Is.EqualTo("Prediction cannot be null"));
-        }
-
-        [Test]
-        public async Task DeletePrediction_ReturnsOk_WhenPredictionExists()
-        {
-            _mockPredictionLogic
-                .Setup(x => x.GetPredictionByIdAsync(1))
-                .ReturnsAsync(_testPrediction);
-            _mockPredictionLogic.Setup(x => x.DeletePredictionAsync(1)).Returns(Task.CompletedTask);
-
-            var result = await _controller.DeletePrediction(1);
-
-            Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result as OkObjectResult;
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo("Prediction with id 1 deleted"));
-        }
-
-        [Test]
-        public async Task DeletePrediction_ReturnsNotFound_WhenPredictionDoesNotExist()
-        {
-            _mockPredictionLogic
-                .Setup(x => x.GetPredictionByIdAsync(99))
-                .ReturnsAsync((Prediction)null);
-
-            var result = await _controller.DeletePrediction(99);
-
-            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
-            var notFoundResult = result as NotFoundObjectResult;
-            Assert.That(notFoundResult.StatusCode, Is.EqualTo(404));
-            Assert.That(notFoundResult.Value, Is.EqualTo("No prediction found with id 99"));
+            // assert
+            Assert.That(actionResult.Result, Is.InstanceOf<ObjectResult>());
+            var er = (ObjectResult)actionResult.Result;
+            Assert.That(er.StatusCode, Is.EqualTo(500));
+            // controller does ex.ToString(), so we at least check it contains the message
+            Assert.That(er.Value.ToString(), Does.Contain("boom"));
         }
     }
 }
