@@ -10,6 +10,6 @@ public interface IPredictionInterface
     Task<List<Prediction>> GetAllPredictions();
     Task AddPredictionAsync(PredictionDTO prediction);
     Task DeletePredictionAsync(int id);
-    
+
     Task<PredictionResponseDTO> RepredictLatestAsync();
 }

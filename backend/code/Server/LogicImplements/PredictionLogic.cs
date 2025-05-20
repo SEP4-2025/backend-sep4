@@ -16,9 +16,9 @@ namespace LogicImplements;
 
 public class PredictionLogic : IPredictionInterface
 {
-    private readonly AppDbContext       _context;
+    private readonly AppDbContext _context;
     private readonly IHttpClientFactory _httpFactory;
-    private readonly string             _pythonBaseUrl;
+    private readonly string _pythonBaseUrl;
     private readonly ILogger<PredictionLogic> _logger;
 
     public PredictionLogic(
@@ -27,10 +27,10 @@ public class PredictionLogic : IPredictionInterface
         IConfiguration config,
         ILogger<PredictionLogic> logger)
     {
-        _context             = context;
-        _httpFactory    = httpFactory;
-        _logger         = logger;
-        _pythonBaseUrl  = config["PythonApi:BaseUrl"]!.TrimEnd('/');
+        _context = context;
+        _httpFactory = httpFactory;
+        _logger = logger;
+        _pythonBaseUrl = config["PythonApi:BaseUrl"]!.TrimEnd('/');
     }
 
     public async Task<Prediction?> GetPredictionByIdAsync(int id)
@@ -85,8 +85,8 @@ public class PredictionLogic : IPredictionInterface
         }*/
         throw new NotImplementedException("DeletePredictionAsync is not implemented.");
     }
-    
-    
+
+
     public async Task<PredictionResponseDTO> RepredictLatestAsync()
     {
         // 1) load last Prediction from DB
@@ -99,12 +99,12 @@ public class PredictionLogic : IPredictionInterface
         // 2) map to request DTO
         var req = new PredictionRequestDTO
         {
-            Temperature     = last.Temperature,
-            Light           = last.Light,
-            AirHumidity     = last.AirHumidity,
-            SoilHumidity    = last.SoilHumidity,
-            Date            = last.Date,
-            GreenhouseId    = last.GreenhouseId,
+            Temperature = last.Temperature,
+            Light = last.Light,
+            AirHumidity = last.AirHumidity,
+            SoilHumidity = last.SoilHumidity,
+            Date = last.Date,
+            GreenhouseId = last.GreenhouseId,
             SensorReadingId = last.SensorReadingId
         };
 

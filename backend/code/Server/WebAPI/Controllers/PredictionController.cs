@@ -17,7 +17,7 @@ public class PredictionController : ControllerBase
         _predictionInterface = predictionInterface;
         _logger = logger;
     }
-    
+
 
     /*[HttpGet("{id}")]
     public async Task<ActionResult<Prediction>> GetPredictionById(int id)
@@ -71,7 +71,7 @@ public class PredictionController : ControllerBase
         await _predictionInterface.DeletePredictionAsync(id);
         return Ok($"Prediction with id {id} deleted");
     }*/
-    
+
     /// <summary>
     /// GET api/prediction/repredict/latest
     /// Retrieves the latest saved prediction, re-sends it to the Python ML endpoint,
