@@ -12,7 +12,7 @@ public static class PredictionSeeder
     {
         var context = TestSetup.Context;
 
-        var prediction = new Prediction
+          var prediction = new Prediction
         {
             Temperature = 25,
             AirHumidity = 60,
@@ -22,6 +22,7 @@ public static class PredictionSeeder
             GreenhouseId = greenhouseId,
             SensorReadingId = sensorReadingId
         };
+
 
         await context.Predictions.AddAsync(prediction);
         await context.SaveChangesAsync();
