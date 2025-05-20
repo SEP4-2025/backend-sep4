@@ -22,11 +22,19 @@ public class GCSUploader
 
     public async Task<string> UploadImageAsync(IFormFile file, string fileName)
     {
-        using var stream = file.OpenReadStream();
+        try
+        {
+            using var stream = file.OpenReadStream();
 
-        var objectName = $"pictures/{fileName}";
-        await _storageClient.UploadObjectAsync(_bucketName, objectName, file.ContentType, stream);
+            var objectName = $"pictures/{fileName}";
+            await _storageClient.UploadObjectAsync(_bucketName, objectName, file.ContentType, stream);
 
-        return $"https://storage.googleapis.com/{_bucketName}/{objectName}";
+            return $"https://storage.googleapis.com/{_bucketName}/{objectName}";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }
