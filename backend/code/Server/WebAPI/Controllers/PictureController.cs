@@ -41,7 +41,7 @@ public class PictureController : ControllerBase
     [HttpPut]
     public async Task<ActionResult<Picture>> UpdatePictureNote(int id, string note)
     {
-        var picture = _pictureInterface.GetPictureByPlantIdAsync(id);
+        var picture = await _pictureInterface.GetPictureByPlantIdAsync(id);
         if (picture == null)
             return NotFound($"Picture with id {id} not found");
         await _pictureInterface.UpdateNote(id, note);
