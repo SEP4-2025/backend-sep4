@@ -60,7 +60,7 @@ builder.Services.AddCors(options =>
         policyBuilder =>
         {
             policyBuilder
-                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io/frontend-sep4")
+                .WithOrigins("http://localhost:5173", "https://sep4-2025.github.io")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
