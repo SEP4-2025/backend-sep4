@@ -4,7 +4,11 @@ namespace ImplementationTests.PredictionImplTests;
 
 public static class PredictionSeeder
 {
-    public static async Task<Prediction> SeedPredictionAsync(int greenhouseId = 1, int sensorReadingId = 1)
+    public static async Task<Prediction> SeedPredictionAsync(
+        int greenhouseId = 1,
+        int sensorReadingId = 4,
+        DateTime? date = null
+    )
     {
         var context = TestSetup.Context;
 
@@ -14,10 +18,11 @@ public static class PredictionSeeder
             AirHumidity = 60,
             Light = 75,
             SoilHumidity = 80,
-            Date = DateTime.Now,
+            Date = date ?? DateTime.UtcNow,
             GreenhouseId = greenhouseId,
             SensorReadingId = sensorReadingId
         };
+
 
         await context.Predictions.AddAsync(prediction);
         await context.SaveChangesAsync();

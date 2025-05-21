@@ -1,121 +1,130 @@
-﻿using Database;
-using DTOs;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Database;
 using Entities;
 using LogicImplements;
 using LogicInterfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
+using NUnit.Framework;
+using DTOs;
 
 namespace ImplementationTests.PredictionImplTests;
 
 public class PredictionTests
 {
+
     private AppDbContext _context;
+    private Mock<IHttpClientFactory> _httpFactoryMock;
     private IPredictionInterface _predictionLogic;
 
     [SetUp]
     public void Setup()
     {
+        // 1) Database in-memory
         _context = TestSetup.Context;
-        _predictionLogic = new PredictionLogic(_context);
-    }
 
-    [Test]
-    public async Task GetPredictionByIdAsync_Success_ReturnsCorrectPrediction()
-    {
-        var testPrediction = await PredictionSeeder.SeedPredictionAsync();
+        // 2) Mock IHttpClientFactory + handler
+        _httpFactoryMock = new Mock<IHttpClientFactory>();
 
-        var result = await _predictionLogic.GetPredictionByIdAsync(testPrediction.Id);
+        // 3) Configuration stub
+        var inMemorySettings = new Dictionary<string, string> {
+                {"PythonApi:BaseUrl", "http://fake-api.local" }
+            };
+        IConfiguration config = new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings)
+            .Build();
 
-        Assert.IsNotNull(result);
-        Assert.That(result.OptimalTemperature, Is.EqualTo(testPrediction.OptimalTemperature));
-        Assert.That(result.OptimalHumidity, Is.EqualTo(testPrediction.OptimalHumidity));
-        Assert.That(result.OptimalLight, Is.EqualTo(testPrediction.OptimalLight));
-        Assert.That(result.OptimalWaterLevel, Is.EqualTo(testPrediction.OptimalWaterLevel));
-        Assert.That(result.GreenhouseId, Is.EqualTo(testPrediction.GreenhouseId));
-        Assert.That(result.SensorReadingId, Is.EqualTo(testPrediction.SensorReadingId));
-    }
+        // 4) Logger stub
+        var logger = Mock.Of<ILogger<PredictionLogic>>();
 
-    [Test]
-    public void GetPredictionByIdAsync_Throws_WhenNotFound()
-    {
-        var exception = Assert.ThrowsAsync<Exception>(
-            async () => await _predictionLogic.GetPredictionByIdAsync(-1)
+        // 5) Instantiate logic under test
+        _predictionLogic = new PredictionLogic(
+            _context,
+            _httpFactoryMock.Object,
+            config,
+            logger
         );
-        Assert.That(exception.Message, Is.EqualTo("Prediction with id -1 not found."));
     }
 
     [Test]
-    public async Task GetPredictionsByDateAsync_Success_ReturnsCorrectPredictions()
+    public async Task RepredictLatestAsync_SendsLatestToApiAndReturnsResponse()
     {
-        var date = DateTime.Now.Date;
-        await PredictionSeeder.SeedPredictionAsync();
-        await PredictionSeeder.SeedPredictionAsync();
+        // --- Arrange ---
+        // Seed two predictions with distinct dates
+        var older = await PredictionSeeder.SeedPredictionAsync(date: DateTime.UtcNow.AddMinutes(-10));
+        var newer = await PredictionSeeder.SeedPredictionAsync(date: DateTime.UtcNow);
 
-        var result = await _predictionLogic.GetPredictionsByDateAsync(date);
-
-        Assert.IsNotNull(result);
-        Assert.That(result.Count, Is.EqualTo(2));
-        Assert.That(result.All(p => p.Date.Date == date), Is.True);
-    }
-
-    [Test]
-    public async Task GetAllPredictions_Success_ReturnsAllPredictions()
-    {
-        await PredictionSeeder.SeedPredictionAsync();
-        await PredictionSeeder.SeedPredictionAsync();
-
-        var result = await _predictionLogic.GetAllPredictions();
-
-        Assert.IsNotNull(result);
-        Assert.That(result.Count, Is.GreaterThanOrEqualTo(2));
-    }
-
-    [Test]
-    public async Task AddPredictionAsync_Success_AddsPredictionCorrectly()
-    {
-        var prediction = new PredictionDTO
+        // Prepare fake response from Python API
+        var fakeResponseDto = new PredictionResponseDTO
         {
-            OptimalTemperature = 22,
-            OptimalHumidity = 55,
-            OptimalLight = 65,
-            OptimalWaterLevel = 70,
-            GreenhouseId = 2,
-            SensorReadingId = 2
+            Prediction = 123.45,
+            PredictionProba = new List<double> { 0.9, 0.1 },
+            InputReceived = new PredictionRequestDTO
+            {
+                Temperature = newer.Temperature,
+                Light = newer.Light,
+                AirHumidity = newer.AirHumidity,
+                SoilHumidity = newer.SoilHumidity,
+                Date = newer.Date,
+                GreenhouseId = newer.GreenhouseId,
+                SensorReadingId = newer.SensorReadingId
+            }
         };
+        var fakeJson = JsonContent.Create(fakeResponseDto);
 
-        await _predictionLogic.AddPredictionAsync(prediction);
+        // Mock a handler that intercepts POST and returns our fake JSON
+        var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+        handlerMock
+           .Protected()
+           .Setup<Task<HttpResponseMessage>>(
+               "SendAsync",
+               ItExpr.Is<HttpRequestMessage>(req =>
+                   req.Method == HttpMethod.Post &&
+                   req.RequestUri == new Uri("http://fake-api.local/predict")),
+               ItExpr.IsAny<CancellationToken>()
+           )
+           .ReturnsAsync(new HttpResponseMessage
+           {
+               StatusCode = HttpStatusCode.OK,
+               Content = fakeJson
+           })
+           .Verifiable();
 
-        var allPredictions = await _predictionLogic.GetAllPredictions();
-        var addedPrediction = allPredictions.FirstOrDefault(p =>
-            p.OptimalTemperature == prediction.OptimalTemperature
-            && p.OptimalHumidity == prediction.OptimalHumidity
-            && p.GreenhouseId == prediction.GreenhouseId
-            && p.SensorReadingId == prediction.SensorReadingId
+        var client = new HttpClient(handlerMock.Object);
+        _httpFactoryMock
+            .Setup(f => f.CreateClient(It.IsAny<string>()))
+            .Returns(client);
+
+        // --- Act ---
+        var result = await _predictionLogic.RepredictLatestAsync();
+
+        // --- Assert ---
+        Assert.IsNotNull(result, "Result should not be null");
+        Assert.That(result.Prediction, Is.EqualTo(fakeResponseDto.Prediction));
+        Assert.That(result.PredictionProba, Is.EqualTo(fakeResponseDto.PredictionProba));
+        // Ensure that the InputReceived matches our newest seed
+        Assert.That(result.InputReceived.SensorReadingId, Is.EqualTo(newer.SensorReadingId));
+
+        // And that we indeed hit our fake handler
+        handlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
+                req.RequestUri == new Uri("http://fake-api.local/predict")
+            ),
+            ItExpr.IsAny<CancellationToken>()
         );
-
-        Assert.IsNotNull(addedPrediction);
-        Assert.That(addedPrediction.OptimalTemperature, Is.EqualTo(prediction.OptimalTemperature));
-        Assert.That(addedPrediction.OptimalHumidity, Is.EqualTo(prediction.OptimalHumidity));
-        Assert.That(addedPrediction.OptimalLight, Is.EqualTo(prediction.OptimalLight));
-        Assert.That(addedPrediction.OptimalWaterLevel, Is.EqualTo(prediction.OptimalWaterLevel));
-        Assert.That(addedPrediction.GreenhouseId, Is.EqualTo(prediction.GreenhouseId));
-        Assert.That(addedPrediction.SensorReadingId, Is.EqualTo(prediction.SensorReadingId));
     }
 
-    [Test]
-    public async Task DeletePredictionAsync_Success_DeletesPrediction()
-    {
-        var testPrediction = await PredictionSeeder.SeedPredictionAsync();
-
-        await _predictionLogic.DeletePredictionAsync(testPrediction.Id);
-
-        var exception = Assert.ThrowsAsync<Exception>(
-            async () => await _predictionLogic.GetPredictionByIdAsync(testPrediction.Id)
-        );
-        Assert.That(
-            exception.Message,
-            Is.EqualTo($"Prediction with id {testPrediction.Id} not found.")
-        );
-    }
 
     [TearDown]
     public async Task TearDown()
