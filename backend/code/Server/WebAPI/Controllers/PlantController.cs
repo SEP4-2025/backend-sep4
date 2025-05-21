@@ -42,29 +42,35 @@ public class PlantController : ControllerBase
     public async Task<ActionResult<Plant>> AddPlant([FromBody] PlantDTO plant)
     {
         if (plant.IsEmpty())
-            return BadRequest($"Plant cannot be null");
-        var plants = await _plantInterface.GetPlantsAsync();
-        var plantCount = plants.Count();
-        if (plantCount > 0)
         {
-            return BadRequest("You can only create one plant.");
+            return BadRequest($"Plant cannot be null");
         }
+
         var addedPlant = await _plantInterface.AddPlantAsync(plant);
         return Ok(addedPlant);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<Plant>> UpdatePlantName(int id, [FromBody] string plantName)
+    [HttpPut("{id}/name")]
+    public async Task<ActionResult<Plant>> UpdatePlantName(int id, string plantName)
     {
         var plant = await _plantInterface.GetPlantByIdAsync(id);
         if (plant == null)
             return NotFound($"No plant found with id {id}");
-
-        if (string.IsNullOrEmpty(plantName))
-        {
-            return BadRequest("Plant name cannot be null or empty.");
-        }
+        
         await _plantInterface.UpdatePlantNameAsync(id, plantName);
+        
+        return Ok(plant);
+    }
+    
+    [HttpPut("{id}/species")]
+    public async Task<ActionResult<Plant>> UpdatePlantSpecies(int id, string species)
+    {
+        var plant = await _plantInterface.GetPlantByIdAsync(id);
+        if (plant == null)
+            return NotFound($"No plant found with id {id}");
+        
+        await _plantInterface.UpdatePlantSpeciesAsync(id, species);
+        
         return Ok(plant);
     }
 

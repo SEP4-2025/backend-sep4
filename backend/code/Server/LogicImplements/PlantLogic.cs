@@ -53,7 +53,28 @@ public class PlantLogic : IPlantInterface
     {
         var existingPlant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
 
+        if (existingPlant == null)
+        {
+            throw new Exception("Plant not found.");
+        }
+        
         existingPlant.Name = plantName;
+
+        await _context.SaveChangesAsync();
+
+        return existingPlant;
+    }
+
+    public async Task<Plant> UpdatePlantSpeciesAsync(int id, string species)
+    {
+        var existingPlant = await _context.Plants.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (existingPlant == null)
+        {
+            throw new Exception("Plant not found.");
+        }
+
+        existingPlant.Species = species;
 
         await _context.SaveChangesAsync();
 
