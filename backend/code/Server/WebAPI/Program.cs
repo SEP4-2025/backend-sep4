@@ -116,6 +116,12 @@ builder
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpClient("ml-api", client =>
+{
+    client.BaseAddress = new Uri("https://ml-model-service-68779328892.europe-north2.run.app");
+    client.Timeout = TimeSpan.FromMinutes(5);
+});
+
 var app = builder.Build();
 
 // Configure default gardner in the database if does not exist yet

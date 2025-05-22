@@ -56,21 +56,21 @@ public class PlantController : ControllerBase
         var plant = await _plantInterface.GetPlantByIdAsync(id);
         if (plant == null)
             return NotFound($"No plant found with id {id}");
-        
+
         await _plantInterface.UpdatePlantNameAsync(id, plantName);
-        
+
         return Ok(plant);
     }
-    
+
     [HttpPut("{id}/species")]
     public async Task<ActionResult<Plant>> UpdatePlantSpecies(int id, string species)
     {
         var plant = await _plantInterface.GetPlantByIdAsync(id);
         if (plant == null)
             return NotFound($"No plant found with id {id}");
-        
+
         await _plantInterface.UpdatePlantSpeciesAsync(id, species);
-        
+
         return Ok(plant);
     }
 
