@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DTOs;
 using Entities;
 using LogicInterfaces;
@@ -83,23 +84,16 @@ public class PredictionController : ControllerBase
     [HttpGet("repredict/latest")]
     public async Task<ActionResult<PredictionResponseDTO>> RepredictLatest()
     {
-        try
-        {
-            var result = await _predictionInterface.RepredictLatestAsync();
-            return Ok(result);
-        }
-        catch (InvalidOperationException inv)
-        {
-            return NotFound(inv.Message);
-        }
-        catch (HttpRequestException httpEx)
-        {
-            return StatusCode(502, httpEx.Message);
-        }
-        catch (Exception ex)
-        {
-            // return full exception message so you can vedea exact de unde vine
-            return StatusCode(500, ex.ToString());
-        }
+
+
+        using var response = await _mlClient.GetAsync("/predict");
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        var result = JsonSerializer.Deserialize<PredictionResponseDTO>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result!;
     }
 }
