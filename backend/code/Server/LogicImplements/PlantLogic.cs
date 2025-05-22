@@ -57,7 +57,7 @@ public class PlantLogic : IPlantInterface
         {
             throw new Exception("Plant not found.");
         }
-        
+
         existingPlant.Name = plantName;
 
         await _context.SaveChangesAsync();
