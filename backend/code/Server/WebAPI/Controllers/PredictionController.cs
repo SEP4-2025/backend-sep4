@@ -11,6 +11,13 @@ public class PredictionController : ControllerBase
 {
     private readonly IPredictionInterface _predictionInterface;
     private readonly ILogger<PredictionController> _logger;
+    private readonly HttpClient _mlClient;
+
+    public PredictionController(IHttpClientFactory httpFactory)
+    {
+
+        _mlClient = httpFactory.CreateClient("ml-api");
+    }
 
     public PredictionController(IPredictionInterface predictionInterface, ILogger<PredictionController> logger)
     {
