@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using DTOs;
 using Entities;
@@ -14,14 +15,16 @@ public class PredictionController : ControllerBase
     private readonly ILogger<PredictionController> _logger;
     private readonly HttpClient _mlClient;
 
-
-    public PredictionController(IPredictionInterface predictionInterface, ILogger<PredictionController> logger, IHttpClientFactory httpFactory)
+    public PredictionController(
+        IPredictionInterface predictionInterface,
+        ILogger<PredictionController> logger,
+        IHttpClientFactory httpFactory
+    )
     {
         _predictionInterface = predictionInterface;
         _logger = logger;
         _mlClient = httpFactory.CreateClient("ml-api");
     }
-
 
     /*[HttpGet("{id}")]
     public async Task<ActionResult<Prediction>> GetPredictionById(int id)
@@ -81,18 +84,37 @@ public class PredictionController : ControllerBase
     /// Retrieves the latest saved prediction, re-sends it to the Python ML endpoint,
     /// and returns the updated prediction.
     /// </summary>
-    [HttpGet("repredict/latest")]
+    [HttpPost("repredict/latest")]
     public async Task<ActionResult<PredictionResponseDTO>> RepredictLatest()
     {
+        var rawPrediction = await _predictionInterface.GetLastPredictionAsync();
 
+        var payload = new
+        {
+            temperature = rawPrediction.Temperature,
+            light = rawPrediction.Light,
+            airHumidity = rawPrediction.AirHumidity,
+            soilHumidity = rawPrediction.SoilHumidity,
+            date = rawPrediction.Date, // Make sure this is a DateTime
+            greenhouseId = rawPrediction.GreenhouseId,
+            sensorReadingId = rawPrediction.SensorReadingId
+        };
 
-        using var response = await _mlClient.GetAsync("/predict");
+        var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
+
+        var json = JsonSerializer.Serialize(payload, options);
+        Console.WriteLine("Sending JSON:\n" + json);
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        using var response = await _mlClient.PostAsync("/predict", content);
         response.EnsureSuccessStatusCode();
 
-        var json = await response.Content.ReadAsStringAsync();
-
-        var result = JsonSerializer.Deserialize<PredictionResponseDTO>(json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var responseJson = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<PredictionResponseDTO>(
+            responseJson,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        );
 
         return result!;
     }

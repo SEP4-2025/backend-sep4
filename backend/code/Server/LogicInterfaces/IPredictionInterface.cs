@@ -12,4 +12,5 @@ public interface IPredictionInterface
     Task DeletePredictionAsync(int id);
 
     Task<PredictionResponseDTO> RepredictLatestAsync();
+    Task<Prediction> GetLastPredictionAsync();
 }

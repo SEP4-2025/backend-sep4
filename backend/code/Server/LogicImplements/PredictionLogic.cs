@@ -86,6 +86,17 @@ public class PredictionLogic : IPredictionInterface
         throw new NotImplementedException("DeletePredictionAsync is not implemented.");
     }
 
+    public async Task<Prediction> GetLastPredictionAsync()
+    {
+        var prediction = await _context.Predictions
+            .OrderByDescending(p => p.Date)
+            .FirstOrDefaultAsync();
+
+        if (prediction == null)
+            throw new InvalidOperationException("No predictions in database.");
+
+        return prediction;
+    }
 
     public async Task<PredictionResponseDTO> RepredictLatestAsync()
     {
