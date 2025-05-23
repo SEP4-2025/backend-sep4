@@ -115,7 +115,7 @@ public class AuthController : ControllerBase
         [FromBody] ConfirmPasswordDTO confirmPasswordRequest
     )
     {
-        var gardener = await _dbContext.Gardeners.FirstOrDefaultAsync(g => g.Id == 2);
+        var gardener = await _dbContext.Gardeners.FirstOrDefaultAsync(g => g.Id == 1);
         if (gardener == null)
         {
             return NotFound("Gardener not found.");
