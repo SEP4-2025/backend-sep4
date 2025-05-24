@@ -124,22 +124,10 @@ builder.Services.AddHttpClient("ml-api", client =>
 
 var app = builder.Build();
 
-// Configure default gardner in the database if does not exist yet
+
 using var scope = app.Services.CreateScope();
 var DbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-if (!DbContext.Gardeners.Any(g => g.Username == "admin"))
-{
-    var passwordHasher = new PasswordHasher<Gardener>();
-
-    var gardener = new Gardener
-    {
-        Username = "admin",
-        Password = passwordHasher.HashPassword(new Gardener(), "admin"),
-    };
-    DbContext.Gardeners.Add(gardener);
-    DbContext.SaveChanges();
-}
 
 //Add Logger
 Logger.Initialize(DbContext);

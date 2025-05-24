@@ -376,7 +376,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
         // create a scope so we can resolve SensorLogic + DbContext
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var sensorLogic = scope.ServiceProvider.GetRequiredService<SensorLogic>();
+        var sensorLogic = new SensorLogic(dbContext);
         var sensor = await sensorLogic.GetSensorByIdAsync(sensorReading.SensorId);
 
         // get or create the state object for this greenhouse
@@ -429,27 +429,37 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
             return;
         }
 
-        // build a new Prediction entity from the **entire current state**
-        var prediction = new Prediction
-        {
-            Temperature = (int)state.Temperature,
-            AirHumidity = (int)state.AirHumidity,
-            Light = (int)state.Light,
-            SoilHumidity = (int)state.SoilHumidity,
-            Date = sensorReading.TimeStamp,
-            GreenhouseId = sensor.GreenhouseId,
-            SensorReadingId = 4
-        };
+        if (!changed)
+            return;
 
-        try
+
+        if (state.Temperature is double temp &&
+            state.AirHumidity is double humid &&
+            state.Light is double light &&
+            state.SoilHumidity is double soil)
         {
-            await dbContext.Predictions.AddAsync(prediction);
-            await dbContext.SaveChangesAsync();
-            _logger.LogInformation("Persisted updated Prediction: {@prediction}", prediction);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to save updated Prediction");
+
+            var prediction = new Prediction
+            {
+                Temperature = (int)temp,
+                AirHumidity = (int)humid,
+                Light = (int)light,
+                SoilHumidity = (int)soil,
+                Date = sensorReading.TimeStamp,
+                GreenhouseId = sensor.GreenhouseId,
+                SensorReadingId = 4
+            };
+
+            try
+            {
+                await dbContext.Predictions.AddAsync(prediction);
+                await dbContext.SaveChangesAsync();
+                _logger.LogInformation("Persisted updated Prediction: {@prediction}", prediction);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save updated Prediction");
+            }
         }
     }
 
