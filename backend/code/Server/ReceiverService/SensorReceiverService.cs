@@ -146,7 +146,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            /*using var scope = _serviceProvider.CreateScope();
 
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -168,7 +168,7 @@ public class SensorReceiverService : BackgroundService, IHealthCheck, IWateringS
             }
 
             // Notification logic v2
-            await HandlePostNotifications(sensorReading);
+            await HandlePostNotifications(sensorReading);*/
             // Update state and save prediction
             await UpdateStateAndSavePredictionAsync(sensorReading);
 

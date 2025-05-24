@@ -69,12 +69,12 @@ public class PlantTests
     [Test]
     public void UpdatePlantNameAsync_Throws_WhenNotFound()
     {
-        var exception = Assert.ThrowsAsync<NullReferenceException>(
+        var exception = Assert.ThrowsAsync<Exception>(
             async () => await _plantLogic.UpdatePlantNameAsync(-1, "Name")
         );
         Assert.That(
             exception.Message,
-            Is.EqualTo("Object reference not set to an instance of an object.")
+            Is.EqualTo("Plant not found.")
         );
     }
 
