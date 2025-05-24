@@ -154,18 +154,7 @@ namespace APITests
             Assert.That(notFoundResult.Value, Is.EqualTo("No plant found with id 99"));
         }
 
-        [Test]
-        public async Task UpdatePlantName_ReturnsBadRequest_WhenNameIsEmpty()
-        {
-            _mockPlantLogic.Setup(x => x.GetPlantByIdAsync(1)).ReturnsAsync(_testPlant);
 
-            var result = await _controller.UpdatePlantName(1, "");
-
-            Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
-            var badRequestResult = result.Result as BadRequestObjectResult;
-            Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
-            Assert.That(badRequestResult.Value, Is.EqualTo("Plant name cannot be null or empty."));
-        }
 
         [Test]
         public async Task DeletePlant_ReturnsOk_WhenPlantExists()

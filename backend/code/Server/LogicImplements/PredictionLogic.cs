@@ -107,6 +107,7 @@ public class PredictionLogic : IPredictionInterface
         if (last == null)
             throw new InvalidOperationException("No predictions in database.");
 
+
         // 2) map to request DTO
         var req = new PredictionRequestDTO
         {
