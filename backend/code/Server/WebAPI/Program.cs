@@ -56,7 +56,7 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
-        "AllowAllOrigins",
+        "AllowFrontendOrigins",
         policyBuilder =>
         {
             policyBuilder
@@ -146,7 +146,7 @@ Logger.Initialize(DbContext);
 
 // Configure the HTTP request pipeline. We might need to adjust for it or get other solution for running local(dev) / cloud(prod)
 // Apply CORS before other middleware
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowFrontendOrigins");
 
 if (app.Environment.IsDevelopment())
 { //Development mode
